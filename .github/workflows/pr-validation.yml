@@ -1,0 +1,162 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # Validate PR title follows conventional commits
+  validate-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" found in the pull request title "{title}"
+            should start with a lowercase letter.
+
+  # Check for breaking changes
+  breaking-changes:
+    name: Check Breaking Changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for breaking changes
+        id: breaking
+        run: |
+          # Check if PR title or body contains breaking change indicators
+          TITLE="${{ github.event.pull_request.title }}"
+          if echo "$TITLE" | grep -qE "!:|BREAKING CHANGE"; then
+            echo "has_breaking=true" >> $GITHUB_OUTPUT
+            echo "::warning::This PR contains breaking changes!"
+          else
+            echo "has_breaking=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on breaking changes
+        if: steps.breaking.outputs.has_breaking == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **Breaking Change Detected**\n\nThis PR appears to contain breaking changes. Please ensure:\n- [ ] Migration guide is included in the PR description\n- [ ] CHANGELOG is updated\n- [ ] Documentation is updated'
+            })
+
+  # Size check
+  size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        id: size
+        run: |
+          # Get changed files count
+          FILES=$(gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files | length')
+          ADDITIONS=$(gh pr view ${{ github.event.pull_request.number }} --json additions --jq '.additions')
+          DELETIONS=$(gh pr view ${{ github.event.pull_request.number }} --json deletions --jq '.deletions')
+          
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
+          echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
+          
+          TOTAL=$((ADDITIONS + DELETIONS))
+          if [ $TOTAL -gt 1000 ]; then
+            echo "size=XL" >> $GITHUB_OUTPUT
+          elif [ $TOTAL -gt 500 ]; then
+            echo "size=L" >> $GITHUB_OUTPUT
+          elif [ $TOTAL -gt 100 ]; then
+            echo "size=M" >> $GITHUB_OUTPUT
+          else
+            echo "size=S" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add size label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const size = '${{ steps.size.outputs.size }}';
+            const labels = {
+              'S': 'size/S',
+              'M': 'size/M', 
+              'L': 'size/L',
+              'XL': 'size/XL'
+            };
+            
+            // Remove existing size labels
+            const currentLabels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            for (const label of currentLabels.data) {
+              if (label.name.startsWith('size/')) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: label.name
+                }).catch(() => {});
+              }
+            }
+            
+            // Add new size label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [labels[size]]
+            }).catch(() => {});
+
+  # First-time contributor welcome
+  welcome:
+    name: Welcome New Contributors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-message: |
+            👋 Thanks for your first pull request to QA Flow!
+            
+            A maintainer will review your changes soon. In the meantime, please make sure:
+            
+            - [ ] Your PR title follows [Conventional Commits](https://www.conventionalcommits.org/)
+            - [ ] Tests pass locally (`pnpm test`)
+            - [ ] Code is formatted (`pnpm lint`)
+            
+            If you have questions, feel free to ask in this PR or join our discussions!

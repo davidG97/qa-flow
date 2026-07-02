@@ -1,0 +1,26 @@
+# GitHub Copilot Code Review Configuration
+# https://docs.github.com/en/copilot/using-github-copilot/code-review
+
+# Automatically request Copilot review on PRs
+auto_review:
+  enabled: true
+  # Review all PRs except drafts
+  drafts: false
+
+# Focus areas for review
+review_focus:
+  - security          # Security vulnerabilities
+  - performance       # Performance issues
+  - best_practices    # Code quality and patterns
+  - documentation     # Missing or outdated docs
+
+# Paths to always review
+paths:
+  include:
+    - "src/**"
+    - "server/src/**"
+  exclude:
+    - "**/*.test.ts"
+    - "**/*.spec.ts"
+    - "dist/**"
+    - "node_modules/**"

@@ -1,0 +1,41 @@
+{
+  "name": "qa-flow",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Proyecto de automatizacion de pruebas lowcode-nocode basado en nodos",
+  "scripts": {
+    "dev": "vite",
+    "dev:all": "concurrently \"pnpm dev\" \"pnpm --filter qa-flow-server dev\"",
+    "server": "pnpm --filter qa-flow-server dev",
+    "build": "tsc && vite build",
+    "build:all": "pnpm -r build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "db:migrate": "pnpm --filter qa-flow-server db:migrate",
+    "db:generate": "pnpm --filter qa-flow-server db:generate",
+    "db:studio": "pnpm --filter qa-flow-server db:studio",
+    "test": "pnpm --filter qa-flow-server test"
+  },
+  "author": "David Garcia.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@xyflow/react": "^12.10.2",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-icons": "^5.6.0",
+    "react-router-dom": "^7.14.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.5.0",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.12",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10"
+  }
+}

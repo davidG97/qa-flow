@@ -1,0 +1,216 @@
+{
+  "name": "Demo simple",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "testNode",
+      "position": {
+        "x": -45,
+        "y": -210
+      },
+      "data": {
+        "label": "Inicio",
+        "nodeType": "start",
+        "category": "trigger",
+        "config": {
+          "baseUrl": "https://playwright.dev/",
+          "browser": "chromium",
+          "headless": false,
+          "testName": "Playwright search",
+          "tags": [
+            "@smoke"
+          ]
+        }
+      },
+      "measured": {
+        "width": 145,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "2",
+      "type": "testNode",
+      "position": {
+        "x": -30,
+        "y": -45
+      },
+      "data": {
+        "label": "Hacer Click",
+        "nodeType": "click",
+        "category": "action",
+        "config": {
+          "button": "left",
+          "clickCount": 1,
+          "delay": 0,
+          "force": false,
+          "timeout": 30000,
+          "selector": "API",
+          "selectorType": "text"
+        },
+        "customLabel": "Ir a API"
+      },
+      "measured": {
+        "width": 110,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "3",
+      "type": "testNode",
+      "position": {
+        "x": 120,
+        "y": -45
+      },
+      "data": {
+        "label": "Hacer Click-2",
+        "nodeType": "click",
+        "category": "action",
+        "config": {
+          "button": "left",
+          "clickCount": 1,
+          "delay": 0,
+          "force": false,
+          "timeout": 30000,
+          "selector": "Search",
+          "selectorType": "text"
+        },
+        "customLabel": "Usar el buscador"
+      },
+      "measured": {
+        "width": 139,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "4",
+      "type": "testNode",
+      "position": {
+        "x": 300,
+        "y": -45
+      },
+      "data": {
+        "label": "Escribir Texto",
+        "nodeType": "type",
+        "category": "action",
+        "config": {
+          "clearFirst": true,
+          "delay": 0,
+          "selector": "#docsearch-input",
+          "selectorType": "css",
+          "text": "Agent"
+        },
+        "customLabel": "Buscar \"agent\""
+      },
+      "measured": {
+        "width": 129,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "5",
+      "type": "testNode",
+      "position": {
+        "x": 465,
+        "y": -45
+      },
+      "data": {
+        "label": "Hacer Click-3",
+        "nodeType": "click",
+        "category": "action",
+        "config": {
+          "button": "left",
+          "clickCount": 1,
+          "delay": 0,
+          "force": false,
+          "timeout": 30000,
+          "selector": ".DocSearch-Hit-Container",
+          "selectorType": "css"
+        },
+        "customLabel": "Ir al primer resultado"
+      },
+      "measured": {
+        "width": 150,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "6",
+      "type": "testNode",
+      "position": {
+        "x": -45,
+        "y": 120
+      },
+      "data": {
+        "label": "Verificar Texto",
+        "nodeType": "assertText",
+        "category": "assertion",
+        "config": {
+          "matchType": "exact",
+          "ignoreCase": false,
+          "timeout": 5000,
+          "selector": "//body/div[2]/div[2]/div/div/main/div/div/div/div/article/div[2]/header/h1",
+          "selectorType": "xpath",
+          "expectedText": "Coding agents"
+        },
+        "customLabel": "Validar que llego a la pagina correcta"
+      },
+      "measured": {
+        "width": 150,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "1",
+      "target": "2",
+      "animated": true,
+      "id": "e-imported-0"
+    },
+    {
+      "source": "2",
+      "target": "3",
+      "animated": true,
+      "id": "e-imported-1"
+    },
+    {
+      "source": "3",
+      "target": "4",
+      "animated": true,
+      "id": "e-imported-2"
+    },
+    {
+      "source": "4",
+      "target": "5",
+      "animated": true,
+      "id": "e-imported-3"
+    },
+    {
+      "source": "5",
+      "target": "6",
+      "animated": true,
+      "id": "e-imported-4"
+    }
+  ],
+  "config": {
+    "executionMode": "default",
+    "workers": 4,
+    "maxFailures": 0,
+    "retries": 0,
+    "timeout": 30000
+  },
+  "savedAt": "2026-07-02T01:05:23.265Z"
+}

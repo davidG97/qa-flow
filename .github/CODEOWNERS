@@ -1,0 +1,24 @@
+# CODEOWNERS - Define who reviews what
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @davidG97
+
+# Frontend
+/src/ @davidG97
+/index.html @davidG97
+/vite.config.ts @davidG97
+/tailwind.config.js @davidG97
+
+# Backend
+/server/ @davidG97
+
+# Infrastructure & DevOps
+/Dockerfile @davidG97
+/docker-compose*.yml @davidG97
+/.github/ @davidG97
+
+# Documentation
+*.md @davidG97
+/examples/ @davidG97
+/docs/ @davidG97

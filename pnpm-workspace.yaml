@@ -1,0 +1,8 @@
+packages:
+  - '.'
+  - 'server'
+  - 'landing'
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true

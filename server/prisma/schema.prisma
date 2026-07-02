@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum ProjectMemberRole {
+  OWNER
+  MEMBER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  members ProjectMember[]
+
+  @@map("users")
+}
+
+model ProjectMember {
+  id        String            @id @default(uuid())
+  projectId String
+  userId    String
+  role      ProjectMemberRole @default(MEMBER)
+  createdAt DateTime          @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+// Proyecto/Flujo de pruebas
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  // Almacena los nodos y edges como JSON
+  nodes       String   // JSON array de nodos
+  edges       String   // JSON array de edges
+  // Configuración del proyecto
+  config      String?  // JSON con ProjectConfig
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  members  ProjectMember[]
+  testRuns TestRun[]
+
+  @@map("projects")
+}
+
+// Ejecución de pruebas
+model TestRun {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  status      String   @default("pending") // pending, running, completed, failed
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?
+
+  // Estadísticas
+  totalTests  Int      @default(0)
+  passedTests Int      @default(0)
+  failedTests Int      @default(0)
+  duration    Int?     // en milisegundos
+
+  createdAt DateTime @default(now())
+
+  // Relaciones
+  results TestResult[]
+  report  Report?
+
+  @@map("test_runs")
+}
+
+// Resultado individual de un nodo/acción
+model TestResult {
+  id        String   @id @default(uuid())
+  testRunId String
+  testRun   TestRun  @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+
+  nodeId    String
+  nodeType  String
+  nodeLabel String?
+  testName  String? // Nombre del test al que pertenece
+
+  success    Boolean
+  message    String?
+  error      String?
+  duration   Int? // en milisegundos
+  screenshot String? // Path o base64 del screenshot
+
+  executedAt DateTime @default(now())
+
+  @@map("test_results")
+}
+
+// Reportes HTML generados
+model Report {
+  id        String   @id @default(uuid())
+  testRunId String   @unique
+  testRun   TestRun  @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+
+  htmlContent String // Contenido HTML del reporte
+  summary     String? // JSON con resumen
+
+  createdAt DateTime @default(now())
+
+  @@map("reports")
+}
