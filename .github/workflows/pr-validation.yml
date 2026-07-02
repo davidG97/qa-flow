@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check PR title
-        uses: amannn/action-semantic-pull-request@v5
+        uses: amannn/action-semantic-pull-request@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -42,7 +42,7 @@ jobs:
     name: Check Breaking Changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -60,7 +60,7 @@ jobs:
 
       - name: Comment on breaking changes
         if: steps.breaking.outputs.has_breaking == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             github.rest.issues.createComment({
@@ -75,7 +75,7 @@ jobs:
     name: PR Size Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -105,13 +105,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add size label
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const size = '${{ steps.size.outputs.size }}';
             const labels = {
               'S': 'size/S',
-              'M': 'size/M', 
+              'M': 'size/M',
               'L': 'size/L',
               'XL': 'size/XL'
             };
@@ -147,10 +147,10 @@ jobs:
     name: Welcome New Contributors
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/first-interaction@v1
+      - uses: actions/first-interaction@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          pr-message: |
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_message: |
             👋 Thanks for your first pull request to QA Flow!
             
             A maintainer will review your changes soon. In the meantime, please make sure:
