@@ -45,7 +45,8 @@ RUN pnpm --filter qa-flow build
 # ---- Build Backend ----
 FROM deps AS build-backend
 COPY . .
-# Generate Prisma client
+# Generate Prisma client (dummy URL for build, real URL at runtime)
+ENV DATABASE_URL="file:./build.db"
 RUN pnpm --filter qa-flow-server db:generate
 # Build TypeScript (emite archivos aunque haya errores de tipos)
 RUN pnpm --filter qa-flow-server build || true
@@ -74,6 +75,7 @@ COPY --from=build-backend /app/server/src/generated ./server/src/generated
 
 # Copy Prisma schema for migrations
 COPY server/prisma ./server/prisma
+COPY server/prisma.config.ts ./server/prisma.config.ts
 
 # Copy static assets if any
 COPY public ./public

@@ -128,29 +128,23 @@ El nodo Inicio permite emular:
 
 ## 🐳 Docker
 
-### Docker Compose (recomendado)
+### Local (SQLite)
 
 ```bash
-echo "JWT_SECRET=$(openssl rand -base64 32)" > .env
-docker compose up -d
+docker run -it --rm \
+  -p 3001:3001 \
+  -v qa-flow-data:/app/data \
+  davidg1997/qa-flow
 ```
 
-### Con PostgreSQL (producción)
+### Cloud (Turso)
 
 ```bash
-cat > .env << EOF
-JWT_SECRET=$(openssl rand -base64 32)
-POSTGRES_PASSWORD=$(openssl rand -base64 16)
-EOF
-
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-```
-
-### Imágenes
-
-```bash
-docker pull davidg1997/qa-flow:latest  # Estable
-docker pull davidg1997/qa-flow:beta    # Últimas features
+docker run -it --rm \
+  -p 3001:3001 \
+  -e DATABASE_URL="libsql://tu-db.turso.io" \
+  -e TURSO_AUTH_TOKEN="tu-token" \
+  davidg1997/qa-flow
 ```
 
 ### Variables de Entorno
