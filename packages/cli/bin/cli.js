@@ -43,7 +43,7 @@ function parseArgs() {
     const arg = args[i];
     
     if (arg === '--help' || arg === '-h') {
-      console.log(`qa-flow v${VERSION} - Visual Test Editor for Playwright
+      console.log(`@davidg97/qa-flow v${VERSION} - Visual Test Editor for Playwright
 
 Usage: npx qa-flow [options]
 
@@ -57,7 +57,7 @@ Docs: https://github.com/davidG97/qa-flow`);
     }
     
     if (arg === '--version' || arg === '-v') {
-      console.log(`qa-flow v${VERSION}`);
+      console.log(`@davidg97/qa-flow v${VERSION}`);
       process.exit(0);
     }
     
