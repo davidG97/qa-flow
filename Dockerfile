@@ -80,10 +80,12 @@ COPY server/prisma.config.ts ./server/prisma.config.ts
 # Copy static assets if any
 COPY public ./public
 
-# Install Playwright browsers (Chromium only for smaller image)
-RUN cd server && npx playwright install chromium --with-deps
+# Install Playwright browsers in shared location
+# ponytail: PLAYWRIGHT_BROWSERS_PATH ensures browsers accessible by non-root user
+ENV PLAYWRIGHT_BROWSERS_PATH=/app/browsers
+RUN mkdir -p /app/browsers && \
+    cd server && npx playwright install chromium --with-deps
 
-# Set ownership
 # Copy entrypoint script
 COPY docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
