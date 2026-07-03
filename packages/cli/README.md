@@ -5,7 +5,7 @@ Visual test editor for Playwright. Design, run, and manage automated tests with 
 ## Quick Start
 
 ```bash
-npx qa-flow
+npx @davidg97/qa-flow
 ```
 
 This will:
@@ -16,7 +16,7 @@ This will:
 ## Options
 
 ```bash
-npx qa-flow [options]
+npx @davidg97/qa-flow [options]
 
 Options:
   --port, -p <port>   Port to run on (default: 3001)
@@ -28,13 +28,13 @@ Options:
 
 ```bash
 # Start on default port 3001
-npx qa-flow
+npx @davidg97/qa-flow
 
 # Start on custom port
-npx qa-flow -p 8080
+npx @davidg97/qa-flow -p 8080
 
 # Using environment variable
-QA_FLOW_PORT=8080 npx qa-flow
+QA_FLOW_PORT=8080 npx @davidg97/qa-flow
 ```
 
 ## Requirements

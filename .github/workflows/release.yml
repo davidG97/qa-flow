@@ -200,12 +200,15 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
   # ==========================================
-  # npm Publishing
+  # npm Publishing (Trusted Publishing / OIDC)
   # ==========================================
   npm:
     name: Publish to npm
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for npm provenance
     steps:
       - uses: actions/checkout@v7
         with:
@@ -226,9 +229,9 @@ jobs:
         working-directory: packages/cli
         run: |
           if [[ "${{ needs.release.outputs.is_prerelease }}" == "true" ]]; then
-            npm publish --tag beta --access public
+            npm publish --tag beta --access public --provenance
           else
-            npm publish --access public
+            npm publish --access public --provenance
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

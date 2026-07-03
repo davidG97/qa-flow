@@ -6,7 +6,7 @@
 
   <br />
 
-  [![npm](https://img.shields.io/npm/v/qa-flow)](https://www.npmjs.com/package/qa-flow)
+  [![npm](https://img.shields.io/npm/v/@davidg97/qa-flow)](https://www.npmjs.com/package/qa-flow)
   [![Docker](https://img.shields.io/docker/v/davidg97/qa-flow?label=docker)](https://hub.docker.com/r/davidg97/qa-flow)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
   
@@ -32,7 +32,7 @@
 Prueba QA Flow al instante con [npx](https://docs.npmjs.com/cli/v7/commands/npx) (requiere [Node.js](https://nodejs.org/) y [Docker](https://docs.docker.com/get-docker/)):
 
 ```bash
-npx qa-flow
+npx @davidg97/qa-flow
 ```
 
 O ejecuta directamente con Docker:

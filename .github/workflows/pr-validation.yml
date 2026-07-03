@@ -160,3 +160,13 @@ jobs:
             - [ ] Code is formatted (`pnpm lint`)
             
             If you have questions, feel free to ask in this PR or join our discussions!
+          issue_message: |
+            👋 Thanks for your first issue in QA Flow!
+            
+            A maintainer will review your issue soon. In the meantime, please make sure:
+            
+            - [ ] Your issue is clear and descriptive
+            - [ ] Steps to reproduce are included (if applicable)
+            - [ ] Any relevant screenshots or logs are attached
+            
+            If you have questions, feel free to ask in this issue or join our discussions!
