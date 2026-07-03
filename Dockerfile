@@ -82,11 +82,17 @@ COPY public ./public
 RUN cd server && npx playwright install chromium --with-deps
 
 # Set ownership
-RUN chown -R qaflow:qaflow /app
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Create data directory for SQLite
+RUN mkdir -p /app/data && chown -R qaflow:qaflow /app
 
 # Environment
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV DATABASE_URL=file:/app/data/qa-flow.db
 
 # Expose port
 EXPOSE 3001
@@ -98,5 +104,5 @@ USER qaflow
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
-# Start server
-CMD ["node", "server/dist/index.js"]
+# Start server with migrations
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
