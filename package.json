@@ -1,6 +1,6 @@
 {
   "name": "qa-flow",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "private": false,
   "type": "module",
   "description": "Proyecto de automatizacion de pruebas lowcode-nocode basado en nodos",
