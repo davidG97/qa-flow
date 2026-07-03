@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use(express.static(frontendPath));
     
     // SPA fallback - todas las rutas no-API van al index.html
-    app.get('*', (req, res, next) => {
+    app.get('/{*splat}', (req, res, next) => {
       if (req.path.startsWith('/api')) {
         return next();
       }

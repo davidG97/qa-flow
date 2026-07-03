@@ -6,8 +6,8 @@
 
   <br />
 
-  [![npm](https://img.shields.io/npm/v/@davidg97/qa-flow)](https://www.npmjs.com/package/qa-flow)
-  [![Docker](https://img.shields.io/docker/v/davidg97/qa-flow?label=docker)](https://hub.docker.com/r/davidg97/qa-flow)
+  [![npm](https://img.shields.io/npm/v/@davidg97/qa-flow)](https://www.npmjs.com/package/@davidg97/qa-flow)
+  [![Docker](https://img.shields.io/docker/v/davidg1997/qa-flow?label=docker)](https://hub.docker.com/r/davidg1997/qa-flow)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
   
   <br />
@@ -38,7 +38,7 @@ npx @davidg97/qa-flow
 O ejecuta directamente con Docker:
 
 ```bash
-docker run -it --rm -p 3001:3001 -v qa-flow-data:/app/data davidg97/qa-flow
+docker run -it --rm -p 3001:3001 -v qa-flow-data:/app/data davidg1997/qa-flow
 ```
 
 Abre **http://localhost:3001** → Login: `admin@qaflow.com` / `admin123`
@@ -149,8 +149,8 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ### Imágenes
 
 ```bash
-docker pull davidg97/qa-flow:latest  # Estable
-docker pull davidg97/qa-flow:beta    # Últimas features
+docker pull davidg1997/qa-flow:latest  # Estable
+docker pull davidg1997/qa-flow:beta    # Últimas features
 ```
 
 ### Variables de Entorno

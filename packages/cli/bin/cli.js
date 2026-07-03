@@ -4,7 +4,7 @@ const { execSync, spawn } = require('node:child_process');
 const { randomBytes } = require('node:crypto');
 const { version: VERSION } = require('../package.json');
 
-const IMAGE = 'davidg97/qa-flow';
+const IMAGE = 'davidg1997/qa-flow';
 const PORT = process.env.QA_FLOW_PORT || '3001';
 const RESET = '\x1b[0m';
 const BRIGHT = '\x1b[1m';
