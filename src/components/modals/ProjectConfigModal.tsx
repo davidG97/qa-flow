@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiX, FiSettings, FiCpu, FiRefreshCw, FiClock, FiAlertTriangle } from 'react-icons/fi';
+import { FiX, FiSettings, FiCpu, FiRefreshCw, FiClock, FiAlertTriangle, FiMonitor } from 'react-icons/fi';
 import { ProjectConfig, defaultProjectConfig } from '../../types/nodes';
 
 interface ProjectConfigModalProps {
@@ -150,6 +150,30 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
               />
               <span className="config-hint">
                 Tiempo máximo de espera por test ({localConfig.timeout / 1000}s)
+              </span>
+            </div>
+          </div>
+
+          {/* Sección de Visualización */}
+          <div className="config-section">
+            <h3 className="config-section-title">
+              <FiMonitor size={16} />
+              Vista en Tiempo Real
+            </h3>
+
+            <div className="config-field">
+              <label>CDP URL (opcional)</label>
+              <input
+                type="text"
+                placeholder="http://localhost:9222"
+                value={localConfig.cdpUrl || ''}
+                onChange={(e) => setLocalConfig({
+                  ...localConfig,
+                  cdpUrl: e.target.value
+                })}
+              />
+              <span className="config-hint">
+                Conecta a un Chrome con --remote-debugging-port=9222 para ver la ejecución en tu navegador
               </span>
             </div>
           </div>

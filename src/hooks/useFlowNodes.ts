@@ -32,7 +32,7 @@ const initialNodes: Node<NodeData>[] = [
       config: {
         baseUrl: 'https://example.com',
         browser: 'chromium',
-        headless: false,
+        // ponytail: headless removed - always headless
       },
     },
   },

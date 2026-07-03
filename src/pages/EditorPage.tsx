@@ -89,6 +89,7 @@ const EditorPage = () => {
   const {
     isRunning,
     executionStatus,
+    executionId,
     validation,
     runFlow,
     clearExecutionStatus,
@@ -359,11 +360,14 @@ const EditorPage = () => {
         onClose={onPaneClick}
         allNodes={nodes}
         edges={edges}
+        cdpUrl={projectConfig.cdpUrl}
       />
 
       <ExecutionPanel 
         status={executionStatus}
         validation={validation}
+        executionId={executionId}
+        isRunning={isRunning}
         onClose={clearExecutionStatus}
       />
 

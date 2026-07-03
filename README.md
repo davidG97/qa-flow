@@ -51,7 +51,8 @@ Abre **http://localhost:3001** → Login: `admin@qaflow.com` / `admin123`
 |-----------|----------------|
 | **Editor** | Canvas interactivo, nodos arrastrables, conexiones visuales |
 | **Ejecución** | Tiempo real vía WebSocket, paralela con workers, reintentos |
-| **Navegadores** | Chromium, Firefox, WebKit + emulación de dispositivos |
+| **Vista en vivo** | 📺 Screencast integrado en el panel de ejecución |
+| **Navegador** | Chrome/Chromium + emulación de dispositivos |
 | **Reportes** | HTML estilo Playwright, screenshots, historial |
 | **Código** | Genera Playwright ejecutable, graba interacciones |
 | **Gestión** | Page Objects, locators reutilizables, import/export JSON |
@@ -76,13 +77,17 @@ Abre **http://localhost:3001** → Login: `admin@qaflow.com` / `admin123`
 ### 3. Configurar Selectores
 
 - **Picker Visual** 🎯: Selecciona elementos directamente en el navegador
+  - Local: Abre Chrome y muestra el picker nativo
+  - Docker: Screencast interactivo (click sobre la imagen para seleccionar)
+  - Ejecuta automáticamente los pasos previos antes de mostrar el selector
 - **Manual**: Escribe selector CSS/XPath
 
 ### 4. Ejecutar
 
 1. Click en **▶️ Ejecutar**
-2. Observa progreso: 🟢 éxito, 🔴 fallo, 🟡 en curso
-3. Revisa el **reporte HTML** generado
+2. **📺 Ve la ejecución en tiempo real** en el panel lateral (screencast automático)
+3. Observa progreso: 🟢 éxito, 🔴 fallo, 🟡 en curso
+4. Revisa el **reporte HTML** generado
 
 ### Ejemplo: Test de Login
 
@@ -154,7 +159,68 @@ docker run -it --rm \
 | `PORT` | Puerto del servidor | `3001` |
 | `JWT_SECRET` | Secret para tokens JWT | ⚠️ Requerido |
 | `DATABASE_URL` | URL de conexión a BD | SQLite local |
+| `CDP_URL` | URL de Chrome remoto (opcional) | - |
 
+---
+
+## 📺 Ver Ejecución en Tiempo Real
+
+QA Flow ofrece **dos formas** de visualizar la ejecución de tests:
+
+### Opción 1: Screencast Integrado (Recomendado) ✨
+
+**Sin configuración**. Al ejecutar un test, el panel de ejecución muestra automáticamente lo que hace el navegador:
+
+1. Click en **▶️ Ejecutar**
+2. El panel lateral muestra la vista del navegador en tiempo real
+3. Ve cada acción mientras se ejecuta
+
+> El screencast usa CDP internamente para transmitir frames del navegador headless al frontend.
+
+### Opción 2: CDP Remoto (Avanzado)
+
+Si prefieres ver la ejecución en tu propio Chrome:
+
+<details>
+<summary>Ver instrucciones CDP</summary>
+
+#### 1. Abre Chrome con remote debugging
+
+**Windows:**
+```cmd
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+```
+
+**macOS:**
+```bash
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+```
+
+**Linux:**
+```bash
+google-chrome --remote-debugging-port=9222
+```
+
+#### 2. Configura QA Flow
+
+En el nodo **Inicio**, sección "Avanzado":
+- **CDP URL**: `http://localhost:9222`
+
+O con Docker:
+```bash
+docker run -p 3001:3001 -e CDP_URL="http://host.docker.internal:9222" davidg1997/qa-flow
+```
+
+> **Windows/Mac**: Usa `host.docker.internal`  
+> **Linux**: Usa `--network=host` o tu IP local
+
+#### 3. Ejecuta
+
+El test se ejecutará en tu Chrome y podrás interactuar con él.
+
+> **💡 Picker Visual en Docker**: Con CDP configurado, el selector visual de elementos también funciona en Docker. Ejecuta los pasos previos en tu Chrome antes de mostrar el picker.
+
+</details>
 ---
 
 ## ⚙️ Configuración del Proyecto

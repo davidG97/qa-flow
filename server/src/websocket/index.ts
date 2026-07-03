@@ -69,6 +69,18 @@ export function notifyClients(executionId: string, status: ExecutionStatus): voi
   }
 }
 
+export function notifyScreencastFrame(executionId: string, frameData: string): void {
+  const clients = wsClients.get(executionId);
+  if (clients) {
+    const message = JSON.stringify({ type: 'screencast-frame', executionId, frame: frameData });
+    clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+}
+
 export function cleanupExecution(executionId: string, delayMs: number = 60000): void {
   setTimeout(() => {
     wsClients.delete(executionId);

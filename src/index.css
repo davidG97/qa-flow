@@ -1801,6 +1801,7 @@
   }
 
   .config-field input[type="number"],
+  .config-field input[type="text"],
   .config-field select {
     width: 100%;
     padding: 0.5rem 0.75rem;
@@ -1813,6 +1814,7 @@
   }
 
   .config-field input[type="number"]:focus,
+  .config-field input[type="text"]:focus,
   .config-field select:focus {
     outline: none;
     border-color: var(--color-accent);

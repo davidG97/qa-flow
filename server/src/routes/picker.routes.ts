@@ -3,8 +3,14 @@ import { pickerController } from '../controllers/picker.controller.js';
 
 const router = Router();
 
-// Iniciar sesión de picker visual
+// Iniciar sesión de picker visual (requiere GUI o CDP)
 router.post('/start', pickerController.startSession);
+
+// Iniciar sesión de picker interactivo (funciona en Docker)
+router.post('/interactive/start', pickerController.startInteractiveSession);
+
+// Seleccionar elemento por coordenadas
+router.post('/interactive/select', pickerController.selectAtCoordinates);
 
 // Cancelar sesión
 router.post('/cancel/:sessionId', pickerController.cancelSession);

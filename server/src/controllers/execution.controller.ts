@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FlowExecutor } from '../services/executor.service.js';
 import { ReporterService } from '../services/reporter.service.js';
 import { RunFlowRequest, ExecutionStatus, TestFlow } from '../types/index.js';
-import { notifyClients, cleanupExecution } from '../websocket/index.js';
+import { notifyClients, notifyScreencastFrame, cleanupExecution } from '../websocket/index.js';
 
 // Almacén de ejecuciones activas
 const executions = new Map<string, ExecutionStatus>();
@@ -21,7 +21,7 @@ export const executionController = {
         return res.status(400).json({ error: 'Flujo inválido' });
       }
 
-      // Crear el ejecutor con callback para notificar progreso
+      // Crear el ejecutor con callback para notificar progreso y screencast
       const executor = new FlowExecutor({
         headless: options?.headless ?? true,
         slowMo: options?.slowMo ?? 100,
@@ -29,6 +29,9 @@ export const executionController = {
         onProgress: (status) => {
           executions.set(executor.getExecutionId(), status);
           notifyClients(executor.getExecutionId(), status);
+        },
+        onScreencastFrame: (frameData) => {
+          notifyScreencastFrame(executor.getExecutionId(), frameData);
         },
       });
 

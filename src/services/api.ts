@@ -68,6 +68,7 @@ export interface RunResponse {
 class ApiService {
   private ws: WebSocket | null = null;
   private readonly statusCallbacks: Map<string, (status: ExecutionStatus) => void> = new Map();
+  private readonly screencastCallbacks: Map<string, (frameBase64: string) => void> = new Map();
 
   /**
    * Obtiene el token JWT del localStorage.
@@ -243,17 +244,32 @@ class ApiService {
             }
           }
 
+          if (data.type === 'screencast-frame' && data.executionId) {
+            const callback = this.screencastCallbacks.get(data.executionId);
+            if (callback) {
+              callback(data.frame);
+            }
+          }
+
           if (data.type === 'picker:result' && data.sessionId) {
             const callback = this.pickerCallbacks.get(data.sessionId);
             if (callback) {
               callback(data.cancelled ? null : data.result);
               this.pickerCallbacks.delete(data.sessionId);
               this.pickerProgressCallbacks.delete(data.sessionId);
+              this.pickerFrameCallbacks.delete(data.sessionId);
             }
           }
 
           if (data.type === 'picker:progress' && data.message) {
             this.pickerProgressCallbacks.forEach(callback => callback(data.message));
+          }
+
+          if (data.type === 'picker:frame' && data.sessionId && data.frame) {
+            const callback = this.pickerFrameCallbacks.get(data.sessionId);
+            if (callback) {
+              callback(data.frame);
+            }
           }
         } catch (error) {
           console.error('Error procesando mensaje WS:', error);
@@ -280,6 +296,14 @@ class ApiService {
 
   unsubscribeFromExecution(executionId: string): void {
     this.statusCallbacks.delete(executionId);
+  }
+
+  subscribeToScreencast(executionId: string, callback: (frameBase64: string) => void): void {
+    this.screencastCallbacks.set(executionId, callback);
+  }
+
+  unsubscribeFromScreencast(executionId: string): void {
+    this.screencastCallbacks.delete(executionId);
   }
 
   // ==========================================
@@ -515,11 +539,12 @@ class ApiService {
   async startPickerWithFlow(
     targetNodeId: string,
     nodes: Array<{ id: string; data: { nodeType: string; label: string; config: Record<string, unknown> } }>,
-    edges: Array<{ id: string; source: string; target: string }>
+    edges: Array<{ id: string; source: string; target: string }>,
+    cdpUrl?: string
   ): Promise<{ sessionId: string }> {
     const response = await this.request(`${API_URL}/picker/start`, {
       method: 'POST',
-      body: JSON.stringify({ targetNodeId, nodes, edges }),
+      body: JSON.stringify({ targetNodeId, nodes, edges, cdpUrl }),
     });
 
     if (!response.ok) {
@@ -547,6 +572,47 @@ class ApiService {
   unsubscribeFromPicker(sessionId: string): void {
     this.pickerCallbacks.delete(sessionId);
     this.pickerProgressCallbacks.delete(sessionId);
+    this.pickerFrameCallbacks.delete(sessionId);
+  }
+
+  // === Interactive Picker (works in Docker) ===
+  
+  private pickerFrameCallbacks: Map<string, (frameBase64: string) => void> = new Map();
+
+  async startInteractivePicker(
+    targetNodeId: string,
+    nodes: Array<{ id: string; data: { nodeType: string; label: string; config: Record<string, unknown> } }>,
+    edges: Array<{ id: string; source: string; target: string }>
+  ): Promise<{ sessionId: string; interactive: boolean }> {
+    const response = await this.request(`${API_URL}/picker/interactive/start`, {
+      method: 'POST',
+      body: JSON.stringify({ targetNodeId, nodes, edges }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Error iniciando selector interactivo');
+    }
+
+    return response.json();
+  }
+
+  async selectAtCoordinates(sessionId: string, x: number, y: number): Promise<{ result: PickerResult }> {
+    const response = await this.request(`${API_URL}/picker/interactive/select`, {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, x, y }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Error seleccionando elemento');
+    }
+
+    return response.json();
+  }
+
+  subscribeToPickerFrame(sessionId: string, callback: (frameBase64: string) => void): void {
+    this.pickerFrameCallbacks.set(sessionId, callback);
   }
 }
 
