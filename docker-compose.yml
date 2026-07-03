@@ -15,7 +15,7 @@
 
 services:
   qa-flow:
-    image: davidg97/qa-flow:latest
+    image: davidg1997/qa-flow:latest
     container_name: qa-flow
     ports:
       - "${PORT:-3001}:3001"
