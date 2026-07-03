@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { ExecutionStatus, ExecutionResult, apiService } from '../../services/api';
 import { FriendlyError } from '../../utils/errorTranslator';
 import { ValidationResult, ValidationIssue } from '../../utils/flowValidator';
+import { BrowserView } from './BrowserView';
 import { 
   FiX, FiLoader, FiCheck, FiAlertCircle, FiClock, FiFileText, 
   FiDownload, FiActivity, FiZap, FiAlertTriangle, FiInfo, FiTarget,
@@ -16,11 +17,13 @@ interface ExecutionStatusWithReport extends ExecutionStatus {
 interface ExecutionPanelProps {
   status: ExecutionStatusWithReport | null;
   validation?: ValidationResult;
+  executionId?: string | null;
+  isRunning?: boolean;
   onClose: () => void;
   onNodeSelect?: (nodeId: string) => void;
 }
 
-const ExecutionPanel = ({ status, validation, onClose, onNodeSelect }: ExecutionPanelProps) => {
+const ExecutionPanel = ({ status, validation, executionId, isRunning = false, onClose, onNodeSelect }: ExecutionPanelProps) => {
   // Calcular estadísticas - antes del return condicional para cumplir reglas de hooks
   const stats = useMemo(() => {
     if (!status) return { total: 0, passed: 0, failed: 0, totalDuration: 0, progress: 0 };
@@ -119,6 +122,11 @@ const ExecutionPanel = ({ status, validation, onClose, onNodeSelect }: Execution
         <div className="progress-bar-container">
           <div className="progress-bar" style={{ width: `${stats.progress}%` }} />
         </div>
+      )}
+
+      {/* Browser View - vista en tiempo real */}
+      {(isRunning || status?.status === 'running') && (
+        <BrowserView executionId={executionId || null} isRunning={isRunning || status?.status === 'running'} />
       )}
 
       {/* Status badge y stats */}

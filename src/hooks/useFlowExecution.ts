@@ -27,6 +27,7 @@ export function useFlowExecution(
 ) {
   const [isRunning, setIsRunning] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<ExecutionStatusWithReport | null>(null);
+  const [executionId, setExecutionId] = useState<string | null>(null);
 
   // Validación reactiva del flujo
   const validation = useMemo(() => {
@@ -121,7 +122,9 @@ export function useFlowExecution(
 
       console.log('Executing flow with config:', projectConfig);
 
-      const response = await apiService.runFlow(flow, { headless: false, slowMo: 100 });
+      // ponytail: headless option removed - always headless, screencast shows execution
+      const response = await apiService.runFlow(flow, { slowMo: 100 });
+      setExecutionId(response.executionId);
       
       apiService.subscribeToExecution(response.executionId, (status) => {
         // Traducir errores a mensajes amigables
@@ -157,11 +160,13 @@ export function useFlowExecution(
 
   const clearExecutionStatus = useCallback(() => {
     setExecutionStatus(null);
+    setExecutionId(null);
   }, []);
 
   return {
     isRunning,
     executionStatus,
+    executionId,
     validation,
     runFlow,
     clearExecutionStatus,

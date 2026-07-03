@@ -8,6 +8,7 @@ export interface ProjectConfig {
   maxFailures: number;
   retries: number;
   timeout: number;
+  cdpUrl?: string; // URL para conectar via CDP y ver ejecución
 }
 
 export const defaultProjectConfig: ProjectConfig = {
@@ -16,6 +17,7 @@ export const defaultProjectConfig: ProjectConfig = {
   maxFailures: 0,
   retries: 0,
   timeout: 30000,
+  cdpUrl: '',
 };
 
 export interface NodeTypeDefinition {
@@ -67,23 +69,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
         placeholder: 'https://ejemplo.com',
         required: true,
       },
-      {
-        name: 'browser',
-        label: 'Navegador',
-        type: 'select',
-        options: [
-          { value: 'chromium', label: 'Chromium' },
-          { value: 'firefox', label: 'Firefox' },
-          { value: 'webkit', label: 'WebKit (Safari)' },
-        ],
-        defaultValue: 'chromium',
-      },
-      {
-        name: 'headless',
-        label: 'Modo Headless',
-        type: 'boolean',
-        defaultValue: true,
-      },
+      // ponytail: headless removed - always headless, user sees via screencast/CDP
       // Opciones avanzadas - Emulación de dispositivo
       {
         name: 'device',

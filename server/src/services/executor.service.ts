@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-extra';
-import { Browser, Page, BrowserContext, devices, firefox, webkit } from 'playwright';
+import { Browser, Page, BrowserContext, CDPSession, devices } from 'playwright';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { expect } from '@playwright/test';
 import { v4 as uuidv4 } from 'uuid';
@@ -20,6 +20,7 @@ export interface ExecutorOptions {
   slowMo?: number;
   timeout?: number;
   onProgress?: (status: ExecutionStatus) => void;
+  onScreencastFrame?: (frameBase64: string) => void;
 }
 
 interface TestCase {
@@ -38,11 +39,13 @@ export class FlowExecutor {
   private browser: Browser | null = null;
   private context: BrowserContext | null = null;
   private page: Page | null = null;
+  private cdpSession: CDPSession | null = null;
   private readonly executionId: string;
   private status: ExecutionStatus;
   private readonly options: ExecutorOptions;
   private flowNodes: FlowNode[] = [];
   private flowEdges: FlowEdge[] = [];
+  private flowConfig: ProjectConfig | undefined;
 
   constructor(options: ExecutorOptions = {}) {
     this.executionId = uuidv4();
@@ -544,21 +547,24 @@ export class FlowExecutor {
 
   /**
    * Inicializa el browser (usado para beforeAll/afterAll)
+   * Soporta CDP remoto para ver ejecución en tiempo real
    */
   private async initBrowser(startNode?: FlowNode): Promise<void> {
     const config = startNode?.data.config || {};
-    const browserType = (config.browser as string) || 'chromium';
-    const headless = typeof config.headless === 'boolean' 
-      ? config.headless 
-      : (this.options.headless ?? true);
+    const cdpUrl = this.flowConfig?.cdpUrl || process.env.CDP_URL;
     const baseUrl = config.baseUrl as string;
 
-    const browserLauncher = { chromium, firefox, webkit }[browserType] || chromium;
-
-    this.browser = await browserLauncher.launch({
-      headless,
-      slowMo: this.options.slowMo,
-    });
+    // CDP remoto: conectar al browser del usuario
+    if (cdpUrl) {
+      console.log(`[Executor] Conectando a browser remoto via CDP: ${cdpUrl}`);
+      this.browser = await chromium.connectOverCDP(cdpUrl);
+    } else {
+      // ponytail: always headless - user sees execution via screencast
+      this.browser = await chromium.launch({
+        headless: true,
+        slowMo: this.options.slowMo,
+      });
+    }
 
     // Construir opciones del contexto con emulación
     const contextOptions = this.buildContextOptions(config);
@@ -567,8 +573,58 @@ export class FlowExecutor {
     this.page = await this.context.newPage();
     this.page.setDefaultTimeout(this.options.timeout || 30000);
 
+    // Iniciar screencast si hay callback configurado
+    if (this.options.onScreencastFrame) {
+      await this.startScreencast();
+    }
+
     if (baseUrl) {
       await this.page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+    }
+  }
+
+  /**
+   * Inicia transmisión de frames del navegador via CDP
+   */
+  private async startScreencast(): Promise<void> {
+    if (!this.page) return;
+    
+    try {
+      this.cdpSession = await this.page.context().newCDPSession(this.page);
+      
+      this.cdpSession.on('Page.screencastFrame', (params) => {
+        // Enviar frame al callback
+        this.options.onScreencastFrame?.(params.data);
+        // Confirmar recepción para recibir el siguiente
+        this.cdpSession?.send('Page.screencastFrameAck', { sessionId: params.sessionId }).catch(() => {});
+      });
+
+      await this.cdpSession.send('Page.startScreencast', {
+        format: 'jpeg',
+        quality: 60,
+        maxWidth: 1280,
+        maxHeight: 720,
+        everyNthFrame: 2, // Reducir framerate para menos tráfico
+      });
+      
+      console.log('[Executor] Screencast iniciado');
+    } catch (error) {
+      console.warn('[Executor] No se pudo iniciar screencast:', error);
+    }
+  }
+
+  /**
+   * Detiene la transmisión de frames
+   */
+  private async stopScreencast(): Promise<void> {
+    if (this.cdpSession) {
+      try {
+        await this.cdpSession.send('Page.stopScreencast');
+        await this.cdpSession.detach();
+      } catch {
+        // Ignorar errores al cerrar
+      }
+      this.cdpSession = null;
     }
   }
 
@@ -579,6 +635,7 @@ export class FlowExecutor {
     this.status.flowId = flow.id;
     this.flowNodes = flow.nodes;
     this.flowEdges = flow.edges;
+    this.flowConfig = flow.config;
     this.updateStatus({ status: 'running', startedAt: new Date() });
 
     try {
@@ -789,18 +846,19 @@ export class FlowExecutor {
 
     try {
       const config = test.startNode.data.config;
-      const browserType = config.browser as string || 'chromium';
-      const headless = typeof config.headless === 'boolean' 
-        ? config.headless 
-        : (this.options.headless ?? true);
+      const cdpUrl = this.flowConfig?.cdpUrl || process.env.CDP_URL;
       const baseUrl = config.baseUrl as string;
 
-      const browserLauncher = { chromium, firefox, webkit }[browserType] || chromium;
-
-      browser = await browserLauncher.launch({
-        headless,
-        slowMo: this.options.slowMo,
-      });
+      // CDP remoto o local
+      if (cdpUrl) {
+        browser = await chromium.connectOverCDP(cdpUrl);
+      } else {
+        // ponytail: always headless - user sees execution via screencast
+        browser = await chromium.launch({
+          headless: true,
+          slowMo: this.options.slowMo,
+        });
+      }
 
       // Construir opciones del contexto con emulación
       const contextOptions = this.buildContextOptions(config);
@@ -1286,26 +1344,26 @@ export class FlowExecutor {
   // ===============================
 
   private async executeStart(config: Record<string, unknown>): Promise<void> {
-    const browserType = config.browser as string || 'chromium';
-    // Si headless está definido en config, usar ese valor; si no, usar el valor de options
-    const headless = typeof config.headless === 'boolean' 
+    const cdpUrl = this.flowConfig?.cdpUrl || process.env.CDP_URL;
+    // ponytail: Force headless in Docker (no display available)
+    const forceHeadless = process.env.FORCE_HEADLESS === 'true';
+    const headless = forceHeadless || (typeof config.headless === 'boolean' 
       ? config.headless 
-      : (this.options.headless ?? true);
+      : (this.options.headless ?? true));
     const baseUrl = config.baseUrl as string;
 
-    const browserLauncher = {
-      chromium,
-      firefox,
-      webkit,
-    }[browserType] || chromium;
-
     try {
-      console.log(`[Executor] Lanzando browser ${browserType} (headless: ${headless})...`);
-      this.browser = await browserLauncher.launch({
-        headless,
-        slowMo: this.options.slowMo,
-      });
-      console.log(`[Executor] Browser lanzado correctamente`);
+      if (cdpUrl) {
+        console.log(`[Executor] Conectando a browser remoto via CDP: ${cdpUrl}`);
+        this.browser = await chromium.connectOverCDP(cdpUrl);
+      } else {
+        console.log(`[Executor] Lanzando chromium (headless: ${headless})...`);
+        this.browser = await chromium.launch({
+          headless,
+          slowMo: this.options.slowMo,
+        });
+      }
+      console.log(`[Executor] Browser listo`);
 
       this.context = await this.browser.newContext({
         viewport: { width: 1280, height: 720 },
@@ -1315,6 +1373,11 @@ export class FlowExecutor {
       this.page = await this.context.newPage();
       this.page.setDefaultTimeout(this.options.timeout || 30000);
       console.log(`[Executor] Página creada`);
+
+      // Iniciar screencast si hay callback configurado
+      if (this.options.onScreencastFrame) {
+        await this.startScreencast();
+      }
 
       if (baseUrl) {
         await this.page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
@@ -2062,6 +2125,9 @@ export class FlowExecutor {
    * Limpia los recursos del browser
    */
   private async cleanup(): Promise<void> {
+    // Detener screencast primero
+    await this.stopScreencast();
+    
     if (this.page) {
       await this.page.close().catch(() => {});
       this.page = null;

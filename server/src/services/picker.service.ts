@@ -509,13 +509,15 @@ class PickerService {
 
   /**
    * Start picker with previous nodes execution
+   * Supports CDP for Docker environments
    */
   async startSessionWithFlow(
     targetNodeId: string,
     nodes: FlowNode[],
     edges: FlowEdge[],
     onResult: (result: PickerResult | null) => void,
-    onProgress?: (message: string) => void
+    onProgress?: (message: string) => void,
+    cdpUrl?: string
   ): Promise<string> {
     const sessionId = uuidv4();
     
@@ -527,18 +529,48 @@ class PickerService {
       throw new Error('No se encontró URL base en el nodo de inicio');
     }
 
-    onProgress?.(`Iniciando navegador...`);
-    
-    const browser = await chromium.launch({
-      headless: false,
-      args: ['--start-maximized'],
-    });
+    // Check for CDP URL (from param, startNode config, or env)
+    const effectiveCdpUrl = cdpUrl || process.env.CDP_URL;
 
-    const context = await browser.newContext({
-      viewport: null,
-    });
+    let browser: Browser;
+    let context: BrowserContext;
+    let page: Page;
 
-    const page = await context.newPage();
+    if (effectiveCdpUrl) {
+      // CDP mode: connect to user's Chrome
+      onProgress?.(`Conectando a Chrome via CDP...`);
+      
+      try {
+        browser = await chromium.connectOverCDP(effectiveCdpUrl);
+        // Get existing context or create new one
+        const contexts = browser.contexts();
+        if (contexts.length > 0) {
+          context = contexts[0];
+          // Create new page in existing context
+          page = await context.newPage();
+        } else {
+          context = await browser.newContext({ viewport: null });
+          page = await context.newPage();
+        }
+      } catch (error) {
+        throw new Error(`No se pudo conectar a Chrome en ${effectiveCdpUrl}. Asegúrate de tener Chrome abierto con --remote-debugging-port=9222`);
+      }
+    } else {
+      // ponytail: try GUI mode, if fails (no display/Docker) frontend uses interactive picker
+      onProgress?.(`Iniciando navegador...`);
+      
+      browser = await chromium.launch({
+        headless: false,
+        args: ['--start-maximized'],
+      });
+
+      context = await browser.newContext({
+        viewport: null,
+      });
+
+      page = await context.newPage();
+    }
+
     page.setDefaultTimeout(15000);
 
     // Listen for picker results
@@ -627,9 +659,292 @@ class PickerService {
   }
 
   async closeAllSessions(): Promise<void> {
-    for (const [sessionId] of this.sessions) {
+    const sessionIds = Array.from(this.sessions.keys());
+    for (const sessionId of sessionIds) {
       await this.closeSession(sessionId);
     }
+  }
+
+  /**
+   * Start interactive picker session with screencast (works in Docker)
+   * No external configuration needed - uses headless browser with CDP
+   */
+  async startInteractiveSession(
+    targetNodeId: string,
+    nodes: FlowNode[],
+    edges: FlowEdge[],
+    onScreencastFrame: (frameBase64: string) => void,
+    onResult: (result: PickerResult | null) => void,
+    onProgress?: (message: string) => void
+  ): Promise<string> {
+    const sessionId = uuidv4();
+    
+    const pathNodes = this.getPathToNode(targetNodeId, nodes, edges);
+    const startNode = pathNodes.find(n => n.data.nodeType === 'start');
+    
+    if (!startNode?.data.config.baseUrl) {
+      throw new Error('No se encontró URL base en el nodo de inicio');
+    }
+
+    onProgress?.('Iniciando navegador...');
+    
+    // Always headless for Docker compatibility
+    const browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox'],
+    });
+
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 720 },
+    });
+
+    const page = await context.newPage();
+    page.setDefaultTimeout(15000);
+
+    // Execute path nodes
+    try {
+      for (let i = 0; i < pathNodes.length; i++) {
+        const node = pathNodes[i];
+        onProgress?.(`Ejecutando: ${node.data.label} (${i + 1}/${pathNodes.length})`);
+        await this.executeNodeAction(node, page);
+        await page.waitForTimeout(100);
+      }
+      onProgress?.('Listo. Click sobre un elemento para seleccionarlo.');
+    } catch (error) {
+      await browser.close();
+      throw new Error(`Error ejecutando nodos: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    // Start screencast via CDP
+    const cdpSession = await page.context().newCDPSession(page);
+    await cdpSession.send('DOM.enable');
+    await cdpSession.send('Page.enable');
+    
+    cdpSession.on('Page.screencastFrame', async (params) => {
+      await cdpSession.send('Page.screencastFrameAck', { sessionId: params.sessionId });
+      onScreencastFrame(params.data);
+    });
+    
+    await cdpSession.send('Page.startScreencast', {
+      format: 'jpeg',
+      quality: 70,
+      maxWidth: 1280,
+      maxHeight: 720,
+      everyNthFrame: 2,
+    });
+
+    // Store session with CDP session for coordinate selection
+    const session: PickerSession & { cdpSession?: typeof cdpSession; onResult?: typeof onResult } = {
+      id: sessionId,
+      browser,
+      context,
+      page,
+      status: 'selecting',
+      cdpSession,
+      onResult,
+    };
+    this.sessions.set(sessionId, session as PickerSession);
+
+    browser.on('disconnected', () => {
+      const sess = this.sessions.get(sessionId);
+      if (sess?.status === 'selecting') {
+        onResult(null);
+      }
+      this.sessions.delete(sessionId);
+    });
+
+    return sessionId;
+  }
+
+  /**
+   * Select element at given coordinates (called when user clicks on screencast)
+   */
+  async selectAtCoordinates(sessionId: string, x: number, y: number): Promise<PickerResult | null> {
+    const session = this.sessions.get(sessionId) as PickerSession & { 
+      cdpSession?: { send: (method: string, params?: Record<string, unknown>) => Promise<Record<string, unknown>> };
+      onResult?: (result: PickerResult | null) => void;
+    };
+    
+    if (!session || !session.cdpSession) {
+      throw new Error('Sesión no encontrada o no es interactiva');
+    }
+
+    try {
+      // Get node at coordinates using CDP
+      const nodeResult = await session.cdpSession.send('DOM.getNodeForLocation', {
+        x: Math.round(x),
+        y: Math.round(y),
+        includeUserAgentShadowDOM: false,
+        ignorePointerEventsNone: true,
+      }) as { backendNodeId: number; nodeId?: number };
+
+      if (!nodeResult.backendNodeId) {
+        return null;
+      }
+
+      // Get document root to enable full DOM access
+      await session.cdpSession.send('DOM.getDocument', { depth: -1 });
+
+      // Describe the node to get its details
+      const nodeDetails = await session.cdpSession.send('DOM.describeNode', {
+        backendNodeId: nodeResult.backendNodeId,
+        depth: 0,
+      }) as { node: { nodeName: string; nodeId: number; attributes?: string[]; localName: string } };
+
+      const node = nodeDetails.node;
+      const tagName = node.localName || node.nodeName.toLowerCase();
+      
+      // Parse attributes
+      const attributes: Record<string, string> = {};
+      if (node.attributes) {
+        for (let i = 0; i < node.attributes.length; i += 2) {
+          attributes[node.attributes[i]] = node.attributes[i + 1];
+        }
+      }
+
+      // Get bounding box
+      let rect = { x: 0, y: 0, width: 0, height: 0 };
+      try {
+        const boxResult = await session.cdpSession.send('DOM.getBoxModel', {
+          backendNodeId: nodeResult.backendNodeId,
+        }) as { model?: { content: number[] } };
+        if (boxResult.model) {
+          const content = boxResult.model.content;
+          rect = {
+            x: content[0],
+            y: content[1],
+            width: content[2] - content[0],
+            height: content[5] - content[1],
+          };
+        }
+      } catch {
+        // Box model may fail for some elements
+      }
+
+      // Get text content
+      let textContent = '';
+      try {
+        const resolved = await session.cdpSession.send('DOM.resolveNode', {
+          backendNodeId: nodeResult.backendNodeId,
+        }) as { object?: { objectId: string } };
+        
+        if (resolved.object?.objectId) {
+          const textResult = await session.cdpSession.send('Runtime.callFunctionOn', {
+            objectId: resolved.object.objectId,
+            functionDeclaration: 'function() { return this.textContent?.trim().slice(0, 50) || ""; }',
+            returnByValue: true,
+          }) as { result?: { value: string } };
+          textContent = textResult.result?.value || '';
+        }
+      } catch {
+        // Text extraction may fail
+      }
+
+      // Generate selectors
+      const selectors = this.generateSelectors(tagName, attributes, textContent);
+
+      const result: PickerResult = {
+        selector: selectors.primary.selector,
+        selectorType: selectors.primary.type as PickerResult['selectorType'],
+        element: {
+          tagName,
+          id: attributes.id,
+          className: attributes.class,
+          text: textContent,
+          rect,
+        },
+        alternatives: selectors.alternatives,
+      };
+
+      // Mark session as completed
+      session.status = 'completed';
+      session.selectedSelector = result.selector;
+      
+      // Stop screencast and notify result
+      try {
+        await session.cdpSession.send('Page.stopScreencast');
+      } catch {
+        // May already be stopped
+      }
+      
+      if (session.onResult) {
+        session.onResult(result);
+      }
+
+      // Close after short delay
+      setTimeout(() => this.closeSession(sessionId), 500);
+
+      return result;
+    } catch (error) {
+      console.error('Error selecting element:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate CSS selectors for an element
+   */
+  private generateSelectors(
+    tagName: string, 
+    attributes: Record<string, string>, 
+    textContent: string
+  ): { primary: { selector: string; type: string }; alternatives: Array<{ selector: string; type: string; confidence: number }> } {
+    const alternatives: Array<{ selector: string; type: string; confidence: number }> = [];
+
+    // Priority 1: data-testid
+    if (attributes['data-testid']) {
+      return {
+        primary: { selector: attributes['data-testid'], type: 'testId' },
+        alternatives: [],
+      };
+    }
+
+    // Priority 2: id
+    if (attributes.id && !attributes.id.match(/^[0-9]|[:\s]/)) {
+      alternatives.push({ selector: `#${attributes.id}`, type: 'css', confidence: 95 });
+    }
+
+    // Priority 3: role + name
+    if (attributes.role) {
+      const name = attributes['aria-label'] || textContent;
+      if (name) {
+        alternatives.push({ selector: `${attributes.role}[name="${name.slice(0, 30)}"]`, type: 'role', confidence: 90 });
+      }
+    }
+
+    // Priority 4: text selector (for buttons, links, labels)
+    if (textContent && ['button', 'a', 'label', 'span'].includes(tagName)) {
+      alternatives.push({ selector: textContent.slice(0, 40), type: 'text', confidence: 85 });
+    }
+
+    // Priority 5: CSS class selector
+    if (attributes.class) {
+      const classes = attributes.class.split(/\s+/).filter(c => c && !c.match(/^[0-9]|--/));
+      if (classes.length > 0) {
+        const selector = `${tagName}.${classes.slice(0, 2).join('.')}`;
+        alternatives.push({ selector, type: 'css', confidence: 70 });
+      }
+    }
+
+    // Priority 6: tag + attribute
+    const usefulAttrs = ['name', 'type', 'placeholder', 'href', 'src'];
+    for (const attr of usefulAttrs) {
+      if (attributes[attr]) {
+        const value = attributes[attr].slice(0, 50);
+        alternatives.push({ selector: `${tagName}[${attr}="${value}"]`, type: 'css', confidence: 65 });
+        break;
+      }
+    }
+
+    // Fallback: just tag
+    if (alternatives.length === 0) {
+      alternatives.push({ selector: tagName, type: 'css', confidence: 30 });
+    }
+
+    return {
+      primary: alternatives[0],
+      alternatives: alternatives.slice(1),
+    };
   }
 }
 

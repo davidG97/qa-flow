@@ -28,6 +28,7 @@ export interface ProjectConfig {
   maxFailures: number;
   retries: number;
   timeout: number;
+  cdpUrl?: string;
 }
 
 export interface TestFlow {
