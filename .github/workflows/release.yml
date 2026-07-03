@@ -173,18 +173,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata for Docker
+      - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v6
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/qa-flow
           tags: |
-            # Para releases normales: latest + version
             type=raw,value=latest,enable=${{ needs.release.outputs.is_prerelease == 'false' }}
             type=raw,value=${{ needs.release.outputs.version }}
-            # Para betas: beta tag
             type=raw,value=beta,enable=${{ needs.release.outputs.is_prerelease == 'true' }}
-            # Semver tags (solo para releases estables)
             type=semver,pattern={{major}},value=${{ needs.release.outputs.version }},enable=${{ needs.release.outputs.is_prerelease == 'false' }}
             type=semver,pattern={{major}}.{{minor}},value=${{ needs.release.outputs.version }},enable=${{ needs.release.outputs.is_prerelease == 'false' }}
 
@@ -197,7 +194,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
   # ==========================================
   # npm Publishing (Trusted Publishing / OIDC)

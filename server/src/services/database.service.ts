@@ -1,32 +1,12 @@
 import { PrismaClient } from '../generated/prisma/client.js';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 
-// Configuración de la base de datos
-const getDatabaseUrl = () => {
-  const url = process.env.DATABASE_URL || 'file:./dev.db';
-  // Convertir formato SQLite de Prisma a formato libsql
-  if (url.startsWith('file:')) {
-    const path = url.replace('file:', '');
-    return `file:${path}`;
-  }
-  return url;
-};
-
-// Crear adaptador con la configuración
+// ponytail: SQLite/Turso only - add PostgreSQL when someone actually needs it
 const adapter = new PrismaLibSql({
-  url: getDatabaseUrl(),
+  url: process.env.DATABASE_URL || 'file:./dev.db',
 });
 
-// Singleton del cliente Prisma para evitar múltiples conexiones
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+export const prisma = new PrismaClient({ adapter });
 
 /**
  * Conectar a la base de datos
