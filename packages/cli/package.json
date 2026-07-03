@@ -1,0 +1,39 @@
+{
+  "name": "qa-flow",
+  "version": "1.0.0",
+  "description": "Visual test editor for Playwright - Design, run, and manage automated tests with a drag-and-drop canvas",
+  "keywords": [
+    "playwright",
+    "testing",
+    "automation",
+    "qa",
+    "visual",
+    "no-code",
+    "low-code",
+    "e2e",
+    "end-to-end",
+    "test-automation"
+  ],
+  "author": "David Garcia",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidG97/qa-flow.git"
+  },
+  "homepage": "https://davidg97.github.io/qa-flow",
+  "bugs": {
+    "url": "https://github.com/davidG97/qa-flow/issues"
+  },
+  "bin": {
+    "qa-flow": "./bin/cli.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "prepublishOnly": "echo 'Ready to publish qa-flow CLI'"
+  }
+}

@@ -1,18 +1,21 @@
 # ================================================
-# QA Flow - Docker Compose
+# QA Flow - Docker Compose (Usuarios)
 # ================================================
 # 
-# Uso:
-#   Desarrollo (SQLite):  docker compose up
-#   Producción (Postgres): docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+# Quick Start:
+#   docker compose up -d
+#
+# Con PostgreSQL:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Para desarrollo (build local):
+#   docker compose -f docker-compose.dev.yml up -d
 #
 # ================================================
 
 services:
   qa-flow:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: davidg97/qa-flow:latest
     container_name: qa-flow
     ports:
       - "${PORT:-3001}:3001"

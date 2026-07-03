@@ -1,8 +1,15 @@
 # ================================================
-# QA Flow - Production Docker Compose (PostgreSQL)
+# QA Flow - Production (PostgreSQL)
 # ================================================
 #
-# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Extiende docker-compose.yml para usar PostgreSQL.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Requerido:
+#   - JWT_SECRET (variable de entorno o en .env)
+#   - POSTGRES_PASSWORD (opcional, default: qaflow_secret)
 #
 # ================================================
 

@@ -1,14 +1,12 @@
 name: Release
 
+# Solo releases manuales - Los colaboradores controlan cuándo crear versiones
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       version:
         description: 'Version bump type'
         required: true
-        default: 'patch'
         type: choice
         options:
           - patch
@@ -62,39 +60,19 @@ jobs:
         id: current_version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
-      - name: Determine version bump
-        id: bump
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "type=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            # Analizar commits para determinar el tipo de bump
-            COMMITS=$(git log --oneline $(git describe --tags --abbrev=0 2>/dev/null || echo "")..HEAD 2>/dev/null || git log --oneline)
-            
-            if echo "$COMMITS" | grep -qE "^[a-f0-9]+ (feat|feature)(\(.+\))?!:|BREAKING CHANGE"; then
-              echo "type=major" >> $GITHUB_OUTPUT
-            elif echo "$COMMITS" | grep -qE "^[a-f0-9]+ (feat|feature)"; then
-              echo "type=minor" >> $GITHUB_OUTPUT
-            else
-              echo "type=patch" >> $GITHUB_OUTPUT
-            fi
-          fi
-
       - name: Check if prerelease
         id: prerelease
         run: |
           if [ "${{ github.event.inputs.prerelease }}" == "true" ]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            echo "suffix=-beta" >> $GITHUB_OUTPUT
           else
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            echo "suffix=" >> $GITHUB_OUTPUT
           fi
 
       - name: Bump version
         id: new_version
         run: |
-          npm version ${{ steps.bump.outputs.type }} --no-git-tag-version
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
           BASE_VERSION=$(node -p "require('./package.json').version")
           
           if [ "${{ steps.prerelease.outputs.is_prerelease }}" == "true" ]; then
@@ -106,7 +84,6 @@ jobs:
               BETA_NUM=$((LAST_NUM + 1))
             fi
             NEW_VERSION="${BASE_VERSION}-beta.${BETA_NUM}"
-            # Actualizar package.json con versión beta
             npm version $NEW_VERSION --no-git-tag-version --allow-same-version
           else
             NEW_VERSION=$BASE_VERSION
@@ -220,3 +197,37 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
+
+  # ==========================================
+  # npm Publishing
+  # ==========================================
+  npm:
+    name: Publish to npm
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: v${{ needs.release.outputs.version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update CLI version
+        working-directory: packages/cli
+        run: |
+          npm version ${{ needs.release.outputs.version }} --no-git-tag-version
+
+      - name: Publish to npm
+        working-directory: packages/cli
+        run: |
+          if [[ "${{ needs.release.outputs.is_prerelease }}" == "true" ]]; then
+            npm publish --tag beta --access public
+          else
+            npm publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -8,8 +8,10 @@ First off, thank you for considering contributing to QA Flow! 🎉
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
 - [How to Contribute](#how-to-contribute)
+- [Git Flow](#git-flow)
 - [Commit Guidelines](#commit-guidelines)
 - [Pull Request Process](#pull-request-process)
+- [Release Process](#release-process)
 - [Style Guide](#style-guide)
 
 ## Code of Conduct
@@ -77,9 +79,55 @@ This project and everyone participating in it is governed by our commitment to f
 
 1. Find an issue to work on or create one
 2. Comment on the issue to let others know you're working on it
-3. Create a branch from `develop`
-4. Make your changes
-5. Submit a Pull Request
+3. Create a branch from `main`
+4. Make your changes following the [Commit Guidelines](#commit-guidelines)
+5. Submit a Pull Request to `main`
+6. Wait for review from collaborators
+
+## Git Flow
+
+QA Flow uses a simplified Git flow where **collaborators control all releases**:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     CONTRIBUTORS                            │
+│  Fork → feature/* → PR to main → Review → Merge            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     COLLABORATORS                           │
+│  Review PRs → Merge to main → Manual Release (when ready)  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+       ┌─────────────┐                 ┌─────────────┐
+       │   STABLE    │                 │    BETA     │
+       │  v1.2.0     │                 │ v1.3.0-beta │
+       │  :latest    │                 │   :beta     │
+       └─────────────┘                 └─────────────┘
+```
+
+### For Contributors
+
+1. **Fork** the repository
+2. **Create a branch** from `main`: `feat/my-feature`
+3. **Make commits** following [Conventional Commits](#commit-guidelines)
+4. **Open a PR** targeting `main`
+5. **Address feedback** from reviewers
+6. **Wait for merge** - collaborators will merge when ready
+
+### For Collaborators
+
+Collaborators have full control over when releases are created:
+
+1. **Review and merge** PRs to `main`
+2. **When ready to release**, go to Actions → Release → Run workflow
+3. **Choose version type**: patch, minor, or major
+4. **Choose release type**: stable or beta (prerelease)
+
+> **Note**: Merging to `main` does NOT automatically create a release. All releases are manual.
 
 ## Commit Guidelines
 
@@ -120,8 +168,8 @@ refactor(api): simplify authentication middleware
 
 1. **Create a branch**
    ```bash
-   git checkout develop
-   git pull upstream develop
+   git checkout main
+   git pull upstream main
    git checkout -b feat/your-feature-name
    ```
 
@@ -142,7 +190,7 @@ refactor(api): simplify authentication middleware
    ```
 
 5. **Create a Pull Request**
-   - Target the `develop` branch
+   - Target the `main` branch
    - Fill out the PR template
    - Link related issues
 
@@ -158,6 +206,54 @@ refactor(api): simplify authentication middleware
 - [ ] Tests added/updated (if applicable)
 - [ ] Documentation updated (if applicable)
 - [ ] No merge conflicts
+
+## Release Process
+
+> **Only for collaborators with write access**
+
+Releases are created manually via GitHub Actions:
+
+### Creating a Stable Release
+
+1. Go to **Actions** → **Release** → **Run workflow**
+2. Select version bump: `patch`, `minor`, or `major`
+3. Leave "Create as beta" unchecked
+4. Click **Run workflow**
+
+This creates:
+- GitHub Release with changelog
+- Docker image tagged as `latest` and `X.Y.Z`
+- npm package `qa-flow` at version `X.Y.Z`
+
+### Creating a Beta Release
+
+1. Go to **Actions** → **Release** → **Run workflow**
+2. Select version bump: `patch`, `minor`, or `major`
+3. Check ✅ "Create as beta/prerelease"
+4. Click **Run workflow**
+
+This creates:
+- GitHub Pre-release (`vX.Y.Z-beta.N`)
+- Docker image tagged as `beta` and `X.Y.Z-beta.N`
+- npm package `qa-flow@beta` at version `X.Y.Z-beta.N`
+
+### Required Secrets
+
+The release workflow requires these repository secrets:
+
+| Secret | Description |
+|--------|-------------|
+| `DOCKERHUB_USERNAME` | Docker Hub username |
+| `DOCKERHUB_TOKEN` | Docker Hub access token |
+| `NPM_TOKEN` | npm automation token (for publishing) |
+
+### Version Bump Guide
+
+| Type | When to use | Example |
+|------|-------------|----------|
+| `patch` | Bug fixes, small changes | 1.0.0 → 1.0.1 |
+| `minor` | New features (backwards compatible) | 1.0.1 → 1.1.0 |
+| `major` | Breaking changes | 1.1.0 → 2.0.0 |
 
 ## Style Guide
 
@@ -208,6 +304,98 @@ qa-flow/
 │   └── prisma/          # Database schema
 │
 └── .github/             # GitHub workflows & templates
+```
+
+## Database
+
+QA Flow uses **Prisma ORM** with SQLite (compatible with Turso/libsql). Can connect to PostgreSQL, MySQL or SQL Server.
+
+### Models
+
+| Model | Description |
+|-------|-------------|
+| `User` | Users with roles (ADMIN / USER) |
+| `Project` | Test flows (nodes, edges, config) |
+| `ProjectMember` | Project membership (OWNER / MEMBER) |
+| `TestRun` | Execution records |
+| `TestResult` | Individual node results |
+| `Report` | Generated HTML reports |
+
+### Commands
+
+```bash
+pnpm db:generate          # Generate Prisma client
+pnpm db:migrate           # Run migrations
+pnpm db:studio            # Open Prisma Studio (GUI)
+pnpm --filter qa-flow-server db:reset  # Reset database
+```
+
+### Production Database
+
+Edit `server/.env`:
+
+```env
+# PostgreSQL
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+
+# MySQL
+DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
+```
+
+Update provider in `prisma/schema.prisma`:
+
+```prisma
+datasource db {
+  provider = "postgresql"  # or "mysql", "sqlserver"
+}
+```
+
+## API Endpoints
+
+### Auth
+- `POST /api/auth/register` - Register
+- `POST /api/auth/login` - Login
+- `GET /api/auth/me` - Current user
+
+### Projects
+- `GET /api/projects` - List
+- `POST /api/projects` - Create
+- `GET /api/projects/:id` - Get
+- `PUT /api/projects/:id` - Update
+- `DELETE /api/projects/:id` - Delete
+
+### Execution
+- `POST /api/run` - Execute flow
+- `GET /api/status/:executionId` - Status
+- `GET /api/test-runs` - List runs
+- `GET /api/test-runs/:id/report` - HTML report
+
+### Recording
+- `POST /api/record/start` - Start recording
+- `POST /api/record/stop/:sessionId` - Stop
+- `GET /api/record/nodes/:sessionId` - Get nodes
+
+### Code
+- `POST /api/generate-code` - Generate Playwright code
+- `POST /api/parse-code` - Parse code to nodes
+
+## Scripts
+
+### Development
+
+```bash
+pnpm dev:all     # Frontend + backend
+pnpm dev         # Frontend only (port 3000)
+pnpm server      # Backend only (port 3001)
+pnpm test        # Run tests
+```
+
+### Build
+
+```bash
+pnpm build       # Frontend
+pnpm build:all   # All packages
+pnpm --filter qa-flow-server build  # Backend only
 ```
 
 ## Need Help?
