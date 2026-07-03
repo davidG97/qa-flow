@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QA Flow — Editor Visual de Pruebas Automáticas</title>
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <meta name="description" content="Diseña, ejecuta y gestiona tests automatizados con Playwright usando un editor visual de nodos. Sin escribir código.">
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="landing-nav">
+    <a href="#" class="nav-logo">
+      <img src="/logo.png" alt="" width="28" height="28" />
+      <span>QA Flow</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#como-funciona">Cómo funciona</a></li>
+      <li><a href="#features">Características</a></li>
+      <li><a href="#comparativa">Comparativa</a></li>
+      <li><a href="http://localhost:3000/proyectos" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Probar ahora</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section style="padding: 10rem 2rem 6rem; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.375rem 1rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 9999px; font-size: 0.875rem; font-weight: 500; color: #a5b4fc; margin-bottom: 1.5rem;" class="animate-fadeInUp">
+        🚀 Basado en Playwright
+      </div>
+      <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; color: white; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.5rem;" class="animate-fadeInUp delay-100">
+        Tests automatizados <br><span style="color: var(--color-accent);">sin escribir código</span>
+      </h1>
+      <p style="font-size: 1.25rem; color: var(--color-dark-400); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.6;" class="animate-fadeInUp delay-200">
+        Diseña flujos de prueba arrastrando nodos en un canvas visual. Ejecuta en múltiples navegadores y exporta a Playwright cuando lo necesites.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;" class="animate-fadeInUp delay-300">
+        <a href="http://localhost:3000/proyectos" class="btn-primary" style="font-size: 1rem; padding: 0.875rem 2rem;">Comenzar gratis →</a>
+        <a href="#como-funciona" class="btn-secondary" style="font-size: 1rem; padding: 0.875rem 2rem;">Ver cómo funciona</a>
+      </div>
+
+      <!-- Hero screenshot -->
+      <div style="margin-top: 4rem;" class="animate-fadeInUp delay-400">
+        <img 
+          src="/screenshots/image.png" 
+          alt="Editor visual de QA Flow con nodos de acción conectados" 
+          style="width: 100%; max-width: 1000px; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- El problema -->
+  <section class="landing-section" style="border-top: 1px solid var(--glass-border);">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+      <div>
+        <h2>Escribir tests es <span>lento y frágil</span></h2>
+        <p class="section-subtitle" style="margin-bottom: 1.5rem;">
+          El testing automatizado debería ser accesible para todo el equipo, no solo para desarrolladores senior.
+        </p>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+          <li style="display: flex; align-items: flex-start; gap: 0.75rem; color: var(--color-dark-300); font-size: 0.9375rem;">
+            <span style="color: var(--color-error); font-weight: 600;">✕</span>
+            Horas escribiendo y manteniendo selectores que se rompen con cada cambio de UI
+          </li>
+          <li style="display: flex; align-items: flex-start; gap: 0.75rem; color: var(--color-dark-300); font-size: 0.9375rem;">
+            <span style="color: var(--color-error); font-weight: 600;">✕</span>
+            Dependencia total de developers para crear o modificar tests
+          </li>
+          <li style="display: flex; align-items: flex-start; gap: 0.75rem; color: var(--color-dark-300); font-size: 0.9375rem;">
+            <span style="color: var(--color-error); font-weight: 600;">✕</span>
+            Configuración compleja de proyectos, workers y emulación de dispositivos
+          </li>
+        </ul>
+      </div>
+      <div class="screenshot-placeholder" style="min-height: 320px;">
+        📸 Screenshot: Código Playwright complejo vs nodos visuales simples
+      </div>
+    </div>
+  </section>
+
+  <!-- Cómo funciona -->
+  <section id="como-funciona" class="landing-section" style="border-top: 1px solid var(--glass-border);">
+    <h2 style="text-align: center;">Cómo funciona en <span>3 pasos</span></h2>
+    <p class="section-subtitle" style="text-align: center; margin: 0 auto 3rem;">
+      De la idea al test ejecutándose en minutos, no en horas.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div>
+          <h3>Arrastra nodos</h3>
+          <p>Elige entre acciones, aserciones, hooks y controles desde el panel lateral y suéltalos en el canvas.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div>
+          <h3>Conecta tu flujo</h3>
+          <p>Usa el picker visual para seleccionar elementos de la página sin escribir un solo selector CSS.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div>
+          <h3>Ejecuta en vivo</h3>
+          <p>Observa el progreso de cada nodo en tiempo real vía WebSocket. Obtén reportes HTML al instante.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="landing-section" style="border-top: 1px solid var(--glass-border);">
+    <h2 style="text-align: center;">Todo lo que <span>necesitas</span></h2>
+    <p class="section-subtitle" style="text-align: center; margin: 0 auto 3rem;">
+      Herramientas que cubren todo el ciclo de testing, desde el diseño hasta el reporte.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(52, 211, 153, 0.15); color: var(--color-trigger);">🎨</div>
+        <h3>Editor Visual</h3>
+        <p>Canvas interactivo con nodos arrastrables. Diseña flujos complejos sin escribir una línea de código.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(96, 165, 250, 0.15); color: var(--color-action);">👆</div>
+        <h3>Picker Visual</h3>
+        <p>Selecciona elementos directamente desde el navegador. Olvídate de escribir selectores frágiles.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(192, 132, 252, 0.15); color: var(--color-control);">📹</div>
+        <h3>Grabación de acciones</h3>
+        <p>Graba interacciones con Playwright codegen y conviértelas automáticamente en nodos editables.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(52, 211, 153, 0.15); color: var(--color-trigger);">🌐</div>
+        <h3>Multi-navegador</h3>
+        <p>Ejecuta tests en Chromium, Firefox y WebKit sin configuración adicional. Un flujo, todos los motores.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(251, 191, 36, 0.15); color: var(--color-assertion);">📱</div>
+        <h3>Emulación avanzada</h3>
+        <p>Simula móviles, tablets, viewport personalizado, geolocalización, red offline y permisos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(244, 114, 182, 0.15); color: var(--color-hook);">📄</div>
+        <h3>Exporta a Playwright</h3>
+        <p>Genera código Playwright 100% ejecutable cuando necesites versionarlo o integrarlo en CI/CD.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshots section para futuras imágenes -->
+  <section class="landing-section" style="border-top: 1px solid var(--glass-border);">
+    <h2 style="text-align: center;">Diseño pensado para <span>equipos</span></h2>
+    <p class="section-subtitle" style="text-align: center; margin: 0 auto 3rem;">
+      Interfaz oscura, minimalista y enfocada. Sin distracciones.
+    </p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+      <div class="screenshot-placeholder" style="min-height: 280px;">
+        <img 
+          src="/screenshots/nodes.png" 
+          alt="Panel de nodos con categorías coloridas" 
+          style="width: 100%; max-width: 1000px; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);"
+        />
+      </div>
+      <div class="screenshot-placeholder" style="min-height: 280px;">
+        <img 
+          src="/screenshots/result.png" 
+          alt="Panel de ejecución mostrando progreso en tiempo real" 
+          style="width: 100%; max-width: 1000px; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparativa -->
+  <section id="comparativa" class="landing-section" style="border-top: 1px solid var(--glass-border);">
+    <h2 style="text-align: center;">QA Flow vs <span>alternativas</span></h2>
+    <p class="section-subtitle" style="text-align: center; margin: 0 auto 3rem;">
+      Comparación directa con las herramientas más usadas del mercado.
+    </p>
+
+    <div style="overflow-x: auto;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Característica</th>
+            <th style="color: var(--color-accent);">QA Flow</th>
+            <th>Playwright puro</th>
+            <th>Cypress</th>
+            <th>Selenium</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight-row">
+            <td>Interfaz visual</td>
+            <td style="color: var(--color-success);">✓ Canvas de nodos</td>
+            <td style="color: var(--color-error);">✕ Código</td>
+            <td style="color: var(--color-error);">✕ Código</td>
+            <td style="color: var(--color-error);">✕ Código</td>
+          </tr>
+          <tr>
+            <td>Escribir tests</td>
+            <td style="color: var(--color-success);">✓ Drag & drop</td>
+            <td style="color: var(--color-error);">✕ TypeScript</td>
+            <td style="color: var(--color-error);">✕ JavaScript</td>
+            <td style="color: var(--color-error);">✕ Múltiples lenguajes</td>
+          </tr>
+          <tr class="highlight-row">
+            <td>Selector visual</td>
+            <td style="color: var(--color-success);">✓ Picker integrado</td>
+            <td style="color: var(--color-error);">✕ Manual</td>
+            <td style="color: var(--color-error);">✕ Manual</td>
+            <td style="color: var(--color-error);">✕ Manual</td>
+          </tr>
+          <tr>
+            <td>Grabación</td>
+            <td style="color: var(--color-success);">✓ Integrada</td>
+            <td style="color: var(--color-warning);">⚠ codegen CLI</td>
+            <td style="color: var(--color-error);">✕ No tiene</td>
+            <td style="color: var(--color-error);">✕ No tiene</td>
+          </tr>
+          <tr class="highlight-row">
+            <td>Multi-navegador</td>
+            <td style="color: var(--color-success);">✓ Chromium, FF, WebKit</td>
+            <td style="color: var(--color-success);">✓ Chromium, FF, WebKit</td>
+            <td style="color: var(--color-error);">✕ Chromium/Firefox</td>
+            <td style="color: var(--color-success);">✓ Todos</td>
+          </tr>
+          <tr>
+            <td>Reportes HTML</td>
+            <td style="color: var(--color-success);">✓ Automáticos</td>
+            <td style="color: var(--color-success);">✓ Con configuración</td>
+            <td style="color: var(--color-warning);">⚠ Dashboard pago</td>
+            <td style="color: var(--color-error);">✕ Plugins</td>
+          </tr>
+          <tr class="highlight-row">
+            <td>Curva de aprendizaje</td>
+            <td style="color: var(--color-success);">✓ Minutos</td>
+            <td style="color: var(--color-error);">✕ Semanas</td>
+            <td style="color: var(--color-error);">✕ Semanas</td>
+            <td style="color: var(--color-error);">✕ Meses</td>
+          </tr>
+          <tr>
+            <td>Exporta a código</td>
+            <td style="color: var(--color-success);">✓ Playwright</td>
+            <td style="color: var(--color-success);">✓ Nativo</td>
+            <td style="color: var(--color-error);">✕ Propio</td>
+            <td style="color: var(--color-error);">✕ Propio</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Para equipos -->
+  <section class="landing-section" style="border-top: 1px solid var(--glass-border);">
+    <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.02) 100%); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: var(--radius-xl); padding: 4rem 3rem; text-align: center;">
+      <h2 style="margin-bottom: 1.5rem;">Hecho para <span>todo el equipo</span></h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; text-align: left; max-width: 800px; margin: 0 auto;">
+        <div>
+          <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">🧑‍💻 QA / Testers</h3>
+          <p style="font-size: 0.9375rem; color: var(--color-dark-400); line-height: 1.6;">
+            Crea, ejecuta y mantiene tests sin conocimientos de programación. El editor visual elimina la barrera técnica.
+          </p>
+        </div>
+        <div>
+          <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">👨‍💻 Developers</h3>
+          <p style="font-size: 0.9375rem; color: var(--color-dark-400); line-height: 1.6;">
+            Exporta flujos a código Playwright limpio cuando quieras versionarlo, code-review o integrarlo en pipelines.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <section style="padding: 6rem 2rem; text-align: center; border-top: 1px solid var(--glass-border);">
+    <h2 style="font-size: 3rem; margin-bottom: 1rem;">Empieza a testear <span>hoy</span></h2>
+    <p style="font-size: 1.125rem; color: var(--color-dark-400); margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+      Gratis, open-source y listo para usar. Instala localmente y comienza en minutos.
+    </p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
+      <a href="http://localhost:3000/proyectos" class="btn-primary" style="font-size: 1.125rem; padding: 1rem 2.5rem;">
+        🚀 Abrir QA Flow
+      </a>
+      <a href="https://github.com/davidG97/qa-flow" target="_blank" class="btn-secondary" style="font-size: 1.125rem; padding: 1rem 2.5rem;">
+        ⭐ GitHub
+      </a>
+    </div>
+    <p style="font-size: 0.875rem; color: var(--color-dark-500);">
+      Requiere Node.js 18+ y pnpm. Ver <a href="#" style="color: var(--color-accent); text-decoration: none;">README</a> para instrucciones de instalación.
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <img src="/logo.png" alt="" width="20" height="20" style="border-radius: 0.25rem;" />
+      <span style="font-weight: 600; color: var(--color-dark-400);">QA Flow</span>
+    </div>
+    <p>Editor visual de pruebas automatizadas · Apache License 2.0</p>
+  </footer>
+
+</body>
+</html>

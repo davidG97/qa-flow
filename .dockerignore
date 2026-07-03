@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs (will be created in Docker)
+dist/
+server/dist/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files (use Docker env instead)
+.env
+.env.*
+!.env.example
+
+# Database files
+*.db
+*.db-journal
+
+# Test outputs
+coverage/
+test-results/
+tests-generated/
+
+# Recordings and screenshots (mounted as volumes)
+server/recordings/
+server/screenshots/
+
+# Documentation
+*.md
+!README.md
+
+# GitHub
+.github/
+
+# Agent tools
+.opencode/
+
+# Landing page
+landing/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore

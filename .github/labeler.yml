@@ -1,0 +1,67 @@
+# Frontend changes
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/*'
+          - 'index.html'
+          - 'vite.config.ts'
+          - 'postcss.config.js'
+          - 'tsconfig.json'
+
+# Backend changes
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'server/**/*'
+
+# Database changes
+database:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'server/prisma/**/*'
+          - '**/database*.ts'
+
+# Documentation changes
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - 'docs/**/*'
+          - 'examples/**/*'
+
+# CI/CD changes
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**/*'
+
+# Dependencies
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'pnpm-lock.yaml'
+          - 'server/package.json'
+
+# UI/Styles
+ui:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/*.css'
+          - 'src/components/**/*'
+
+# Tests
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.test.ts'
+          - '**/*.spec.ts'
+          - '**/tests/**/*'
+
+# Configuration
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.config.*'
+          - 'tsconfig*.json'
+          - '.env*'
