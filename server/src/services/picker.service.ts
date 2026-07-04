@@ -673,11 +673,12 @@ class PickerService {
     targetNodeId: string,
     nodes: FlowNode[],
     edges: FlowEdge[],
-    onScreencastFrame: (frameBase64: string) => void,
+    onScreencastFrame: (sessionId: string, frameBase64: string) => void,
     onResult: (result: PickerResult | null) => void,
     onProgress?: (message: string) => void
   ): Promise<string> {
     const sessionId = uuidv4();
+    console.log(`[Picker] Starting session ${sessionId} for node ${targetNodeId}`);
     
     const pathNodes = this.getPathToNode(targetNodeId, nodes, edges);
     const startNode = pathNodes.find(n => n.data.nodeType === 'start');
@@ -711,6 +712,7 @@ class PickerService {
       }
       onProgress?.('Listo. Click sobre un elemento para seleccionarlo.');
     } catch (error) {
+      console.error(`[Picker] Error executing nodes:`, error);
       await browser.close();
       throw new Error(`Error ejecutando nodos: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -721,17 +723,30 @@ class PickerService {
     await cdpSession.send('Page.enable');
     
     cdpSession.on('Page.screencastFrame', async (params) => {
-      await cdpSession.send('Page.screencastFrameAck', { sessionId: params.sessionId });
-      onScreencastFrame(params.data);
+      try {
+        await cdpSession.send('Page.screencastFrameAck', { sessionId: params.sessionId });
+      } catch {
+        // Session may be closed
+      }
+      onScreencastFrame(sessionId, params.data);
     });
     
     await cdpSession.send('Page.startScreencast', {
       format: 'jpeg',
-      quality: 70,
+      quality: 80,
       maxWidth: 1280,
       maxHeight: 720,
-      everyNthFrame: 2,
+      everyNthFrame: 1,
     });
+    
+    // Force repaint to trigger initial frame (CDP doesn't send frames for static pages)
+    await page.evaluate(() => {
+      document.body.style.opacity = '0.99';
+      requestAnimationFrame(() => {
+        document.body.style.opacity = '1';
+      });
+    });
+    await page.waitForTimeout(200);
 
     // Store session with CDP session for coordinate selection
     const session: PickerSession & { cdpSession?: typeof cdpSession; onResult?: typeof onResult } = {
@@ -879,6 +894,22 @@ class PickerService {
       console.error('Error selecting element:', error);
       return null;
     }
+  }
+
+  /**
+   * Scroll in interactive picker session
+   */
+  async scroll(sessionId: string, x: number, y: number, deltaY: number): Promise<void> {
+    const session = this.sessions.get(sessionId) as PickerSession & { 
+      cdpSession?: { send: (method: string, params?: Record<string, unknown>) => Promise<Record<string, unknown>> };
+    };
+    
+    if (!session?.page) {
+      throw new Error('Sesión no encontrada');
+    }
+
+    // Use mouse wheel scroll
+    await session.page.mouse.wheel(0, deltaY);
   }
 
   /**

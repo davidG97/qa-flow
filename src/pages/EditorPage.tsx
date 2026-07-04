@@ -360,7 +360,6 @@ const EditorPage = () => {
         onClose={onPaneClick}
         allNodes={nodes}
         edges={edges}
-        cdpUrl={projectConfig.cdpUrl}
       />
 
       <ExecutionPanel 

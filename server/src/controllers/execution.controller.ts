@@ -23,7 +23,6 @@ export const executionController = {
 
       // Crear el ejecutor con callback para notificar progreso y screencast
       const executor = new FlowExecutor({
-        headless: options?.headless ?? true,
         slowMo: options?.slowMo ?? 100,
         timeout: options?.timeout ?? 30000,
         onProgress: (status) => {

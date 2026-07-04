@@ -269,6 +269,9 @@ class ApiService {
             const callback = this.pickerFrameCallbacks.get(data.sessionId);
             if (callback) {
               callback(data.frame);
+            } else {
+              // Buffer frame until subscriber connects
+              this.pickerFrameBuffer.set(data.sessionId, data.frame);
             }
           }
         } catch (error) {
@@ -312,7 +315,7 @@ class ApiService {
 
   async runFlow(
     flow: TestFlow,
-    options?: { headless?: boolean; slowMo?: number }
+    options?: { slowMo?: number }  // ponytail: headless removed - always true
   ): Promise<RunResponse> {
     const response = await this.request(`${API_URL}/run`, {
       method: 'POST',
@@ -573,11 +576,13 @@ class ApiService {
     this.pickerCallbacks.delete(sessionId);
     this.pickerProgressCallbacks.delete(sessionId);
     this.pickerFrameCallbacks.delete(sessionId);
+    this.pickerFrameBuffer.delete(sessionId);
   }
 
   // === Interactive Picker (works in Docker) ===
   
   private pickerFrameCallbacks: Map<string, (frameBase64: string) => void> = new Map();
+  private pickerFrameBuffer: Map<string, string> = new Map();  // Buffer frames until subscriber connects
 
   async startInteractivePicker(
     targetNodeId: string,
@@ -611,8 +616,23 @@ class ApiService {
     return response.json();
   }
 
+  async scrollPicker(sessionId: string, x: number, y: number, deltaY: number): Promise<void> {
+    await this.request(`${API_URL}/picker/interactive/scroll`, {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, x, y, deltaY }),
+    });
+  }
+
   subscribeToPickerFrame(sessionId: string, callback: (frameBase64: string) => void): void {
     this.pickerFrameCallbacks.set(sessionId, callback);
+    
+    // Deliver buffered frame if any
+    const bufferedFrame = this.pickerFrameBuffer.get(sessionId);
+    if (bufferedFrame) {
+      this.pickerFrameBuffer.delete(sessionId);
+      // Deliver on next tick to ensure component is ready
+      setTimeout(() => callback(bufferedFrame), 0);
+    }
   }
 }
 

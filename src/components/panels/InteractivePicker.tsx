@@ -6,30 +6,90 @@ interface InteractivePickerProps {
   sessionId: string;
   onResult: (result: PickerResult) => void;
   onCancel: () => void;
-  progress: string;
 }
 
 export default function InteractivePicker({ 
   sessionId, 
   onResult, 
   onCancel,
-  progress 
 }: InteractivePickerProps) {
   const [frame, setFrame] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const viewRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
 
   // Subscribe to screencast frames
   useEffect(() => {
-    apiService.subscribeToPickerFrame(sessionId, (frameBase64) => {
+    mountedRef.current = true;
+    setFrame(null);
+    setError(null);
+    
+    console.log('[InteractivePicker] Subscribing to session:', sessionId);
+    
+    // Use a stable callback that checks if still mounted
+    const frameCallback = (frameBase64: string) => {
+      if (!mountedRef.current) return;
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setFrame(frameBase64);
-    });
+    };
+    
+    apiService.subscribeToPickerFrame(sessionId, frameCallback);
+
+    // Set timeout for no frames
+    timeoutRef.current = setTimeout(() => {
+      if (mountedRef.current) {
+        console.warn('[InteractivePicker] No frames received, timeout');
+        setError('No se recibieron frames. Intenta de nuevo.');
+      }
+    }, 15000);
 
     return () => {
-      apiService.unsubscribeFromPicker(sessionId);
+      console.log('[InteractivePicker] Cleanup session:', sessionId);
+      mountedRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      // Don't unsubscribe immediately - let it persist for reconnection
+      // apiService.unsubscribeFromPicker(sessionId);
     };
   }, [sessionId]);
+
+  // Native wheel handler for scroll (passive: false required for preventDefault)
+  useEffect(() => {
+    const viewEl = viewRef.current;
+    if (!viewEl) return;
+
+    const handleWheel = async (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (!imgRef.current || !frame) return;
+
+      const rect = imgRef.current.getBoundingClientRect();
+      const scaleX = 1280 / rect.width;
+      const scaleY = 720 / rect.height;
+      
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+
+      try {
+        await apiService.scrollPicker(sessionId, x, y, e.deltaY);
+      } catch (err) {
+        console.error('Error scrolling:', err);
+      }
+    };
+
+    viewEl.addEventListener('wheel', handleWheel, { passive: false });
+    return () => viewEl.removeEventListener('wheel', handleWheel);
+  }, [sessionId, frame]);
 
   // Handle click on image
   const handleClick = useCallback(async (e: React.MouseEvent<HTMLImageElement>) => {
@@ -58,20 +118,6 @@ export default function InteractivePicker({
     }
   }, [sessionId, isSelecting, onResult]);
 
-  // Track cursor position for visual feedback
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLImageElement>) => {
-    if (!imgRef.current) return;
-    const rect = imgRef.current.getBoundingClientRect();
-    setCursorPos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setCursorPos(null);
-  }, []);
-
   return (
     <div className="interactive-picker-overlay">
       <div className="interactive-picker-container">
@@ -86,33 +132,19 @@ export default function InteractivePicker({
           </button>
         </div>
 
-        {/* Progress or Instructions */}
-        <div className="interactive-picker-status">
-          {!frame ? (
-            <>
-              <FiLoader className="spinner" size={16} />
-              <span>{progress || 'Preparando vista...'}</span>
-            </>
-          ) : isSelecting ? (
-            <>
-              <FiLoader className="spinner" size={16} />
-              <span>Seleccionando elemento...</span>
-            </>
-          ) : (
-            <span>🎯 Click sobre el elemento que deseas seleccionar</span>
-          )}
-        </div>
-
         {/* Screencast view */}
-        <div className="interactive-picker-view">
-          {frame ? (
+        <div className="interactive-picker-view" ref={viewRef}>
+          {error ? (
+            <div className="error-placeholder">
+              <p>{error}</p>
+              <button onClick={onCancel}>Cerrar</button>
+            </div>
+          ) : frame ? (
             <img
               ref={imgRef}
               src={`data:image/jpeg;base64,${frame}`}
               alt="Vista del navegador"
               onClick={handleClick}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
               className={isSelecting ? 'selecting' : ''}
               draggable={false}
             />
@@ -121,17 +153,6 @@ export default function InteractivePicker({
               <FiLoader className="spinner" size={32} />
               <p>Cargando vista del navegador...</p>
             </div>
-          )}
-          
-          {/* Cursor crosshair */}
-          {cursorPos && frame && !isSelecting && (
-            <div 
-              className="cursor-indicator"
-              style={{ 
-                left: cursorPos.x, 
-                top: cursorPos.y 
-              }}
-            />
           )}
         </div>
 
@@ -165,6 +186,7 @@ export default function InteractivePicker({
           display: flex;
           flex-direction: column;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+          user-select: none;
         }
 
         .interactive-picker-header {
@@ -197,17 +219,6 @@ export default function InteractivePicker({
         .close-btn:hover {
           color: var(--color-text, #fff);
           background: rgba(255, 255, 255, 0.1);
-        }
-
-        .interactive-picker-status {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 10px 16px;
-          background: var(--color-primary, #6366f1);
-          color: white;
-          font-size: 14px;
         }
 
         .spinner {
@@ -250,38 +261,21 @@ export default function InteractivePicker({
           color: var(--color-text-muted, #888);
         }
 
-        .cursor-indicator {
-          position: absolute;
-          width: 20px;
-          height: 20px;
-          border: 2px solid #6366f1;
-          border-radius: 50%;
-          pointer-events: none;
-          transform: translate(-50%, -50%);
-          box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        .error-placeholder {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          color: #f87171;
         }
 
-        .cursor-indicator::before,
-        .cursor-indicator::after {
-          content: '';
-          position: absolute;
-          background: #6366f1;
-        }
-
-        .cursor-indicator::before {
-          width: 1px;
-          height: 30px;
-          left: 50%;
-          top: -5px;
-          transform: translateX(-50%);
-        }
-
-        .cursor-indicator::after {
-          width: 30px;
-          height: 1px;
-          top: 50%;
-          left: -5px;
-          transform: translateY(-50%);
+        .error-placeholder button {
+          padding: 8px 16px;
+          background: var(--color-primary, #6366f1);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
         }
 
         .interactive-picker-footer {

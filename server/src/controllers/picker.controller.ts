@@ -127,16 +127,18 @@ export const pickerController = {
         targetNodeId,
         nodes,
         edges,
-        (frameBase64) => {
+        (sid, frameBase64) => {
           // Send screencast frame to all clients
           if (wss) {
             const msg = JSON.stringify({
               type: 'picker:frame',
-              sessionId,
+              sessionId: sid,
               frame: frameBase64,
             });
             wss.clients.forEach((client) => {
-              if (client.readyState === 1) client.send(msg);
+              if (client.readyState === 1) {
+                client.send(msg);
+              }
             });
           }
         },
@@ -197,6 +199,29 @@ export const pickerController = {
       console.error('Error selecting element:', error);
       res.status(500).json({
         error: error instanceof Error ? error.message : 'Error seleccionando elemento',
+      });
+    }
+  },
+
+  /**
+   * Scroll in interactive picker
+   * POST /api/picker/interactive/scroll
+   * Body: { sessionId, x, y, deltaY }
+   */
+  async scroll(req: Request, res: Response) {
+    try {
+      const { sessionId, x, y, deltaY } = req.body;
+
+      if (!sessionId || typeof x !== 'number' || typeof y !== 'number' || typeof deltaY !== 'number') {
+        return res.status(400).json({ error: 'sessionId, x, y y deltaY son requeridos' });
+      }
+
+      await pickerService.scroll(sessionId, x, y, deltaY);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error scrolling:', error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : 'Error scrolling',
       });
     }
   },
