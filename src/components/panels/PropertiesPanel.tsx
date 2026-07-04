@@ -4,7 +4,6 @@ import { nodeTypes, NodeTypeDefinition, NodeCategory, NodeField } from '../../ty
 import { getNodeIcon } from '../../utils/icons';
 import { FiX, FiPlus, FiChevronDown, FiChevronRight, FiCrosshair } from 'react-icons/fi';
 import { apiService, PickerResult } from '../../services/api';
-import { pickerService } from '../../services/picker';
 import InteractivePicker from './InteractivePicker';
 
 // ponytail: simplified selector types - only what Playwright actually uses
@@ -32,7 +31,6 @@ interface PropertiesPanelProps {
   onClose: () => void;
   allNodes?: Node<NodeData>[];
   edges?: Edge[];
-  cdpUrl?: string;
 }
 
 // ponytail: simplified selector field - just input + type dropdown + visual button
@@ -199,7 +197,7 @@ const FieldRenderer = ({
   );
 };
 
-const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes, edges, cdpUrl }: PropertiesPanelProps) => {
+const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes, edges }: PropertiesPanelProps) => {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set(['emulation']));
   const [isPickerActive, setIsPickerActive] = useState(false);
   const [pickerProgress, setPickerProgress] = useState('');
@@ -217,7 +215,6 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
         apiService.cancelPicker(pickerSessionId).catch(() => {});
         apiService.unsubscribeFromPicker(pickerSessionId);
       }
-      pickerService.cancel();
     };
   }, [pickerSessionId]);
 
@@ -248,7 +245,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
     setPickerSessionId(null);
   };
 
-  // ponytail: Backend picker executes previous nodes before opening selector
+  // ponytail: Always use interactive picker (screencast) - works everywhere
   const handleStartPicker = async () => {
     if (!selectedNode || !allNodes || !edges) return;
     
@@ -260,7 +257,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
       return;
     }
 
-    // Prepare nodes and edges for backend (outside try so catch can access)
+    // Prepare nodes and edges for backend
     const nodesForBackend = allNodes.map(n => ({
       id: n.id,
       data: {
@@ -277,91 +274,28 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
 
     try {
       setIsPickerActive(true);
-      setPickerProgress('Iniciando navegador...');
+      setPickerProgress('Iniciando selector visual...');
 
-      const { sessionId } = await apiService.startPickerWithFlow(
+      const { sessionId } = await apiService.startInteractivePicker(
         selectedNode.id,
         nodesForBackend,
-        edgesForBackend,
-        cdpUrl
+        edgesForBackend
       );
       
-      setPickerSessionId(sessionId);
-
-      // Subscribe to progress updates
+      // Subscribe to progress updates BEFORE mounting InteractivePicker
       apiService.subscribeToPickerProgress(sessionId, (message) => {
         setPickerProgress(message);
       });
 
-      // Subscribe to result
-      apiService.subscribeToPickerResult(sessionId, (result) => {
-        setIsPickerActive(false);
-        setPickerProgress('');
-        setPickerSessionId(null);
-        apiService.unsubscribeFromPicker(sessionId);
-
-        const currentNode = selectedNodeRef.current;
-        if (result && currentNode) {
-          onUpdateNode(currentNode.id, {
-            ...currentNode.data.config,
-            selector: result.selector,
-            selectorType: result.selectorType,
-          });
-        }
-      });
+      // Mount the picker component (will subscribe to frames)
+      setPickerSessionId(sessionId);
+      setIsInteractivePicker(true);
     } catch (error) {
-      // Use interactive picker (works in Docker without configuration)
-      console.warn('Backend picker failed, using interactive picker:', error);
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      
-      // If Docker error, use interactive picker which works headless
-      if (errorMsg.includes('Docker') || errorMsg.includes('headless') || errorMsg.includes('CDP')) {
-        setPickerProgress('Usando selector interactivo...');
-        
-        try {
-          const { sessionId } = await apiService.startInteractivePicker(
-            selectedNode.id,
-            nodesForBackend,
-            edgesForBackend
-          );
-          
-          setPickerSessionId(sessionId);
-          setIsInteractivePicker(true);
-
-          // Subscribe to progress
-          apiService.subscribeToPickerProgress(sessionId, (message) => {
-            setPickerProgress(message);
-          });
-        } catch (interactiveError) {
-          setIsPickerActive(false);
-          setPickerProgress('');
-          setPickerSessionId(null);
-          alert('Error iniciando selector interactivo');
-        }
-      } else {
-        // Fallback to frontend picker for other errors
-        setPickerProgress('Usando selector básico...');
-        
-        try {
-          const result = await pickerService.startPicker(baseUrl, setPickerProgress);
-          setIsPickerActive(false);
-          setPickerProgress('');
-
-          const currentNode = selectedNodeRef.current;
-          if (result && currentNode) {
-            onUpdateNode(currentNode.id, {
-              ...currentNode.data.config,
-              selector: result.selector,
-              selectorType: result.selectorType,
-            });
-          }
-        } catch (fallbackError) {
-          setIsPickerActive(false);
-          setPickerProgress('');
-          setPickerSessionId(null);
-          alert('Error: No se pudo iniciar el selector visual');
-        }
-      }
+      console.error('Picker error:', error);
+      setIsPickerActive(false);
+      setPickerProgress('');
+      setPickerSessionId(null);
+      alert('Error iniciando selector visual');
     }
   };
 
@@ -525,7 +459,6 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
           sessionId={pickerSessionId}
           onResult={handleInteractiveResult}
           onCancel={handleInteractiveCancel}
-          progress={pickerProgress}
         />
       )}
     </div>

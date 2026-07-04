@@ -62,7 +62,6 @@ export interface ExecutionStatus {
 export interface RunFlowRequest {
   flow: TestFlow;
   options?: {
-    headless?: boolean;
     slowMo?: number;
     timeout?: number;
   };

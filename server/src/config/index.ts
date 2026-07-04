@@ -7,7 +7,6 @@ export const config = {
   },
   jsonLimit: '10mb',
   execution: {
-    defaultHeadless: true,
     defaultSlowMo: 100,
     defaultTimeout: 30000,
     cleanupDelay: 60000, // 1 minuto para limpiar suscripciones

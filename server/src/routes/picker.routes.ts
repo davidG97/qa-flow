@@ -12,6 +12,9 @@ router.post('/interactive/start', pickerController.startInteractiveSession);
 // Seleccionar elemento por coordenadas
 router.post('/interactive/select', pickerController.selectAtCoordinates);
 
+// Scroll en picker interactivo
+router.post('/interactive/scroll', pickerController.scroll);
+
 // Cancelar sesión
 router.post('/cancel/:sessionId', pickerController.cancelSession);
 

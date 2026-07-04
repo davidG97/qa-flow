@@ -12,11 +12,9 @@ import {
   ProjectConfig
 } from '../types/index.js';
 
-// ponytail: only chromium gets stealth - the only browser used in practice
 chromium.use(StealthPlugin());
 
 export interface ExecutorOptions {
-  headless?: boolean;
   slowMo?: number;
   timeout?: number;
   onProgress?: (status: ExecutionStatus) => void;
@@ -50,7 +48,6 @@ export class FlowExecutor {
   constructor(options: ExecutorOptions = {}) {
     this.executionId = uuidv4();
     this.options = {
-      headless: true,
       slowMo: 0,
       timeout: 30000,
       ...options,
@@ -1345,11 +1342,6 @@ export class FlowExecutor {
 
   private async executeStart(config: Record<string, unknown>): Promise<void> {
     const cdpUrl = this.flowConfig?.cdpUrl || process.env.CDP_URL;
-    // ponytail: Force headless in Docker (no display available)
-    const forceHeadless = process.env.FORCE_HEADLESS === 'true';
-    const headless = forceHeadless || (typeof config.headless === 'boolean' 
-      ? config.headless 
-      : (this.options.headless ?? true));
     const baseUrl = config.baseUrl as string;
 
     try {
@@ -1357,9 +1349,10 @@ export class FlowExecutor {
         console.log(`[Executor] Conectando a browser remoto via CDP: ${cdpUrl}`);
         this.browser = await chromium.connectOverCDP(cdpUrl);
       } else {
-        console.log(`[Executor] Lanzando chromium (headless: ${headless})...`);
+        // ponytail: always headless - user sees execution via screencast
+        console.log(`[Executor] Lanzando chromium (headless: true)...`);
         this.browser = await chromium.launch({
-          headless,
+          headless: true,
           slowMo: this.options.slowMo,
         });
       }
