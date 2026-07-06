@@ -503,7 +503,7 @@ class ApiService {
     return response.json();
   }
 
-  async updateProject(id: string, project: Partial<CreateProjectInput>): Promise<ProjectDTO> {
+  async updateProject(id: string, project: UpdateProjectInput): Promise<ProjectDTO> {
     const response = await this.request(`${API_URL}/projects/${id}`, {
       method: 'PUT',
       body: JSON.stringify(project),
@@ -711,6 +711,15 @@ export interface CreateProjectInput {
   nodes: FlowNode[];
   edges: FlowEdge[];
   config?: ProjectConfig;
+}
+
+export interface UpdateProjectInput {
+  name?: string;
+  description?: string;
+  nodes?: FlowNode[];
+  edges?: FlowEdge[];
+  config?: ProjectConfig;
+  newOwnerId?: string;
 }
 
 export const apiService = new ApiService();

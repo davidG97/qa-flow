@@ -80,12 +80,12 @@ router.post('/', async (req: Request, res: Response) => {
  */
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    const { name, description, nodes, edges, config } = req.body;
+    const { name, description, nodes, edges, config, newOwnerId } = req.body;
     const isAdmin = req.userRole === UserRole.ADMIN;
 
     const project = await projectsService.update(
       req.params.id,
-      { name, description, nodes, edges, config },
+      { name, description, nodes, edges, config, newOwnerId },
       req.userId!,
       isAdmin
     );
