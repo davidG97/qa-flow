@@ -41,7 +41,7 @@ O ejecuta directamente con Docker:
 docker run -it --rm -p 3001:3001 -v qa-flow-data:/app/data davidg1997/qa-flow
 ```
 
-Abre **http://localhost:3001** → Login: `admin@qaflow.com` / `admin123`
+Abre **http://localhost:3001** → Login: `admin@qa-flow.local` / `admin123`
 
 ---
 
@@ -64,7 +64,7 @@ Abre **http://localhost:3001** → Login: `admin@qaflow.com` / `admin123`
 
 ### 1. Crear Proyecto
 
-1. Inicia sesión con `admin@qaflow.com` / `admin123`
+1. Inicia sesión con `admin@qa-flow.local` / `admin123`
 2. Click en "Nuevo Proyecto"
 3. Nombra tu proyecto
 

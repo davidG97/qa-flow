@@ -33,6 +33,7 @@ export interface UpdateProjectInput {
   nodes?: FlowNode[];
   edges?: FlowEdge[];
   config?: ProjectConfig;
+  newOwnerId?: string;  // Transfer ownership to another user
 }
 
 /**
@@ -138,6 +139,43 @@ export class ProjectsService {
 
     if (!isAdmin && !existing.members.some((m) => m.userId === userId && m.role === ProjectMemberRole.OWNER)) {
       throw new Error('No tienes permiso para editar este proyecto');
+    }
+
+    // Handle ownership transfer if requested
+    if (input.newOwnerId) {
+      // Verify new owner exists
+      const newOwner = await prisma.user.findUnique({ where: { id: input.newOwnerId } });
+      if (!newOwner) {
+        throw new Error('El nuevo propietario no existe');
+      }
+
+      // Find current owner and demote to EDITOR
+      const currentOwner = existing.members.find(m => m.role === ProjectMemberRole.OWNER);
+      if (currentOwner && currentOwner.userId !== input.newOwnerId) {
+        await prisma.projectMember.update({
+          where: { id: currentOwner.id },
+          data: { role: ProjectMemberRole.EDITOR },
+        });
+      }
+
+      // Check if new owner is already a member
+      const existingMember = existing.members.find(m => m.userId === input.newOwnerId);
+      if (existingMember) {
+        // Promote to OWNER
+        await prisma.projectMember.update({
+          where: { id: existingMember.id },
+          data: { role: ProjectMemberRole.OWNER },
+        });
+      } else {
+        // Add as new OWNER
+        await prisma.projectMember.create({
+          data: {
+            projectId: id,
+            userId: input.newOwnerId,
+            role: ProjectMemberRole.OWNER,
+          },
+        });
+      }
     }
 
     const project = await prisma.project.update({

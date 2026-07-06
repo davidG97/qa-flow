@@ -90,7 +90,7 @@ async function main() {
 
   console.log(`\n${GREEN}🚀 Starting on port ${options.port}...${RESET}`);
   console.log(`   Open: http://localhost:${options.port}`);
-  console.log(`   Login: admin@qaflow.com / admin123\n`);
+  console.log(`   Login: admin@qa-flow.local / admin123\n`);
 
   const jwtSecret = process.env.JWT_SECRET || randomBytes(32).toString('base64');
 

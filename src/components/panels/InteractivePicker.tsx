@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { apiService, PickerResult } from '../../services/api';
-import { FiX, FiLoader, FiMousePointer } from 'react-icons/fi';
+import { FiX, FiLoader } from 'react-icons/fi';
 
 interface InteractivePickerProps {
   sessionId: string;
@@ -91,6 +92,18 @@ export default function InteractivePicker({
     return () => viewEl.removeEventListener('wheel', handleWheel);
   }, [sessionId, frame]);
 
+  // ESC key to cancel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onCancel();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
+
   // Handle click on image
   const handleClick = useCallback(async (e: React.MouseEvent<HTMLImageElement>) => {
     if (!imgRef.current || isSelecting) return;
@@ -118,19 +131,13 @@ export default function InteractivePicker({
     }
   }, [sessionId, isSelecting, onResult]);
 
-  return (
+  return createPortal(
     <div className="interactive-picker-overlay">
       <div className="interactive-picker-container">
-        {/* Header */}
-        <div className="interactive-picker-header">
-          <div className="header-title">
-            <FiMousePointer size={18} />
-            <span>Selector Visual</span>
-          </div>
-          <button className="close-btn" onClick={onCancel} title="Cancelar">
-            <FiX size={20} />
-          </button>
-        </div>
+        {/* Close button - floating outside image area */}
+        <button className="picker-close-btn" onClick={onCancel} title="Cancelar (ESC)">
+          <FiX size={20} />
+        </button>
 
         {/* Screencast view */}
         <div className="interactive-picker-view" ref={viewRef}>
@@ -158,7 +165,7 @@ export default function InteractivePicker({
 
         {/* Footer hint */}
         <div className="interactive-picker-footer">
-          <kbd>Click</kbd> para seleccionar • <kbd>ESC</kbd> para cancelar
+          <kbd>Click</kbd> seleccionar • <kbd>Scroll</kbd> navegar • <kbd>ESC</kbd> cancelar
         </div>
       </div>
 
@@ -169,15 +176,16 @@ export default function InteractivePicker({
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.8);
+          background: rgba(0, 0, 0, 0.85);
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 10000;
+          z-index: 99999;
           padding: 20px;
         }
 
         .interactive-picker-container {
+          position: relative;
           background: var(--color-surface, #1a1a2e);
           border-radius: 12px;
           overflow: hidden;
@@ -189,36 +197,26 @@ export default function InteractivePicker({
           user-select: none;
         }
 
-        .interactive-picker-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 12px 16px;
-          background: var(--color-surface-elevated, #252542);
-          border-bottom: 1px solid var(--color-border, #333);
-        }
-
-        .header-title {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-weight: 600;
-          color: var(--color-text, #fff);
-        }
-
-        .close-btn {
-          background: none;
-          border: none;
-          color: var(--color-text-muted, #888);
-          cursor: pointer;
-          padding: 4px;
-          border-radius: 4px;
-          transition: all 0.15s;
-        }
-
-        .close-btn:hover {
-          color: var(--color-text, #fff);
+        .picker-close-btn {
+          position: absolute;
+          top: -40px;
+          right: 0;
           background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: #fff;
+          cursor: pointer;
+          padding: 8px;
+          border-radius: 8px;
+          transition: all 0.15s;
+          z-index: 10;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .picker-close-btn:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.3);
         }
 
         .spinner {
@@ -279,9 +277,9 @@ export default function InteractivePicker({
         }
 
         .interactive-picker-footer {
-          padding: 10px 16px;
+          padding: 8px 16px;
           text-align: center;
-          font-size: 12px;
+          font-size: 11px;
           color: var(--color-text-muted, #888);
           background: var(--color-surface-elevated, #252542);
           border-top: 1px solid var(--color-border, #333);
@@ -293,9 +291,10 @@ export default function InteractivePicker({
           border-radius: 4px;
           border: 1px solid var(--color-border, #444);
           font-family: monospace;
-          font-size: 11px;
+          font-size: 10px;
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }

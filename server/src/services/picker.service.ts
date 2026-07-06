@@ -785,114 +785,130 @@ class PickerService {
     }
 
     try {
-      // Get node at coordinates using CDP
-      const nodeResult = await session.cdpSession.send('DOM.getNodeForLocation', {
-        x: Math.round(x),
-        y: Math.round(y),
-        includeUserAgentShadowDOM: false,
-        ignorePointerEventsNone: true,
-      }) as { backendNodeId: number; nodeId?: number };
+      // Use document.elementFromPoint which works correctly with scroll
+      // Pass code as string to avoid esbuild __name transformation
+      const elementData = await session.page.evaluate(`
+        (function(x, y) {
+          var element = document.elementFromPoint(x, y);
+          if (!element || (element.id && element.id.startsWith('__qaflow-picker'))) {
+            return null;
+          }
 
-      if (!nodeResult.backendNodeId) {
+          var roleMap = {
+            BUTTON: 'button', A: 'link', SELECT: 'combobox', TEXTAREA: 'textbox',
+            NAV: 'navigation', MAIN: 'main', HEADER: 'banner', FOOTER: 'contentinfo'
+          };
+
+          var rect = element.getBoundingClientRect();
+          var attributes = {};
+          for (var i = 0; i < element.attributes.length; i++) {
+            var attr = element.attributes[i];
+            attributes[attr.name] = attr.value;
+          }
+
+          var selectors = [];
+
+          // data-testid has highest priority
+          if (attributes['data-testid']) {
+            selectors.push({ selector: attributes['data-testid'], type: 'testId', confidence: 100 });
+          }
+
+          // id
+          if (element.id && !element.id.match(/^[0-9]|[:\\s]/)) {
+            selectors.push({ selector: '#' + element.id, type: 'css', confidence: 95 });
+          }
+
+          // role + name
+          var role = attributes.role || roleMap[element.tagName];
+          if (element.tagName === 'INPUT') {
+            var inputType = element.type;
+            if (inputType === 'checkbox') role = 'checkbox';
+            else if (inputType === 'radio') role = 'radio';
+            else if (inputType === 'submit' || inputType === 'button') role = 'button';
+          }
+          if (role) {
+            var name = attributes['aria-label'] || (element.textContent || '').trim().slice(0, 30);
+            if (name) {
+              selectors.push({ selector: role + '[name="' + name + '"]', type: 'role', confidence: 90 });
+            }
+          }
+
+          // text selector for buttons/links
+          var text = (element.textContent || '').trim().slice(0, 40);
+          if (text && ['BUTTON', 'A', 'LABEL', 'SPAN'].indexOf(element.tagName) !== -1) {
+            selectors.push({ selector: text, type: 'text', confidence: 85 });
+          }
+
+          // class-based selector
+          if (element.className && typeof element.className === 'string') {
+            var classes = element.className.split(/\\s+/).filter(function(c) { 
+              return c && !c.match(/^[0-9]/); 
+            }).slice(0, 2);
+            if (classes.length > 0) {
+              selectors.push({ 
+                selector: element.tagName.toLowerCase() + '.' + classes.join('.'), 
+                type: 'css', 
+                confidence: 70 
+              });
+            }
+          }
+
+          // tag + attributes fallback
+          selectors.push({
+            selector: element.tagName.toLowerCase() + (attributes.type ? '[type="' + attributes.type + '"]' : ''),
+            type: 'css',
+            confidence: 50
+          });
+
+          // Sort by confidence
+          selectors.sort(function(a, b) { return b.confidence - a.confidence; });
+
+          return {
+            tagName: element.tagName.toLowerCase(),
+            id: element.id || undefined,
+            className: element.className || undefined,
+            text: (element.textContent || '').trim().slice(0, 100) || undefined,
+            rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            selectors: selectors
+          };
+        })(${Math.round(x)}, ${Math.round(y)})
+      `) as {
+        tagName: string;
+        id?: string;
+        className?: string;
+        text?: string;
+        rect: { x: number; y: number; width: number; height: number };
+        selectors: Array<{ selector: string; type: string; confidence: number }>;
+      } | null;
+
+      if (!elementData) {
         return null;
       }
 
-      // Get document root to enable full DOM access
-      await session.cdpSession.send('DOM.getDocument', { depth: -1 });
-
-      // Describe the node to get its details
-      const nodeDetails = await session.cdpSession.send('DOM.describeNode', {
-        backendNodeId: nodeResult.backendNodeId,
-        depth: 0,
-      }) as { node: { nodeName: string; nodeId: number; attributes?: string[]; localName: string } };
-
-      const node = nodeDetails.node;
-      const tagName = node.localName || node.nodeName.toLowerCase();
-      
-      // Parse attributes
-      const attributes: Record<string, string> = {};
-      if (node.attributes) {
-        for (let i = 0; i < node.attributes.length; i += 2) {
-          attributes[node.attributes[i]] = node.attributes[i + 1];
-        }
-      }
-
-      // Get bounding box
-      let rect = { x: 0, y: 0, width: 0, height: 0 };
-      try {
-        const boxResult = await session.cdpSession.send('DOM.getBoxModel', {
-          backendNodeId: nodeResult.backendNodeId,
-        }) as { model?: { content: number[] } };
-        if (boxResult.model) {
-          const content = boxResult.model.content;
-          rect = {
-            x: content[0],
-            y: content[1],
-            width: content[2] - content[0],
-            height: content[5] - content[1],
-          };
-        }
-      } catch {
-        // Box model may fail for some elements
-      }
-
-      // Get text content
-      let textContent = '';
-      try {
-        const resolved = await session.cdpSession.send('DOM.resolveNode', {
-          backendNodeId: nodeResult.backendNodeId,
-        }) as { object?: { objectId: string } };
-        
-        if (resolved.object?.objectId) {
-          const textResult = await session.cdpSession.send('Runtime.callFunctionOn', {
-            objectId: resolved.object.objectId,
-            functionDeclaration: 'function() { return this.textContent?.trim().slice(0, 50) || ""; }',
-            returnByValue: true,
-          }) as { result?: { value: string } };
-          textContent = textResult.result?.value || '';
-        }
-      } catch {
-        // Text extraction may fail
-      }
-
-      // Generate selectors
-      const selectors = this.generateSelectors(tagName, attributes, textContent);
+      const primary = elementData.selectors[0] || { selector: elementData.tagName, type: 'css' };
 
       const result: PickerResult = {
-        selector: selectors.primary.selector,
-        selectorType: selectors.primary.type as PickerResult['selectorType'],
+        selector: primary.selector,
+        selectorType: primary.type as PickerResult['selectorType'],
         element: {
-          tagName,
-          id: attributes.id,
-          className: attributes.class,
-          text: textContent,
-          rect,
+          tagName: elementData.tagName,
+          id: elementData.id,
+          className: elementData.className,
+          text: elementData.text,
+          rect: elementData.rect,
         },
-        alternatives: selectors.alternatives,
+        alternatives: elementData.selectors.slice(0, 5),
       };
 
-      // Mark session as completed
-      session.status = 'completed';
-      session.selectedSelector = result.selector;
-      
-      // Stop screencast and notify result
-      try {
-        await session.cdpSession.send('Page.stopScreencast');
-      } catch {
-        // May already be stopped
-      }
-      
+      // Notify callback and close session
       if (session.onResult) {
         session.onResult(result);
       }
 
-      // Close after short delay
-      setTimeout(() => this.closeSession(sessionId), 500);
-
       return result;
     } catch (error) {
       console.error('Error selecting element:', error);
-      return null;
+      throw error;
     }
   }
 

@@ -3,39 +3,203 @@ import { Link } from 'react-router-dom';
 import { apiService, ProjectDTO } from '../services/api';
 import {
   FiLayers, FiArrowLeft, FiTrash2, FiAlertCircle,
-  FiFolder, FiUsers, FiClock
+  FiFolder, FiUsers, FiClock, FiEdit2, FiX, FiSave
 } from 'react-icons/fi';
+
+interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+}
+
+interface EditModalProps {
+  project: ProjectDTO;
+  users: User[];
+  onClose: () => void;
+  onSave: (id: string, data: { name: string; description: string; newOwnerId?: string }) => Promise<void>;
+}
+
+function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
+  const currentOwner = project.members?.find(m => m.role === 'OWNER');
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description || '');
+  const [ownerId, setOwnerId] = useState(currentOwner?.user.id || '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      setError('El nombre es requerido');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      await onSave(project.id, {
+        name: name.trim(),
+        description: description.trim(),
+        newOwnerId: ownerId !== currentOwner?.user.id ? ownerId : undefined,
+      });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error guardando');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      background: 'rgba(0,0,0,0.7)', display: 'flex',
+      alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+    }} onClick={onClose}>
+      <div style={{
+        background: 'var(--color-dark-800)', borderRadius: '0.75rem',
+        width: '100%', maxWidth: '480px', padding: '1.5rem',
+        border: '1px solid rgba(51, 65, 85, 0.5)',
+      }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'white' }}>Editar Proyecto</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--color-dark-400)', cursor: 'pointer' }}>
+            <FiX size={20} />
+          </button>
+        </div>
+
+        {error && (
+          <div style={{
+            padding: '0.75rem', marginBottom: '1rem',
+            background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
+            borderRadius: '0.5rem', color: '#fca5a5', fontSize: '0.875rem',
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
+              Nombre *
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              style={{
+                width: '100%', padding: '0.625rem 0.875rem',
+                background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(51, 65, 85, 0.5)',
+                borderRadius: '0.5rem', color: 'white', fontSize: '0.875rem',
+              }}
+              placeholder="Nombre del proyecto"
+            />
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
+              Descripción
+            </label>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              rows={3}
+              style={{
+                width: '100%', padding: '0.625rem 0.875rem',
+                background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(51, 65, 85, 0.5)',
+                borderRadius: '0.5rem', color: 'white', fontSize: '0.875rem', resize: 'vertical',
+              }}
+              placeholder="Descripción opcional"
+            />
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
+              Propietario
+            </label>
+            <select
+              value={ownerId}
+              onChange={e => setOwnerId(e.target.value)}
+              style={{
+                width: '100%', padding: '0.625rem 0.875rem',
+                background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(51, 65, 85, 0.5)',
+                borderRadius: '0.5rem', color: 'white', fontSize: '0.875rem',
+              }}
+            >
+              {users.map(u => (
+                <option key={u.id} value={u.id}>
+                  {u.name || u.email} {u.role === 'ADMIN' ? '(Admin)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary"
+              style={{ padding: '0.5rem 1rem' }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={saving}
+              style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <FiSave size={14} />
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<ProjectDTO[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editingProject, setEditingProject] = useState<ProjectDTO | null>(null);
 
-  const loadProjects = async () => {
+  const loadData = async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await apiService.getProjects();
-      setProjects(data);
+      const [projectsData, usersData] = await Promise.all([
+        apiService.getProjects(),
+        apiService.getUsers(),
+      ]);
+      setProjects(projectsData);
+      setUsers(usersData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error cargando proyectos');
+      setError(err instanceof Error ? err.message : 'Error cargando datos');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadProjects();
+    loadData();
   }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar este proyecto?')) return;
     try {
       await apiService.deleteProject(id);
-      loadProjects();
+      loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error eliminando proyecto');
     }
+  };
+
+  const handleSaveProject = async (id: string, data: { name: string; description: string; newOwnerId?: string }) => {
+    await apiService.updateProject(id, data);
+    await loadData();
   };
 
   const formatDate = (d: string) => {
@@ -154,14 +318,24 @@ export default function AdminProjectsPage() {
                         </span>
                       </td>
                       <td style={tdStyle}>
-                        <button
-                          className="btn-secondary"
-                          style={{ padding: '0.375rem 0.5rem', color: '#ef4444' }}
-                          onClick={() => handleDelete(p.id)}
-                          title="Eliminar proyecto"
-                        >
-                          <FiTrash2 size={14} />
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            className="btn-secondary"
+                            style={{ padding: '0.375rem 0.5rem' }}
+                            onClick={() => setEditingProject(p)}
+                            title="Editar proyecto"
+                          >
+                            <FiEdit2 size={14} />
+                          </button>
+                          <button
+                            className="btn-secondary"
+                            style={{ padding: '0.375rem 0.5rem', color: '#ef4444' }}
+                            onClick={() => handleDelete(p.id)}
+                            title="Eliminar proyecto"
+                          >
+                            <FiTrash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -178,6 +352,15 @@ export default function AdminProjectsPage() {
           </div>
         )}
       </main>
+
+      {editingProject && (
+        <EditProjectModal
+          project={editingProject}
+          users={users}
+          onClose={() => setEditingProject(null)}
+          onSave={handleSaveProject}
+        />
+      )}
     </div>
   );
 }
