@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import executionRoutes from './execution.routes.js';
-import recordingRoutes from './recording.routes.js';
 import flowRoutes from './flow.routes.js';
 import reportRoutes from './report.routes.js';
 import projectsRoutes from './projects.routes.js';
@@ -20,7 +19,6 @@ router.use('/users', usersRoutes);
 
 // Montar todas las rutas
 router.use('/', executionRoutes);
-router.use('/', recordingRoutes);
 router.use('/', flowRoutes);
 router.use('/', reportRoutes);
 

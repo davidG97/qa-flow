@@ -199,17 +199,55 @@ jobs:
   # ==========================================
   # npm Publishing (Trusted Publishing / OIDC)
   # ==========================================
-  npm:
-    name: Publish to npm
+  check-packages-changes:
+    name: Check for packages changes
     needs: release
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check for changes in packages directory
+        id: check
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # First release, check all files
+            CHANGES=$(git diff --name-only HEAD~10 HEAD -- packages/ || echo "packages/")
+          else
+            CHANGES=$(git diff --name-only ${PREVIOUS_TAG}..HEAD -- packages/)
+          fi
+          
+          if [ -n "$CHANGES" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in packages/:"
+            echo "$CHANGES"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes in packages/ directory"
+          fi
+
+  npm:
+    name: Publish to npm
+    needs: [release, docker, check-packages-changes]
+    if: needs.check-packages-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
-      id-token: write  # Required for npm provenance
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v7
         with:
           ref: v${{ needs.release.outputs.version }}
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -217,10 +255,20 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Update CLI version
-        working-directory: packages/cli
+      - name: Update CLI version and commit
         run: |
-          npm version ${{ needs.release.outputs.version }} --no-git-tag-version
+          cd packages/cli
+          npm version ${{ needs.release.outputs.version }} --no-git-tag-version --allow-same-version
+          cd ../..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/cli/package.json
+          git diff --cached --quiet || git commit -m "chore(cli): bump version to ${{ needs.release.outputs.version }}"
+          git push origin HEAD:main || true
+
+      - name: Install dependencies
+        working-directory: packages/cli
+        run: pnpm install
 
       - name: Publish to npm
         working-directory: packages/cli
