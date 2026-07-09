@@ -616,6 +616,16 @@ class ApiService {
     return response.json();
   }
 
+  async hoverAtCoordinates(sessionId: string, x: number, y: number): Promise<{ 
+    result: { selector: string; tagName: string; rect: { x: number; y: number; width: number; height: number }; inShadowDOM?: boolean } | null 
+  }> {
+    const response = await this.request(`${API_URL}/picker/interactive/hover`, {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, x, y }),
+    });
+    return response.json();
+  }
+
   async scrollPicker(sessionId: string, x: number, y: number, deltaY: number): Promise<void> {
     await this.request(`${API_URL}/picker/interactive/scroll`, {
       method: 'POST',

@@ -3,6 +3,13 @@ import { createPortal } from 'react-dom';
 import { apiService, PickerResult } from '../../services/api';
 import { FiX, FiLoader } from 'react-icons/fi';
 
+interface HoverInfo {
+  selector: string;
+  tagName: string;
+  rect: { x: number; y: number; width: number; height: number };
+  inShadowDOM?: boolean;
+}
+
 interface InteractivePickerProps {
   sessionId: string;
   onResult: (result: PickerResult) => void;
@@ -17,9 +24,11 @@ export default function InteractivePicker({
   const [frame, setFrame] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
   // Subscribe to screencast frames
@@ -131,6 +140,68 @@ export default function InteractivePicker({
     }
   }, [sessionId, isSelecting, onResult]);
 
+  // Handle mousemove for hover highlight (debounced)
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLImageElement>) => {
+    if (!imgRef.current || isSelecting) return;
+
+    // Clear previous timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+
+    const rect = imgRef.current.getBoundingClientRect();
+    const scaleX = 1280 / rect.width;
+    const scaleY = 720 / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    // Debounce hover calls (50ms)
+    hoverTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await apiService.hoverAtCoordinates(sessionId, x, y);
+        if (mountedRef.current && response.result) {
+          setHoverInfo(response.result);
+        }
+      } catch {
+        // Ignore hover errors silently
+      }
+    }, 50);
+  }, [sessionId, isSelecting]);
+
+  // Clear hover on mouse leave
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoverInfo(null);
+  }, []);
+
+  // Cleanup hover timeout
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Calculate highlight position scaled to display size
+  const getHighlightStyle = useCallback(() => {
+    if (!hoverInfo || !imgRef.current) return { display: 'none' };
+    
+    const imgRect = imgRef.current.getBoundingClientRect();
+    const scaleX = imgRect.width / 1280;
+    const scaleY = imgRect.height / 720;
+    
+    return {
+      display: 'block',
+      left: hoverInfo.rect.x * scaleX,
+      top: hoverInfo.rect.y * scaleY,
+      width: hoverInfo.rect.width * scaleX,
+      height: hoverInfo.rect.height * scaleY,
+    };
+  }, [hoverInfo]);
+
   return createPortal(
     <div className="interactive-picker-overlay">
       <div className="interactive-picker-container">
@@ -147,14 +218,32 @@ export default function InteractivePicker({
               <button onClick={onCancel}>Cerrar</button>
             </div>
           ) : frame ? (
-            <img
-              ref={imgRef}
-              src={`data:image/jpeg;base64,${frame}`}
-              alt="Vista del navegador"
-              onClick={handleClick}
-              className={isSelecting ? 'selecting' : ''}
-              draggable={false}
-            />
+            <>
+              <img
+                ref={imgRef}
+                src={`data:image/jpeg;base64,${frame}`}
+                alt="Vista del navegador"
+                onClick={handleClick}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className={isSelecting ? 'selecting' : ''}
+                draggable={false}
+              />
+              {/* Hover highlight overlay */}
+              {hoverInfo && (
+                <>
+                  <div 
+                    className="picker-highlight"
+                    style={getHighlightStyle() as React.CSSProperties}
+                  />
+                  <div className="picker-tooltip">
+                    {hoverInfo.inShadowDOM && <span className="shadow-badge">Shadow DOM</span>}
+                    <code>{hoverInfo.selector}</code>
+                    <span className="tag-name">&lt;{hoverInfo.tagName}&gt;</span>
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="loading-placeholder">
               <FiLoader className="spinner" size={32} />
@@ -249,6 +338,58 @@ export default function InteractivePicker({
         .interactive-picker-view img.selecting {
           cursor: wait;
           opacity: 0.7;
+        }
+
+        .picker-highlight {
+          position: absolute;
+          border: 2px solid #22c55e;
+          background: rgba(34, 197, 94, 0.15);
+          pointer-events: none;
+          border-radius: 2px;
+          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+        }
+
+        .picker-tooltip {
+          position: absolute;
+          bottom: 8px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #1e1e2e;
+          color: #fff;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          max-width: 90%;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+          pointer-events: none;
+          z-index: 10;
+        }
+
+        .picker-tooltip code {
+          font-family: 'SF Mono', Monaco, monospace;
+          color: #22c55e;
+          max-width: 300px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .picker-tooltip .tag-name {
+          color: #888;
+          font-size: 10px;
+        }
+
+        .picker-tooltip .shadow-badge {
+          background: #6366f1;
+          color: #fff;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 9px;
+          text-transform: uppercase;
+          font-weight: 600;
         }
 
         .loading-placeholder {

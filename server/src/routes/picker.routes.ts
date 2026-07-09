@@ -12,6 +12,9 @@ router.post('/interactive/start', pickerController.startInteractiveSession);
 // Seleccionar elemento por coordenadas
 router.post('/interactive/select', pickerController.selectAtCoordinates);
 
+// Hover para highlight
+router.post('/interactive/hover', pickerController.hoverAtCoordinates);
+
 // Scroll en picker interactivo
 router.post('/interactive/scroll', pickerController.scroll);
 
