@@ -21,8 +21,8 @@ import PropertiesPanel from '../components/panels/PropertiesPanel';
 import ExecutionPanel from '../components/panels/ExecutionPanel';
 
 // Modal components
-import RecordingModal from '../components/modals/RecordingModal';
 import ProjectConfigModal from '../components/modals/ProjectConfigModal';
+import CodeViewerModal from '../components/modals/CodeViewerModal';
 
 // Node components
 import TestNode from '../components/nodes/TestNode';
@@ -58,8 +58,9 @@ const EditorPage = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const hasLoadedProject = useRef(false);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
-  const [showRecordingModal, setShowRecordingModal] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState('');
   const [projectConfig, setProjectConfig] = useState<ProjectConfig>(defaultProjectConfig);
   const [projectName, setProjectName] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -265,21 +266,15 @@ const EditorPage = () => {
 
       const code = await apiService.generateCode(flow);
       
-      // Mostrar el código en una nueva ventana
-      const newWindow = window.open('', '_blank');
-      if (newWindow) {
-        newWindow.document.write(generateCodeViewerHtml(code));
-      }
+      // Mostrar el código en el modal
+      setGeneratedCode(code);
+      setShowCodeModal(true);
     } catch {
       alert('Error generando código');
     }
   }, [nodes, edges, backendConnected, projectId, projectName, projectConfig]);
 
-  // Manejar import de nodos
-  const handleImportNodes = useCallback((importedNodes: FlowNode[], importedEdges: FlowEdge[]) => {
-    importNodes(importedNodes, importedEdges);
-    setShowRecordingModal(false);
-  }, [importNodes]);
+
 
   if (loading) {
     return (
@@ -299,7 +294,6 @@ const EditorPage = () => {
           onRun={runFlow}
           onSave={handleSaveProject}
           onGenerateCode={onGenerateCode}
-          onRecord={() => setShowRecordingModal(true)}
           onConfig={() => setShowConfigModal(true)}
           onExport={handleExportProject}
           onImport={handleImportProject}
@@ -370,17 +364,18 @@ const EditorPage = () => {
         onClose={clearExecutionStatus}
       />
 
-      <RecordingModal
-        isOpen={showRecordingModal}
-        onClose={() => setShowRecordingModal(false)}
-        onImport={handleImportNodes}
-      />
-
       <ProjectConfigModal
         isOpen={showConfigModal}
         onClose={() => setShowConfigModal(false)}
         config={projectConfig}
         onSave={setProjectConfig}
+      />
+
+      <CodeViewerModal
+        isOpen={showCodeModal}
+        onClose={() => setShowCodeModal(false)}
+        code={generatedCode}
+        filename={`${(projectName || 'test').toLowerCase().replace(/\s+/g, '-')}.spec.ts`}
       />
     </div>
   );
@@ -417,120 +412,6 @@ function BackendStatusIndicator({ connected }: Readonly<{ connected: boolean }>)
       {connected ? 'Backend conectado' : 'Desconectado'}
     </div>
   );
-}
-
-// Función para generar el HTML del visor de código
-function generateCodeViewerHtml(code: string): string {
-  const escapedCode = code.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-  
-  return `
-    <html>
-      <head>
-        <title>Código Playwright Generado</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { 
-            background: #020617; 
-            color: #f1f5f9; 
-            font-family: 'Inter', system-ui, sans-serif;
-            padding: 2rem;
-            min-height: 100vh;
-          }
-          .container { max-width: 900px; margin: 0 auto; }
-          h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #ffffff;
-          }
-          .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
-          button {
-            background: #6366f1;
-            color: white;
-            border: none;
-            padding: 0.625rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 150ms;
-          }
-          button:hover { background: #818cf8; }
-          button.secondary {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(51, 65, 85, 0.5);
-          }
-          button.secondary:hover {
-            background: rgba(51, 65, 85, 0.5);
-            border-color: #6366f1;
-          }
-          .code-container {
-            background: #0f172a;
-            border: 1px solid rgba(51, 65, 85, 0.5);
-            border-radius: 0.75rem;
-            overflow: hidden;
-          }
-          .code-header {
-            background: rgba(30, 41, 59, 0.5);
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-            font-size: 0.75rem;
-            color: #64748b;
-          }
-          pre { 
-            padding: 1.25rem; 
-            overflow-x: auto;
-            font-family: 'JetBrains Mono', 'Monaco', monospace;
-            font-size: 0.8rem;
-            line-height: 1.6;
-            color: #94a3b8;
-          }
-          .copied { background: #22c55e !important; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h2>📄 Código Playwright Generado</h2>
-          <div class="toolbar">
-            <button onclick="copyCode(this)">📋 Copiar código</button>
-            <button class="secondary" onclick="downloadCode()">💾 Descargar archivo</button>
-          </div>
-          <div class="code-container">
-            <div class="code-header">test.spec.ts</div>
-            <pre id="code">${escapedCode}</pre>
-          </div>
-        </div>
-        <script>
-          function copyCode(btn) {
-            navigator.clipboard.writeText(document.getElementById('code').textContent);
-            btn.classList.add('copied');
-            btn.innerHTML = '✓ Copiado';
-            setTimeout(() => {
-              btn.classList.remove('copied');
-              btn.innerHTML = '📋 Copiar código';
-            }, 2000);
-          }
-          function downloadCode() {
-            const code = document.getElementById('code').textContent;
-            const blob = new Blob([code], { type: 'text/typescript' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'test.spec.ts';
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-        </script>
-      </body>
-    </html>
-  `;
 }
 
 export default EditorPage;

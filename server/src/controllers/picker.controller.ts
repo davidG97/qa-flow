@@ -204,6 +204,24 @@ export const pickerController = {
   },
 
   /**
+   * Get element info at coordinates for hover highlight
+   * POST /api/picker/interactive/hover
+   * Body: { sessionId, x, y }
+   */
+  async hoverAtCoordinates(req: Request, res: Response) {
+    try {
+      const { sessionId, x, y } = req.body;
+      if (!sessionId || typeof x !== 'number' || typeof y !== 'number') {
+        return res.status(400).json({ error: 'sessionId, x e y son requeridos' });
+      }
+      const result = await pickerService.hoverAtCoordinates(sessionId, x, y);
+      res.json({ success: true, result });
+    } catch (error) {
+      res.status(500).json({ error: 'Error en hover' });
+    }
+  },
+
+  /**
    * Scroll in interactive picker
    * POST /api/picker/interactive/scroll
    * Body: { sessionId, x, y, deltaY }

@@ -249,10 +249,12 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
   const handleStartPicker = async () => {
     if (!selectedNode || !allNodes || !edges) return;
     
-    const startNode = allNodes.find(n => n.data?.nodeType === 'start');
-    const baseUrl = startNode?.data?.config?.baseUrl as string | undefined;
+    // ponytail: Just check any start node has URL, backend finds the correct one via BFS
+    const hasStartWithUrl = allNodes.some(n => 
+      n.data?.nodeType === 'start' && n.data?.config?.baseUrl
+    );
     
-    if (!baseUrl) {
+    if (!hasStartWithUrl) {
       alert('Configura una URL base en el nodo de Inicio.');
       return;
     }

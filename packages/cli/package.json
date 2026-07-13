@@ -1,6 +1,6 @@
 {
   "name": "@davidg97/qa-flow",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Visual test editor for Playwright - Design, run, and manage automated tests with a drag-and-drop canvas",
   "keywords": [
     "playwright",

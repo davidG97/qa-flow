@@ -386,44 +386,44 @@ class PickerService {
 
   /**
    * Get path from start node to target node
+   * ponytail: BFS backwards from target to find the correct start node
    */
   private getPathToNode(targetId: string, nodes: FlowNode[], edges: FlowEdge[]): FlowNode[] {
-    const startNode = nodes.find(n => n.data.nodeType === 'start');
-    if (!startNode) return [];
-    
-    // BFS to find path
-    const visited = new Map<string, string | null>(); // nodeId -> parentId
-    const queue = [startNode.id];
-    visited.set(startNode.id, null);
+    // BFS backwards from target to find the connected start node
+    const visited = new Map<string, string | null>(); // nodeId -> childId (next in path)
+    const queue = [targetId];
+    visited.set(targetId, null);
+    let foundStartId: string | null = null;
     
     while (queue.length > 0) {
       const currentId = queue.shift()!;
-      if (currentId === targetId) break;
+      const currentNode = nodes.find(n => n.id === currentId);
       
-      const outEdges = edges.filter(e => e.source === currentId);
-      for (const edge of outEdges) {
-        if (!visited.has(edge.target)) {
-          visited.set(edge.target, currentId);
-          queue.push(edge.target);
+      if (currentNode?.data.nodeType === 'start') {
+        foundStartId = currentId;
+        break;
+      }
+      
+      // Find incoming edges (edges where target is currentId)
+      const inEdges = edges.filter(e => e.target === currentId);
+      for (const edge of inEdges) {
+        if (!visited.has(edge.source)) {
+          visited.set(edge.source, currentId);
+          queue.push(edge.source);
         }
       }
     }
     
-    // Reconstruct path (excluding target node)
+    if (!foundStartId) return [];
+    
+    // Reconstruct path from start to target (excluding target)
     const path: FlowNode[] = [];
-    let current: string | null | undefined = visited.has(targetId) ? visited.get(targetId) : null;
+    let current: string | null = foundStartId;
     
-    while (current) {
+    while (current && current !== targetId) {
       const node = nodes.find(n => n.id === current);
-      if (node) path.unshift(node);
-      current = visited.get(current);
-    }
-    
-    // Add start node at beginning if not already there
-    if (path.length > 0 && path[0].data.nodeType !== 'start' && startNode) {
-      path.unshift(startNode);
-    } else if (path.length === 0 && startNode) {
-      path.push(startNode);
+      if (node) path.push(node);
+      current = visited.get(current) ?? null;
     }
     
     return path;
@@ -740,12 +740,10 @@ class PickerService {
     });
     
     // Force repaint to trigger initial frame (CDP doesn't send frames for static pages)
-    await page.evaluate(() => {
+    await page.evaluate(`
       document.body.style.opacity = '0.99';
-      requestAnimationFrame(() => {
-        document.body.style.opacity = '1';
-      });
-    });
+      requestAnimationFrame(() => { document.body.style.opacity = '1'; });
+    `);
     await page.waitForTimeout(200);
 
     // Store session with CDP session for coordinate selection
@@ -773,142 +771,169 @@ class PickerService {
 
   /**
    * Select element at given coordinates (called when user clicks on screencast)
+   * ponytail: JS only - handles scroll, traverses open shadow DOM
    */
   async selectAtCoordinates(sessionId: string, x: number, y: number): Promise<PickerResult | null> {
-    const session = this.sessions.get(sessionId) as PickerSession & { 
-      cdpSession?: { send: (method: string, params?: Record<string, unknown>) => Promise<Record<string, unknown>> };
-      onResult?: (result: PickerResult | null) => void;
-    };
+    const session = this.sessions.get(sessionId);
     
-    if (!session || !session.cdpSession) {
-      throw new Error('Sesión no encontrada o no es interactiva');
+    if (!session) {
+      throw new Error('Sesión no encontrada');
     }
 
     try {
-      // Use document.elementFromPoint which works correctly with scroll
-      // Pass code as string to avoid esbuild __name transformation
-      const elementData = await session.page.evaluate(`
-        (function(x, y) {
-          var element = document.elementFromPoint(x, y);
-          if (!element || (element.id && element.id.startsWith('__qaflow-picker'))) {
-            return null;
-          }
-
-          var roleMap = {
-            BUTTON: 'button', A: 'link', SELECT: 'combobox', TEXTAREA: 'textbox',
-            NAV: 'navigation', MAIN: 'main', HEADER: 'banner', FOOTER: 'contentinfo'
-          };
-
-          var rect = element.getBoundingClientRect();
-          var attributes = {};
-          for (var i = 0; i < element.attributes.length; i++) {
-            var attr = element.attributes[i];
-            attributes[attr.name] = attr.value;
-          }
-
-          var selectors = [];
-
-          // data-testid has highest priority
-          if (attributes['data-testid']) {
-            selectors.push({ selector: attributes['data-testid'], type: 'testId', confidence: 100 });
-          }
-
-          // id
-          if (element.id && !element.id.match(/^[0-9]|[:\\s]/)) {
-            selectors.push({ selector: '#' + element.id, type: 'css', confidence: 95 });
-          }
-
-          // role + name
-          var role = attributes.role || roleMap[element.tagName];
-          if (element.tagName === 'INPUT') {
-            var inputType = element.type;
-            if (inputType === 'checkbox') role = 'checkbox';
-            else if (inputType === 'radio') role = 'radio';
-            else if (inputType === 'submit' || inputType === 'button') role = 'button';
-          }
-          if (role) {
-            var name = attributes['aria-label'] || (element.textContent || '').trim().slice(0, 30);
-            if (name) {
-              selectors.push({ selector: role + '[name="' + name + '"]', type: 'role', confidence: 90 });
+      // ponytail: elementFromPoint handles scroll correctly and traverses open shadows
+      const jsResult = await session.page.evaluate(`
+        (function(px, py) {
+          function traverse(root, x, y) {
+            var el = root.elementFromPoint ? root.elementFromPoint(x, y) : document.elementFromPoint(x, y);
+            if (!el || (el.id && el.id.startsWith('__qaflow-picker'))) return null;
+            
+            // Traverse into open shadow roots
+            if (el.shadowRoot) {
+              var deeper = traverse(el.shadowRoot, x, y);
+              if (deeper) return deeper;
             }
-          }
-
-          // text selector for buttons/links
-          var text = (element.textContent || '').trim().slice(0, 40);
-          if (text && ['BUTTON', 'A', 'LABEL', 'SPAN'].indexOf(element.tagName) !== -1) {
-            selectors.push({ selector: text, type: 'text', confidence: 85 });
-          }
-
-          // class-based selector
-          if (element.className && typeof element.className === 'string') {
-            var classes = element.className.split(/\\s+/).filter(function(c) { 
-              return c && !c.match(/^[0-9]/); 
-            }).slice(0, 2);
-            if (classes.length > 0) {
-              selectors.push({ 
-                selector: element.tagName.toLowerCase() + '.' + classes.join('.'), 
-                type: 'css', 
-                confidence: 70 
-              });
+            
+            var rect = el.getBoundingClientRect();
+            var attrs = {};
+            for (var i = 0; i < el.attributes.length; i++) {
+              attrs[el.attributes[i].name] = el.attributes[i].value;
             }
+            
+            return {
+              tagName: el.tagName.toLowerCase(),
+              attrs: attrs,
+              rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+            };
           }
-
-          // tag + attributes fallback
-          selectors.push({
-            selector: element.tagName.toLowerCase() + (attributes.type ? '[type="' + attributes.type + '"]' : ''),
-            type: 'css',
-            confidence: 50
-          });
-
-          // Sort by confidence
-          selectors.sort(function(a, b) { return b.confidence - a.confidence; });
-
-          return {
-            tagName: element.tagName.toLowerCase(),
-            id: element.id || undefined,
-            className: element.className || undefined,
-            text: (element.textContent || '').trim().slice(0, 100) || undefined,
-            rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-            selectors: selectors
-          };
+          return traverse(document, px, py);
         })(${Math.round(x)}, ${Math.round(y)})
-      `) as {
-        tagName: string;
-        id?: string;
-        className?: string;
-        text?: string;
-        rect: { x: number; y: number; width: number; height: number };
-        selectors: Array<{ selector: string; type: string; confidence: number }>;
-      } | null;
+      `) as { tagName: string; attrs: Record<string, string>; rect: { x: number; y: number; width: number; height: number } } | null;
 
-      if (!elementData) {
-        return null;
-      }
+      if (!jsResult) return null;
 
-      const primary = elementData.selectors[0] || { selector: elementData.tagName, type: 'css' };
-
-      const result: PickerResult = {
-        selector: primary.selector,
-        selectorType: primary.type as PickerResult['selectorType'],
-        element: {
-          tagName: elementData.tagName,
-          id: elementData.id,
-          className: elementData.className,
-          text: elementData.text,
-          rect: elementData.rect,
-        },
-        alternatives: elementData.selectors.slice(0, 5),
-      };
-
-      // Notify callback and close session
-      if (session.onResult) {
-        session.onResult(result);
-      }
-
-      return result;
+      return this.buildPickerResult(jsResult.tagName, jsResult.attrs, jsResult.rect);
     } catch (error) {
       console.error('Error selecting element:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Build PickerResult from element info
+   */
+  private buildPickerResult(
+    tagName: string, 
+    attrs: Record<string, string>, 
+    rect: { x: number; y: number; width: number; height: number }
+  ): PickerResult {
+    const selectors: Array<{ selector: string; type: string; confidence: number }> = [];
+
+    if (attrs['data-testid']) {
+      selectors.push({ selector: attrs['data-testid'], type: 'testId', confidence: 100 });
+    }
+
+    if (attrs.id && !attrs.id.match(/^[0-9]|[:\s]/)) {
+      selectors.push({ selector: `#${attrs.id}`, type: 'css', confidence: 95 });
+    }
+
+    const roleMap: Record<string, string> = { button: 'button', a: 'link', input: 'textbox', select: 'combobox', textarea: 'textbox' };
+    let role = attrs.role || roleMap[tagName];
+    if (tagName === 'input') {
+      const t = attrs.type || 'text';
+      if (t === 'checkbox') role = 'checkbox';
+      else if (t === 'radio') role = 'radio';
+      else if (t === 'submit' || t === 'button') role = 'button';
+    }
+    const name = attrs['aria-label'] || attrs.placeholder || attrs.title;
+    if (role && name) {
+      selectors.push({ selector: `getByRole('${role}', { name: '${name.replace(/'/g, "\\'")}' })`, type: 'role', confidence: 92 });
+    }
+
+    if (attrs.placeholder) {
+      selectors.push({ selector: `getByPlaceholder('${attrs.placeholder.replace(/'/g, "\\'")}')`, type: 'placeholder', confidence: 90 });
+    }
+
+    if (attrs.title) {
+      selectors.push({ selector: `getByTitle('${attrs.title.replace(/'/g, "\\'")}')`, type: 'title', confidence: 88 });
+    }
+
+    if (attrs.class) {
+      const classes = attrs.class.split(/\s+/).filter(c => c && !c.match(/^[0-9]/)).slice(0, 2);
+      if (classes.length > 0) {
+        selectors.push({ selector: `${tagName}.${classes.join('.')}`, type: 'css', confidence: 70 });
+      }
+    }
+
+    if (attrs.type) {
+      selectors.push({ selector: `${tagName}[type="${attrs.type}"]`, type: 'css', confidence: 60 });
+    }
+
+    selectors.push({ selector: tagName, type: 'css', confidence: 30 });
+    selectors.sort((a, b) => b.confidence - a.confidence);
+
+    const primary = selectors[0] || { selector: tagName, type: 'css' };
+
+    return {
+      selector: primary.selector,
+      selectorType: primary.type as PickerResult['selectorType'],
+      element: {
+        tagName: tagName,
+        id: attrs.id,
+        className: attrs.class,
+        text: undefined,
+        rect: rect,
+      },
+      alternatives: selectors.slice(0, 5),
+    };
+  }
+
+  /**
+   * Get element info at coordinates for hover highlight (doesn't select)
+   * ponytail: Uses JS for scroll support
+   */
+  async hoverAtCoordinates(sessionId: string, x: number, y: number): Promise<{
+    selector: string;
+    tagName: string;
+    rect: { x: number; y: number; width: number; height: number };
+    inShadowDOM?: boolean;
+  } | null> {
+    const session = this.sessions.get(sessionId) as PickerSession & { 
+      cdpSession?: { send: (method: string, params?: Record<string, unknown>) => Promise<Record<string, unknown>> };
+    };
+    
+    if (!session?.page) return null;
+
+    try {
+      // Use JS elementFromPoint for scroll support
+      const data = await session.page.evaluate(`
+        (function(px, py) {
+          function traverse(root, x, y) {
+            var el = root.elementFromPoint ? root.elementFromPoint(x, y) : document.elementFromPoint(x, y);
+            if (!el || (el.id && el.id.startsWith('__qaflow-picker'))) return null;
+            if (el.shadowRoot) {
+              var deeper = traverse(el.shadowRoot, x, y);
+              if (deeper) return deeper;
+            }
+            var rect = el.getBoundingClientRect();
+            var sel = el.getAttribute('data-testid') || el.id || 
+                      el.getAttribute('placeholder') || el.getAttribute('aria-label') ||
+                      (el.className && typeof el.className === 'string' ? '.' + el.className.split(' ')[0] : '') ||
+                      el.tagName.toLowerCase();
+            var hasClosed = el.tagName.includes('-') && el.shadowRoot === null;
+            return {
+              selector: sel,
+              tagName: el.tagName.toLowerCase(),
+              rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+              inShadowDOM: hasClosed
+            };
+          }
+          return traverse(document, px, py);
+        })(${Math.round(x)}, ${Math.round(y)})
+      `);
+      return data as { selector: string; tagName: string; rect: { x: number; y: number; width: number; height: number }; inShadowDOM?: boolean } | null;
+    } catch {
+      return null;
     }
   }
 
