@@ -1,0 +1,188 @@
+{
+  "name": "Shadow DOM support",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "7",
+      "type": "testNode",
+      "position": {
+        "x": -75,
+        "y": 135
+      },
+      "data": {
+        "label": "Inicio-2",
+        "nodeType": "start",
+        "category": "trigger",
+        "config": {
+          "device": "",
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "locale": "",
+          "timezoneId": "",
+          "colorScheme": "",
+          "reducedMotion": "",
+          "forcedColors": "",
+          "offline": false,
+          "javaScriptEnabled": true,
+          "baseUrl": "https://selectorshub.com/xpath-practice-page/",
+          "testName": "Shadow DOM support",
+          "tags": [
+            "@DOM"
+          ]
+        }
+      },
+      "measured": {
+        "width": 150,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "8",
+      "type": "testNode",
+      "position": {
+        "x": 135,
+        "y": 135
+      },
+      "data": {
+        "label": "Escribir Texto-2",
+        "nodeType": "type",
+        "category": "action",
+        "config": {
+          "clearFirst": true,
+          "delay": 0,
+          "selector": "#userName >> #kils",
+          "selectorType": "pierce",
+          "text": "User"
+        },
+        "customLabel": "Shadow open"
+      },
+      "measured": {
+        "width": 119,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "9",
+      "type": "testNode",
+      "position": {
+        "x": 315,
+        "y": 135
+      },
+      "data": {
+        "label": "Escribir Texto-3",
+        "nodeType": "type",
+        "category": "action",
+        "config": {
+          "clearFirst": true,
+          "delay": 0,
+          "selector": "#pizza",
+          "selectorType": "css",
+          "text": "Peperoni"
+        },
+        "customLabel": "Shadow open inside shadow open"
+      },
+      "measured": {
+        "width": 150,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "10",
+      "type": "testNode",
+      "position": {
+        "x": 510,
+        "y": 135
+      },
+      "data": {
+        "label": "Hacer Click",
+        "nodeType": "click",
+        "category": "action",
+        "config": {
+          "button": "left",
+          "clickCount": 1,
+          "delay": 0,
+          "force": false,
+          "timeout": 30000,
+          "selector": "a.elementor-button.elementor-button-link >> nth=3",
+          "selectorType": "css"
+        },
+        "customLabel": "Click button to redirect"
+      },
+      "measured": {
+        "width": 150,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "11",
+      "type": "testNode",
+      "position": {
+        "x": 705,
+        "y": 135
+      },
+      "data": {
+        "label": "Verificar URL",
+        "nodeType": "assertUrl",
+        "category": "assertion",
+        "config": {
+          "matchType": "exact",
+          "timeout": 5000,
+          "expectedUrl": "https://selectorshub.com/iframe-in-shadow-dom/"
+        }
+      },
+      "measured": {
+        "width": 116,
+        "height": 103
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "7",
+      "target": "8",
+      "animated": true,
+      "id": "e-imported-5",
+      "selected": false
+    },
+    {
+      "source": "8",
+      "target": "9",
+      "animated": true,
+      "id": "e-imported-6",
+      "selected": false
+    },
+    {
+      "source": "9",
+      "target": "10",
+      "animated": true,
+      "id": "xy-edge__9-10"
+    },
+    {
+      "source": "10",
+      "target": "11",
+      "animated": true,
+      "id": "xy-edge__10-11"
+    }
+  ],
+  "config": {
+    "executionMode": "default",
+    "workers": 4,
+    "maxFailures": 0,
+    "retries": 0,
+    "timeout": 30000
+  },
+  "savedAt": "2026-07-09T14:33:19.339Z"
+}

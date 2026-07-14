@@ -949,6 +949,67 @@
     border-color: var(--color-accent);
   }
 
+  /* Menú de hover del nodo */
+  .node-hover-menu {
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    background: var(--color-dark-700);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--color-dark-400);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+  }
+
+  .hover-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: var(--color-dark-500);
+    color: var(--color-text-secondary);
+  }
+
+  .hover-menu-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .hover-menu-btn.delete {
+    color: #f87171;
+  }
+
+  .hover-menu-btn.delete:hover {
+    background: rgba(248, 113, 113, 0.2);
+    color: #fca5a5;
+  }
+
+  .hover-menu-btn.disconnect {
+    color: #fbbf24;
+  }
+
+  .hover-menu-btn.disconnect:hover {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fcd34d;
+  }
+
+  .hover-menu-btn.config {
+    color: #60a5fa;
+  }
+
+  .hover-menu-btn.config:hover {
+    background: rgba(96, 165, 250, 0.2);
+    color: #93c5fd;
+  }
+
   /* If Node */
   .if-node {
     padding-bottom: 1.5rem;
