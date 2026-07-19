@@ -9,6 +9,7 @@ interface NodeData extends Record<string, unknown> {
   category: NodeCategory;
   config: Record<string, unknown>;
   customLabel?: string;
+  executionStatus?: 'running' | 'success' | 'error';
 }
 
 export interface SavedProject {

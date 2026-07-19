@@ -49,6 +49,7 @@ interface NodeData extends Record<string, unknown> {
   category: NodeCategory;
   config: Record<string, unknown>;
   customLabel?: string;
+  executionStatus?: 'running' | 'success' | 'error';
 }
 
 const EditorPage = () => {
@@ -65,6 +66,7 @@ const EditorPage = () => {
   const [projectName, setProjectName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isPanelMinimized, setIsPanelMinimized] = useState(false);
 
   // Custom hooks
   const { backendConnected } = useBackendConnection();
@@ -93,7 +95,6 @@ const EditorPage = () => {
     executionId,
     validation,
     runFlow,
-    clearExecutionStatus,
   } = useFlowExecution(nodes, edges, backendConnected, projectConfig);
 
   // Cargar proyecto al montar - solo una vez
@@ -133,6 +134,43 @@ const EditorPage = () => {
 
     loadProject();
   }, [projectId, importNodes, navigate]);
+
+  // Actualizar estado de ejecución en los nodos
+  useEffect(() => {
+    if (!executionStatus && !isRunning) {
+      // Limpiar estados de ejecución cuando no hay ejecución
+      setNodes((nds) =>
+        nds.map((node) => ({
+          ...node,
+          data: { ...node.data, executionStatus: undefined },
+        }))
+      );
+      return;
+    }
+
+    setNodes((nds) =>
+      nds.map((node) => {
+        // Buscar si este nodo tiene resultado
+        const result = executionStatus?.results.find((r) => r.nodeId === node.id);
+        
+        let status: 'running' | 'success' | 'error' | undefined;
+        
+        if (result) {
+          status = result.success ? 'success' : 'error';
+        } else if (executionStatus?.currentNode === node.id) {
+          status = 'running';
+        } else if (isRunning && !result) {
+          // Nodo pendiente durante ejecución
+          status = undefined;
+        }
+
+        return {
+          ...node,
+          data: { ...node.data, executionStatus: status },
+        };
+      })
+    );
+  }, [executionStatus, isRunning, setNodes]);
 
   // Guardar proyecto en base de datos
   const handleSaveProject = useCallback(async () => {
@@ -289,7 +327,7 @@ const EditorPage = () => {
     <div className="app-container">
       <Sidebar onDragStart={onDragStart} />
       
-      <div className="canvas-area">
+      <div className={`canvas-area ${isPanelMinimized ? 'panel-minimized' : ''}`}>
         <Toolbar
           onRun={runFlow}
           onSave={handleSaveProject}
@@ -361,7 +399,7 @@ const EditorPage = () => {
         validation={validation}
         executionId={executionId}
         isRunning={isRunning}
-        onClose={clearExecutionStatus}
+        onMinimizeChange={setIsPanelMinimized}
       />
 
       <ProjectConfigModal

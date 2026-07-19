@@ -287,35 +287,3 @@ const extractReadableMessage = (error: string): string => {
   
   return truncate(firstLine || 'Error desconocido', 200);
 };
-
-/**
- * Obtiene el ícono sugerido para la categoría de error
- */
-export const getErrorCategoryIcon = (category: FriendlyError['category']): string => {
-  const icons: Record<FriendlyError['category'], string> = {
-    selector: '🎯',
-    timeout: '⏱️',
-    navigation: '🌐',
-    assertion: '✓',
-    network: '📡',
-    browser: '🖥️',
-    unknown: '❓',
-  };
-  return icons[category];
-};
-
-/**
- * Obtiene el color sugerido para la categoría
- */
-export const getErrorCategoryColor = (category: FriendlyError['category']): string => {
-  const colors: Record<FriendlyError['category'], string> = {
-    selector: '#f59e0b', // amber
-    timeout: '#ef4444', // red
-    navigation: '#3b82f6', // blue
-    assertion: '#8b5cf6', // violet
-    network: '#ec4899', // pink
-    browser: '#6366f1', // indigo
-    unknown: '#6b7280', // gray
-  };
-  return colors[category];
-};
