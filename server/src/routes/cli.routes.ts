@@ -43,7 +43,7 @@ router.post('/run', async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error ejecutando test con CLI',
+      error: error instanceof Error ? error.message : 'Error running test with CLI',
     });
   }
 });

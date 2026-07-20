@@ -17,7 +17,7 @@ export interface Locator {
   name: string;           // Nombre descriptivo (ej: "loginButton", "usernameInput")
   type: LocatorType;      // Tipo de localizador
   value: string;          // El selector en sí
-  description?: string;   // Descripción opcional
+  description?: string;   // Optional description
   // Para roles, opciones adicionales
   roleOptions?: {
     name?: string;        // Nombre accesible del elemento
@@ -74,7 +74,7 @@ export const LOCATOR_TYPES: Array<{
     value: 'text',
     label: 'Texto',
     description: 'Localiza por contenido de texto',
-    example: 'Iniciar sesión, Enviar formulario',
+    example: 'Login, Submit form',
     playwrightMethod: 'page.getByText()',
   },
   {
@@ -116,7 +116,7 @@ export const LOCATOR_TYPES: Array<{
     value: 'title',
     label: 'Title',
     description: 'Localiza por atributo title',
-    example: 'Cerrar modal, Más información',
+    example: 'Close modal, More info',
     playwrightMethod: 'page.getByTitle()',
   },
   {

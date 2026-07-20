@@ -29,7 +29,7 @@ export function useFlowExecution(
   const [executionStatus, setExecutionStatus] = useState<ExecutionStatusWithReport | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
 
-  // Validación reactiva del flujo
+  // Reactive flow validation
   const validation = useMemo(() => {
     return validateFlow(nodes, edges);
   }, [nodes, edges]);
@@ -40,15 +40,15 @@ export function useFlowExecution(
         flowId: 'error',
         status: 'failed',
         results: [],
-        error: 'Backend no conectado',
+        error: 'Backend not connected',
         friendlyError: {
-          title: 'Backend no conectado',
-          description: 'Para ejecutar pruebas necesitas iniciar el servidor backend.',
+          title: 'Backend not connected',
+          description: 'To run tests you need to start the backend server.',
           suggestions: [
-            'Abre una terminal en la carpeta del proyecto',
-            'Ejecuta: cd server && npm run dev',
-            'Espera a ver "Server running on port 3001"',
-            'Vuelve a intentar ejecutar',
+            'Open a terminal in the project folder',
+            'Run: cd server && npm run dev',
+            'Wait to see "Server running on port 3001"',
+            'Try running again',
           ],
           category: 'browser',
         },
@@ -56,20 +56,20 @@ export function useFlowExecution(
       return;
     }
 
-    // Validar flujo antes de ejecutar
+    // Validate flow before executing
     if (!skipValidation && !validation.canExecute) {
       setExecutionStatus({
         flowId: 'validation-error',
         status: 'failed',
         results: [],
-        error: `Hay ${validation.summary.errors} errores que impiden la ejecución`,
+        error: `There are ${validation.summary.errors} errors preventing execution`,
         friendlyError: {
-          title: 'Hay errores en el flujo',
-          description: `Se encontraron ${validation.summary.errors} problemas que debes corregir antes de ejecutar.`,
+          title: 'There are errors in the flow',
+          description: `Found ${validation.summary.errors} issues that must be fixed before running.`,
           suggestions: [
-            'Revisa los nodos marcados con error (borde rojo)',
-            'Completa los campos obligatorios faltantes',
-            'Asegúrate de tener al menos un nodo de Inicio',
+            'Review nodes marked with error (red border)',
+            'Complete missing required fields',
+            'Make sure you have at least one Start node',
           ],
           category: 'unknown',
         },
@@ -82,14 +82,14 @@ export function useFlowExecution(
         flowId: 'empty-flow',
         status: 'failed',
         results: [],
-        error: 'No hay nodos en el flujo',
+        error: 'No nodes in the flow',
         friendlyError: {
-          title: 'El canvas está vacío',
-          description: 'Necesitas agregar nodos para crear un flujo de prueba.',
+          title: 'The canvas is empty',
+          description: 'You need to add nodes to create a test flow.',
           suggestions: [
-            'Arrastra un nodo "Inicio" desde el panel izquierdo',
-            'Agrega acciones como Click, Escribir texto, etc.',
-            'Conecta los nodos para definir el orden de ejecución',
+            'Drag a "Start" node from the left panel',
+            'Add actions like Click, Type text, etc.',
+            'Connect nodes to define the execution order',
           ],
           category: 'unknown',
         },
@@ -127,7 +127,7 @@ export function useFlowExecution(
       setExecutionId(response.executionId);
       
       apiService.subscribeToExecution(response.executionId, (status) => {
-        // Traducir errores a mensajes amigables
+        // Translate errors to friendly messages
         const statusWithFriendly: ExecutionStatusWithReport = {
           ...status,
         };
@@ -144,10 +144,10 @@ export function useFlowExecution(
       });
 
     } catch (error) {
-      console.error('Error ejecutando flujo:', error);
+      console.error('Error executing flow:', error);
       setIsRunning(false);
       
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setExecutionStatus({
         flowId: 'execution-error',
         status: 'failed',

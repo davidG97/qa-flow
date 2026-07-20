@@ -35,7 +35,7 @@ export default function AdminUsersPage() {
       const data = await apiService.getUsers();
       setUsers(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error cargando usuarios');
+      setError(err instanceof Error ? err.message : 'Error loading users');
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export default function AdminUsersPage() {
         });
       } else {
         if (!formPassword) {
-          setError('La contraseña es obligatoria para nuevos usuarios');
+          setError('Password is required for new users');
           return;
         }
         await apiService.createUser({
@@ -89,21 +89,21 @@ export default function AdminUsersPage() {
       setShowModal(false);
       loadUsers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error guardando usuario');
+      setError(err instanceof Error ? err.message : 'Error saving user');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+    if (!confirm('Are you sure you want to delete this user?')) return;
     try {
       await apiService.deleteUser(id);
       loadUsers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando usuario');
+      setError(err instanceof Error ? err.message : 'Error deleting user');
     }
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString('es-ES');
+  const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US');
 
   return (
     <div className="app-container" style={{ flexDirection: 'column' }}>
@@ -121,11 +121,11 @@ export default function AdminUsersPage() {
         </Link>
         <FiShield size={20} style={{ color: 'var(--color-accent)' }} />
         <h1 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'white', flex: 1 }}>
-          Administración de Usuarios
+          User Management
         </h1>
         <button className="btn-primary" onClick={openCreate}>
           <FiPlus size={16} />
-          <span>Nuevo usuario</span>
+          <span>New user</span>
         </button>
       </header>
 
@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
 
         {loading ? (
           <div style={{ color: 'var(--color-dark-500)', textAlign: 'center', padding: '4rem' }}>
-            Cargando usuarios...
+            Loading users...
           </div>
         ) : (
           <div style={{
@@ -155,10 +155,10 @@ export default function AdminUsersPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(30, 41, 59, 0.5)' }}>
-                  <th style={thStyle}>Nombre</th>
+                  <th style={thStyle}>Name</th>
                   <th style={thStyle}>Email</th>
-                  <th style={thStyle}>Rol</th>
-                  <th style={thStyle}>Creado</th>
+                  <th style={thStyle}>Role</th>
+                  <th style={thStyle}>Created</th>
                   <th style={thStyle}></th>
                 </tr>
               </thead>
@@ -174,7 +174,7 @@ export default function AdminUsersPage() {
                             fontSize: '0.625rem', fontWeight: 600,
                             background: 'rgba(99, 102, 241, 0.15)', color: '#a5b4fc',
                             padding: '0.125rem 0.375rem', borderRadius: '9999px',
-                          }}>Tú</span>
+                          }}>You</span>
                         )}
                       </div>
                     </td>
@@ -186,7 +186,7 @@ export default function AdminUsersPage() {
                         background: u.role === 'ADMIN' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(52, 211, 153, 0.1)',
                         color: u.role === 'ADMIN' ? '#a5b4fc' : '#34d399',
                       }}>
-                        {u.role === 'ADMIN' ? 'Admin' : 'Usuario'}
+                        {u.role === 'ADMIN' ? 'Admin' : 'User'}
                       </span>
                     </td>
                     <td style={tdStyle}>{formatDate(u.createdAt)}</td>
@@ -196,7 +196,7 @@ export default function AdminUsersPage() {
                           className="btn-secondary"
                           style={{ padding: '0.375rem 0.5rem' }}
                           onClick={() => openEdit(u)}
-                          title="Editar"
+                          title="Edit"
                         >
                           <FiEdit2 size={14} />
                         </button>
@@ -205,7 +205,7 @@ export default function AdminUsersPage() {
                             className="btn-secondary"
                             style={{ padding: '0.375rem 0.5rem', color: '#ef4444' }}
                             onClick={() => handleDelete(u.id)}
-                            title="Eliminar"
+                            title="Delete"
                           >
                             <FiTrash2 size={14} />
                           </button>
@@ -217,7 +217,7 @@ export default function AdminUsersPage() {
                 {users.length === 0 && (
                   <tr>
                     <td colSpan={5} style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-dark-500)' }}>
-                      No hay usuarios registrados
+                      No registered users
                     </td>
                   </tr>
                 )}
@@ -233,7 +233,7 @@ export default function AdminUsersPage() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}
             style={{ maxWidth: '28rem' }}>
             <div className="modal-header">
-              <h2>{editingUser ? 'Editar usuario' : 'Nuevo usuario'}</h2>
+              <h2>{editingUser ? 'Edit user' : 'New user'}</h2>
               <button className="btn-icon" onClick={() => setShowModal(false)}>
                 <FiX size={18} />
               </button>
@@ -250,7 +250,7 @@ export default function AdminUsersPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Nombre</label>
+                <label style={labelStyle}>Name</label>
                 <input
                   type="text"
                   value={formName}
@@ -260,7 +260,7 @@ export default function AdminUsersPage() {
               </div>
               <div>
                 <label style={labelStyle}>
-                  Contraseña {editingUser ? <span style={{ color: 'var(--color-dark-500)' }}>(dejar en blanco para no cambiar)</span> : <span style={{ color: '#ef4444' }}>*</span>}
+                  Password {editingUser ? <span style={{ color: 'var(--color-dark-500)' }}>(leave blank to keep unchanged)</span> : <span style={{ color: '#ef4444' }}>*</span>}
                 </label>
                 <input
                   type="password"
@@ -271,22 +271,22 @@ export default function AdminUsersPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Rol</label>
+                <label style={labelStyle}>Role</label>
                 <select
                   value={formRole}
                   onChange={(e) => setFormRole(e.target.value as 'USER' | 'ADMIN')}
                   style={inputStyle}
                 >
-                  <option value="USER">Usuario</option>
-                  <option value="ADMIN">Administrador</option>
+                  <option value="USER">User</option>
+                  <option value="ADMIN">Administrator</option>
                 </select>
               </div>
               <div className="modal-footer" style={{ justifyContent: 'flex-end' }}>
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
-                  Cancelar
+                  Cancel
                 </button>
                 <button type="submit" className="btn-primary">
-                  {editingUser ? 'Guardar cambios' : 'Crear usuario'}
+                  {editingUser ? 'Save changes' : 'Create user'}
                 </button>
               </div>
             </form>

@@ -71,7 +71,7 @@ export const executionController = {
       cleanupExecution(executionId);
 
     } catch (error) {
-      console.error('Error ejecutando flujo:', error);
+      console.error('Error running flow:', error);
       res.status(500).json({ 
         error: 'Error interno del servidor',
         details: error instanceof Error ? error.message : String(error)

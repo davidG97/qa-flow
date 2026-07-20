@@ -356,7 +356,7 @@ export class FlowExecutor {
     if (nodes.length === 0) return;
 
     const prefix = testName ? `[${testName}][${hookName}]` : `[${hookName}]`;
-    console.log(`${prefix} Ejecutando (${nodes.length} nodos)`);
+    console.log(`${prefix} Running (${nodes.length} nodos)`);
 
     for (const node of nodes) {
       const startTime = Date.now();
@@ -398,7 +398,7 @@ export class FlowExecutor {
   ): Promise<void> {
     if (nodes.length === 0) return;
 
-    console.log(`[${testName}][${hookName}] Ejecutando (${nodes.length} nodos)`);
+    console.log(`[${testName}][${hookName}] Running (${nodes.length} nodos)`);
 
     for (const node of nodes) {
       const startTime = Date.now();
@@ -739,7 +739,7 @@ export class FlowExecutor {
             );
           }
         } finally {
-          // Limpiar browser entre tests/reintentos
+          // Limpiar browser entre tests/retries
           await this.cleanup();
         }
       }
@@ -756,7 +756,7 @@ export class FlowExecutor {
     let failureCount = 0;
     let shouldStop = false;
 
-    console.log(`[Parallel] Ejecutando ${tests.length} tests con ${maxWorkers} workers${maxRetries > 0 ? `, ${maxRetries} reintentos` : ''}`);
+    console.log(`[Parallel] Running ${tests.length} tests con ${maxWorkers} workers${maxRetries > 0 ? `, ${maxRetries} retries` : ''}`);
 
     // Pool de tareas pendientes con conteo de intentos
     const pending: Array<{ test: TestCase; attempt: number }> = tests.map(t => ({ test: t, attempt: 0 }));
@@ -784,12 +784,12 @@ export class FlowExecutor {
         .catch((error) => {
           console.error(`[Parallel] ✗ Fallido: ${testName} (intento ${attempt + 1})`, error);
           
-          // Si hay reintentos disponibles, volver a encolar
+          // Si hay retries disponibles, volver a encolar
           if (attempt < maxRetries) {
             console.log(`[Parallel] Reencolando para reintento: ${testName}`);
             pending.push({ test, attempt: attempt + 1 });
           } else {
-            // Sin más reintentos, contar como fallo
+            // Sin más retries, contar como fallo
             failureCount++;
             
             if (maxFailures > 0 && failureCount >= maxFailures) {
@@ -1341,11 +1341,13 @@ export class FlowExecutor {
   // ===============================
 
   private async executeStart(config: Record<string, unknown>): Promise<void> {
-    const cdpUrl = this.flowConfig?.cdpUrl || process.env.CDP_URL;
+    let cdpUrl = this.flowConfig?.cdpUrl || process.env.CDP_URL;
     const baseUrl = config.baseUrl as string;
 
     try {
       if (cdpUrl) {
+        // ponytail: localhost → 127.0.0.1 para evitar IPv6 issues
+        cdpUrl = cdpUrl.replace('localhost', '127.0.0.1');
         console.log(`[Executor] Conectando a browser remoto via CDP: ${cdpUrl}`);
         this.browser = await chromium.connectOverCDP(cdpUrl);
       } else {
@@ -1885,7 +1887,7 @@ export class FlowExecutor {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Error ejecutando código JavaScript: ${errorMessage}`);
+      throw new Error(`Error executing JavaScript code: ${errorMessage}`);
     }
   }
 

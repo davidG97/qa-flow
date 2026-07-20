@@ -50,7 +50,7 @@ export const pickerController = {
       res.json({
         success: true,
         sessionId,
-        message: 'Ejecutando nodos previos y abriendo selector.',
+        message: 'Running previous nodes and opening selector.',
       });
     } catch (error) {
       console.error('Error starting picker session:', error);
@@ -85,7 +85,7 @@ export const pickerController = {
       const session = pickerService.getSession(sessionId);
 
       if (!session) {
-        return res.status(404).json({ error: 'Sesión no encontrada' });
+        return res.status(404).json({ error: 'Session not found' });
       }
 
       res.json({

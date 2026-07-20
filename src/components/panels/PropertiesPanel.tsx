@@ -60,7 +60,7 @@ const SelectorField = ({
       disabled={isPickerActive}
     >
       <FiCrosshair size={18} />
-      <span>{isPickerActive ? (pickerProgress || 'Ejecutando...') : 'Seleccionar visualmente'}</span>
+      <span>{isPickerActive ? (pickerProgress || 'Running...') : 'Select visually'}</span>
     </button>
     
     {/* Row 2: Type dropdown + input */}
@@ -78,7 +78,7 @@ const SelectorField = ({
         type="text"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="ej: #submit-btn, .login-form, [data-testid='email']"
+        placeholder="e.g.: #submit-btn, .login-form, [data-testid='email']"
         className="selector-input"
       />
     </div>
@@ -181,7 +181,7 @@ const FieldRenderer = ({
             checked={Boolean(value ?? field.defaultValue)}
             onChange={(e) => onChange(e.target.checked)}
           />
-          <span className="checkbox-text">{value ? 'Activado' : 'Desactivado'}</span>
+          <span className="checkbox-text">{value ? 'Enabled' : 'Disabled'}</span>
         </label>
       )}
       
@@ -255,7 +255,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
     );
     
     if (!hasStartWithUrl) {
-      alert('Configura una URL base en el nodo de Inicio.');
+      alert('Configure a base URL in the Start node.');
       return;
     }
 
@@ -276,7 +276,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
 
     try {
       setIsPickerActive(true);
-      setPickerProgress('Iniciando selector visual...');
+      setPickerProgress('Starting visual selector...');
 
       const { sessionId } = await apiService.startInteractivePicker(
         selectedNode.id,
@@ -297,7 +297,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
       setIsPickerActive(false);
       setPickerProgress('');
       setPickerSessionId(null);
-      alert('Error iniciando selector visual');
+      alert('Error starting visual selector');
     }
   };
 
@@ -404,13 +404,13 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
         <div className="modal-body">
           {selectedNode.data.nodeType !== 'start' && (
             <div className="panel-section">
-              <h3>Identificación</h3>
+              <h3>Identification</h3>
               <div className="panel-field">
                 <label>
-                  Título del nodo{' '}
+                  Node title{' '}
                   <input
                     type="text"
-                    placeholder={nodeDefinition?.label || 'Título personalizado'}
+                    placeholder={nodeDefinition?.label || 'Custom title'}
                     value={selectedNode.data.customLabel || ''}
                     onChange={(e) => handleLabelChange(e.target.value)}
                   />
@@ -420,7 +420,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
           )}
 
           <div className="panel-section">
-            <h3>Configuración</h3>
+            <h3>Configuration</h3>
             {renderFields(nodeDefinition?.fields.filter(f => !f.group) || [])}
           </div>
 
@@ -440,7 +440,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
                   <span className="group-toggle">
                     {collapsedGroups.has(groupName) ? <FiChevronRight size={14} /> : <FiChevronDown size={14} />}
                   </span>
-                  <h3>⚙️ Opciones Avanzadas</h3>
+                  <h3>⚙️ Advanced Options</h3>
                   <span className="group-count">{fields.length}</span>
                 </button>
                 {!collapsedGroups.has(groupName) && <div className="group-content">{renderFields(fields)}</div>}
@@ -449,7 +449,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
           })()}
           
           <div className="panel-section">
-            <h3>Información</h3>
+            <h3>Information</h3>
             <p className="info-text">{nodeDefinition?.description}</p>
           </div>
         </div>

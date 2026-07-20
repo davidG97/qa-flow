@@ -46,7 +46,7 @@ export const BrowserView = ({ executionId, isRunning }: BrowserViewProps) => {
           ) : (
             <>
               <FiMonitor size={24} />
-              <span>Sin vista previa</span>
+              <span>No preview</span>
             </>
           )}
         </div>

@@ -56,7 +56,7 @@ export default function InteractivePicker({
     timeoutRef.current = setTimeout(() => {
       if (mountedRef.current) {
         console.warn('[InteractivePicker] No frames received, timeout');
-        setError('No se recibieron frames. Intenta de nuevo.');
+        setError('No frames received. Please try again.');
       }
     }, 15000);
 
@@ -134,7 +134,7 @@ export default function InteractivePicker({
       }
     } catch (error) {
       console.error('Error selecting element:', error);
-      alert('No se pudo seleccionar el elemento. Intenta de nuevo.');
+      alert('Could not select element. Please try again.');
     } finally {
       setIsSelecting(false);
     }
@@ -206,7 +206,7 @@ export default function InteractivePicker({
     <div className="interactive-picker-overlay">
       <div className="interactive-picker-container">
         {/* Close button - floating outside image area */}
-        <button className="picker-close-btn" onClick={onCancel} title="Cancelar (ESC)">
+        <button className="picker-close-btn" onClick={onCancel} title="Cancel (ESC)">
           <FiX size={20} />
         </button>
 
@@ -215,14 +215,14 @@ export default function InteractivePicker({
           {error ? (
             <div className="error-placeholder">
               <p>{error}</p>
-              <button onClick={onCancel}>Cerrar</button>
+              <button onClick={onCancel}>Close</button>
             </div>
           ) : frame ? (
             <>
               <img
                 ref={imgRef}
                 src={`data:image/jpeg;base64,${frame}`}
-                alt="Vista del navegador"
+                alt="Browser view"
                 onClick={handleClick}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
@@ -247,14 +247,14 @@ export default function InteractivePicker({
           ) : (
             <div className="loading-placeholder">
               <FiLoader className="spinner" size={32} />
-              <p>Cargando vista del navegador...</p>
+              <p>Loading browser view...</p>
             </div>
           )}
         </div>
 
         {/* Footer hint */}
         <div className="interactive-picker-footer">
-          <kbd>Click</kbd> seleccionar • <kbd>Scroll</kbd> navegar • <kbd>ESC</kbd> cancelar
+          <kbd>Click</kbd> select • <kbd>Scroll</kbd> navigate • <kbd>ESC</kbd> cancel
         </div>
       </div>
 

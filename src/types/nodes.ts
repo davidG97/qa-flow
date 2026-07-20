@@ -1,14 +1,14 @@
-// Tipos para los nodos de automatización de pruebas
+// Types for test automation nodes
 export type NodeCategory = 'trigger' | 'action' | 'assertion' | 'control' | 'hook';
 
-// Configuración global del proyecto
+// Global project configuration
 export interface ProjectConfig {
   executionMode: 'default' | 'parallel' | 'serial';
   workers: number;
   maxFailures: number;
   retries: number;
   timeout: number;
-  cdpUrl?: string; // URL para conectar via CDP y ver ejecución
+  cdpUrl?: string; // URL to connect via CDP and view execution
 }
 
 export const defaultProjectConfig: ProjectConfig = {
@@ -36,25 +36,25 @@ export interface NodeField {
   defaultValue?: string | number | boolean;
   placeholder?: string;
   required?: boolean;
-  group?: string; // Grupo colapsable al que pertenece el campo
-  dependsOn?: { field: string; value: unknown }; // Campo del que depende para mostrarse
+  group?: string; // Collapsible group the field belongs to
+  dependsOn?: { field: string; value: unknown }; // Field it depends on to show
 }
 
-// Definición de todos los tipos de nodos disponibles
+// Definition of all available node types
 export const nodeTypes: NodeTypeDefinition[] = [
   // Triggers
   {
     id: 'start',
-    label: 'Inicio',
+    label: 'Start',
     category: 'trigger',
-    description: 'Punto de inicio del flujo de pruebas',
+    description: 'Starting point of the test flow',
     fields: [
-      // Campos básicos
+      // Basic fields
       {
         name: 'testName',
-        label: 'Nombre del Test',
+        label: 'Test Name',
         type: 'text',
-        placeholder: 'Mi test de login',
+        placeholder: 'My login test',
       },
       {
         name: 'tags',
@@ -64,20 +64,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'baseUrl',
-        label: 'URL Base',
+        label: 'Base URL',
         type: 'text',
-        placeholder: 'https://ejemplo.com',
+        placeholder: 'https://example.com',
         required: true,
       },
       // ponytail: headless removed - always headless, user sees via screencast/CDP
-      // Opciones avanzadas - Emulación de dispositivo
+      // Advanced options - Device emulation
       {
         name: 'device',
-        label: 'Emular Dispositivo',
+        label: 'Emulate Device',
         type: 'select',
         group: 'emulation',
         options: [
-          { value: '', label: 'Ninguno (Desktop)' },
+          { value: '', label: 'None (Desktop)' },
           { value: 'Pixel 5', label: 'Pixel 5' },
           { value: 'Pixel 7', label: 'Pixel 7' },
           { value: 'iPhone 12', label: 'iPhone 12' },
@@ -91,10 +91,10 @@ export const nodeTypes: NodeTypeDefinition[] = [
         ],
         defaultValue: '',
       },
-      // Opciones avanzadas - Viewport
+      // Advanced options - Viewport
       {
         name: 'viewportWidth',
-        label: 'Ancho Viewport',
+        label: 'Viewport Width',
         type: 'number',
         group: 'emulation',
         placeholder: '1280',
@@ -102,7 +102,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'viewportHeight',
-        label: 'Alto Viewport',
+        label: 'Viewport Height',
         type: 'number',
         group: 'emulation',
         placeholder: '720',
@@ -110,7 +110,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'deviceScaleFactor',
-        label: 'Factor de Escala',
+        label: 'Scale Factor',
         type: 'number',
         group: 'emulation',
         placeholder: '1',
@@ -118,26 +118,26 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'isMobile',
-        label: 'Es Móvil',
+        label: 'Is Mobile',
         type: 'boolean',
         group: 'emulation',
         defaultValue: false,
       },
       {
         name: 'hasTouch',
-        label: 'Pantalla Táctil',
+        label: 'Touch Screen',
         type: 'boolean',
         group: 'emulation',
         defaultValue: false,
       },
-      // Opciones avanzadas - Localización
+      // Advanced options - Localization
       {
         name: 'locale',
-        label: 'Idioma/Región',
+        label: 'Locale/Region',
         type: 'select',
         group: 'emulation',
         options: [
-          { value: '', label: 'Por defecto' },
+          { value: '', label: 'Default' },
           { value: 'en-US', label: 'English (US)' },
           { value: 'en-GB', label: 'English (UK)' },
           { value: 'es-ES', label: 'Español (España)' },
@@ -155,16 +155,16 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'timezoneId',
-        label: 'Zona Horaria',
+        label: 'Timezone',
         type: 'select',
         group: 'emulation',
         options: [
-          { value: '', label: 'Por defecto' },
+          { value: '', label: 'Default' },
           { value: 'America/New_York', label: 'New York (EST)' },
           { value: 'America/Los_Angeles', label: 'Los Angeles (PST)' },
           { value: 'America/Chicago', label: 'Chicago (CST)' },
           { value: 'America/Bogota', label: 'Bogotá (COT)' },
-          { value: 'America/Mexico_City', label: 'Ciudad de México' },
+          { value: 'America/Mexico_City', label: 'Mexico City (CST)' },
           { value: 'America/Sao_Paulo', label: 'São Paulo' },
           { value: 'Europe/London', label: 'London (GMT)' },
           { value: 'Europe/Paris', label: 'Paris (CET)' },
@@ -175,93 +175,93 @@ export const nodeTypes: NodeTypeDefinition[] = [
         ],
         defaultValue: '',
       },
-      // Opciones avanzadas - Geolocalización
+      // Advanced options - Geolocation
       {
         name: 'geoLatitude',
-        label: 'Latitud',
+        label: 'Latitude',
         type: 'text',
         group: 'emulation',
         placeholder: '4.6097',
       },
       {
         name: 'geoLongitude',
-        label: 'Longitud',
+        label: 'Longitude',
         type: 'text',
         group: 'emulation',
         placeholder: '-74.0817',
       },
       {
         name: 'geoAccuracy',
-        label: 'Precisión Geo (metros)',
+        label: 'Geo Accuracy (meters)',
         type: 'number',
         group: 'emulation',
         placeholder: '100',
       },
-      // Opciones avanzadas - Apariencia y comportamiento
+      // Advanced options - Appearance and behavior
       {
         name: 'colorScheme',
-        label: 'Esquema de Color',
+        label: 'Color Scheme',
         type: 'select',
         group: 'emulation',
         options: [
-          { value: '', label: 'Por defecto' },
-          { value: 'light', label: 'Claro (Light)' },
-          { value: 'dark', label: 'Oscuro (Dark)' },
-          { value: 'no-preference', label: 'Sin preferencia' },
+          { value: '', label: 'Default' },
+          { value: 'light', label: 'Light' },
+          { value: 'dark', label: 'Dark' },
+          { value: 'no-preference', label: 'No preference' },
         ],
         defaultValue: '',
       },
       {
         name: 'reducedMotion',
-        label: 'Reducir Movimiento',
+        label: 'Reduce Motion',
         type: 'select',
         group: 'emulation',
         options: [
-          { value: '', label: 'Por defecto' },
-          { value: 'reduce', label: 'Reducir' },
-          { value: 'no-preference', label: 'Sin preferencia' },
+          { value: '', label: 'Default' },
+          { value: 'reduce', label: 'Reduce' },
+          { value: 'no-preference', label: 'No preference' },
         ],
         defaultValue: '',
       },
       {
         name: 'forcedColors',
-        label: 'Colores Forzados',
+        label: 'Forced Colors',
         type: 'select',
         group: 'emulation',
         options: [
-          { value: '', label: 'Por defecto' },
-          { value: 'active', label: 'Activo' },
-          { value: 'none', label: 'Ninguno' },
+          { value: '', label: 'Default' },
+          { value: 'active', label: 'Active' },
+          { value: 'none', label: 'None' },
         ],
         defaultValue: '',
       },
-      // Opciones avanzadas - Red y JS
+      // Advanced options - Network and JS
       {
         name: 'offline',
-        label: 'Modo Offline',
+        label: 'Offline Mode',
         type: 'boolean',
         group: 'emulation',
         defaultValue: false,
       },
       {
         name: 'javaScriptEnabled',
-        label: 'JavaScript Habilitado',
+        label: 'JavaScript Enabled',
         type: 'boolean',
         group: 'emulation',
         defaultValue: true,
       },
-      // Opciones avanzadas - User Agent
+      // Advanced options - User Agent
       {
         name: 'userAgent',
-        label: 'User Agent Personalizado',
+        label: 'Custom User Agent',
         type: 'textarea',
         group: 'emulation',
         placeholder: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)...',
       },
-      // Opciones avanzadas - Permisos
+      // Advanced options - Permissions
       {
         name: 'permissions',
-        label: 'Permisos del Navegador',
+        label: 'Browser Permissions',
         type: 'tags',
         group: 'emulation',
         placeholder: 'geolocation, notifications, camera',
@@ -269,28 +269,28 @@ export const nodeTypes: NodeTypeDefinition[] = [
     ],
   },
 
-  // Actions - Navegación
+  // Actions - Navigation
   {
     id: 'navigate',
-    label: 'Navegar',
+    label: 'Navigate',
     category: 'action',
-    description: 'Navega a una URL específica',
+    description: 'Navigates to a specific URL',
     fields: [
       {
         name: 'url',
         label: 'URL',
         type: 'text',
-        placeholder: '/ruta o https://...',
+        placeholder: '/path or https://...',
         required: true,
       },
       {
         name: 'waitUntil',
-        label: 'Esperar hasta',
+        label: 'Wait until',
         type: 'select',
         options: [
-          { value: 'load', label: 'Carga completa' },
-          { value: 'domcontentloaded', label: 'DOM cargado' },
-          { value: 'networkidle', label: 'Red inactiva' },
+          { value: 'load', label: 'Full load' },
+          { value: 'domcontentloaded', label: 'DOM loaded' },
+          { value: 'networkidle', label: 'Network idle' },
         ],
         defaultValue: 'load',
       },
@@ -300,43 +300,43 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Clicks
   {
     id: 'click',
-    label: 'Hacer Click',
+    label: 'Click',
     category: 'action',
-    description: 'Hace click en un elemento',
+    description: 'Clicks on an element',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '#id, .clase, button[type="submit"]',
+        placeholder: '#id, .class, button[type="submit"]',
         required: true,
       },
       {
         name: 'button',
-        label: 'Botón del mouse',
+        label: 'Mouse button',
         type: 'select',
         options: [
-          { value: 'left', label: 'Izquierdo' },
-          { value: 'right', label: 'Derecho' },
-          { value: 'middle', label: 'Central' },
+          { value: 'left', label: 'Left' },
+          { value: 'right', label: 'Right' },
+          { value: 'middle', label: 'Middle' },
         ],
         defaultValue: 'left',
       },
       {
         name: 'clickCount',
-        label: 'Número de clicks',
+        label: 'Click count',
         type: 'number',
         defaultValue: 1,
       },
       {
         name: 'delay',
-        label: 'Delay entre mousedown/mouseup (ms)',
+        label: 'Delay between mousedown/mouseup (ms)',
         type: 'number',
         defaultValue: 0,
       },
       {
         name: 'force',
-        label: 'Forzar (ignorar chequeos)',
+        label: 'Force (skip checks)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -352,9 +352,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Checkbox
   {
     id: 'check',
-    label: 'Marcar/Desmarcar Checkbox',
+    label: 'Check/Uncheck Checkbox',
     category: 'action',
-    description: 'Marca o desmarca un checkbox',
+    description: 'Checks or unchecks a checkbox',
     fields: [
       {
         name: 'selector',
@@ -365,17 +365,17 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'action',
-        label: 'Acción',
+        label: 'Action',
         type: 'select',
         options: [
-          { value: 'check', label: 'Marcar' },
-          { value: 'uncheck', label: 'Desmarcar' },
+          { value: 'check', label: 'Check' },
+          { value: 'uncheck', label: 'Uncheck' },
         ],
         defaultValue: 'check',
       },
       {
         name: 'force',
-        label: 'Forzar (ignorar chequeos)',
+        label: 'Force (skip checks)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -391,9 +391,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Typing
   {
     id: 'type',
-    label: 'Escribir Texto',
+    label: 'Type Text',
     category: 'action',
-    description: 'Escribe texto en un campo',
+    description: 'Types text in a field',
     fields: [
       {
         name: 'selector',
@@ -404,32 +404,32 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'text',
-        label: 'Texto',
+        label: 'Text',
         type: 'text',
-        placeholder: 'Texto a escribir...',
+        placeholder: 'Text to type...',
         required: true,
       },
       {
         name: 'clearFirst',
-        label: 'Limpiar primero',
+        label: 'Clear first',
         type: 'boolean',
         defaultValue: true,
       },
       {
         name: 'delay',
-        label: 'Delay entre teclas (ms)',
+        label: 'Delay between keys (ms)',
         type: 'number',
         defaultValue: 0,
       },
     ],
   },
 
-  // Actions - Fill (más rápido que type)
+  // Actions - Fill (faster than type)
   {
     id: 'fill',
-    label: 'Rellenar Campo',
+    label: 'Fill Field',
     category: 'action',
-    description: 'Rellena un campo de forma instantánea',
+    description: 'Fills a field instantly',
     fields: [
       {
         name: 'selector',
@@ -440,9 +440,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'value',
-        label: 'Valor',
+        label: 'Value',
         type: 'text',
-        placeholder: 'valor a insertar',
+        placeholder: 'value to insert',
         required: true,
       },
     ],
@@ -451,32 +451,32 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Select
   {
     id: 'select',
-    label: 'Seleccionar Opción',
+    label: 'Select Option',
     category: 'action',
-    description: 'Selecciona una opción de un dropdown',
+    description: 'Selects an option from a dropdown',
     fields: [
       {
         name: 'selector',
-        label: 'Selector del select',
+        label: 'Select selector',
         type: 'text',
         placeholder: 'select#pais',
         required: true,
       },
       {
         name: 'value',
-        label: 'Valor',
+        label: 'Value',
         type: 'text',
-        placeholder: 'valor de la opción',
+        placeholder: 'option value',
         required: true,
       },
       {
         name: 'selectBy',
-        label: 'Seleccionar por',
+        label: 'Select by',
         type: 'select',
         options: [
-          { value: 'value', label: 'Valor' },
-          { value: 'label', label: 'Etiqueta visible' },
-          { value: 'index', label: 'Índice' },
+          { value: 'value', label: 'Value' },
+          { value: 'label', label: 'Visible label' },
+          { value: 'index', label: 'Index' },
         ],
         defaultValue: 'value',
       },
@@ -488,7 +488,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
     id: 'hover',
     label: 'Hover',
     category: 'action',
-    description: 'Pasa el mouse sobre un elemento',
+    description: 'Hovers over an element',
     fields: [
       {
         name: 'selector',
@@ -503,27 +503,27 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Wait
   {
     id: 'wait',
-    label: 'Esperar',
+    label: 'Wait',
     category: 'action',
-    description: 'Espera un tiempo o condición',
+    description: 'Waits for a time or condition',
     fields: [
       {
         name: 'waitType',
-        label: 'Tipo de espera',
+        label: 'Wait type',
         type: 'select',
         options: [
-          { value: 'time', label: 'Tiempo fijo' },
-          { value: 'selector', label: 'Elemento visible' },
-          { value: 'hidden', label: 'Elemento oculto' },
-          { value: 'networkidle', label: 'Red inactiva' },
+          { value: 'time', label: 'Fixed time' },
+          { value: 'selector', label: 'Element visible' },
+          { value: 'hidden', label: 'Element hidden' },
+          { value: 'networkidle', label: 'Network idle' },
         ],
         defaultValue: 'time',
       },
       {
         name: 'value',
-        label: 'Valor (ms o selector)',
+        label: 'Value (ms or selector)',
         type: 'text',
-        placeholder: '1000 o #elemento',
+        placeholder: '1000 or #element',
         required: true,
       },
       {
@@ -538,28 +538,28 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Screenshot
   {
     id: 'screenshot',
-    label: 'Captura de Pantalla',
+    label: 'Screenshot',
     category: 'action',
-    description: 'Toma una captura de pantalla',
+    description: 'Takes a screenshot',
     fields: [
       {
         name: 'name',
-        label: 'Nombre del archivo',
+        label: 'File name',
         type: 'text',
         placeholder: 'captura-login',
         required: true,
       },
       {
         name: 'fullPage',
-        label: 'Página completa',
+        label: 'Full page',
         type: 'boolean',
         defaultValue: false,
       },
       {
         name: 'selector',
-        label: 'Selector (opcional)',
+        label: 'Selector (optional)',
         type: 'text',
-        placeholder: 'Solo capturar este elemento',
+        placeholder: 'Capture only this element',
         dependsOn: { field: 'fullPage', value: false },
       },
     ],
@@ -568,37 +568,37 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Double Click
   {
     id: 'dblclick',
-    label: 'Doble Click',
+    label: 'Double Click',
     category: 'action',
-    description: 'Hace doble click en un elemento',
+    description: 'Double clicks on an element',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '#id, .clase, button',
+        placeholder: '#id, .class, button',
         required: true,
       },
       {
         name: 'button',
-        label: 'Botón del mouse',
+        label: 'Mouse button',
         type: 'select',
         options: [
-          { value: 'left', label: 'Izquierdo' },
-          { value: 'right', label: 'Derecho' },
-          { value: 'middle', label: 'Central' },
+          { value: 'left', label: 'Left' },
+          { value: 'right', label: 'Right' },
+          { value: 'middle', label: 'Middle' },
         ],
         defaultValue: 'left',
       },
       {
         name: 'delay',
-        label: 'Delay entre clicks (ms)',
+        label: 'Delay between clicks (ms)',
         type: 'number',
         defaultValue: 0,
       },
       {
         name: 'force',
-        label: 'Forzar (ignorar chequeos)',
+        label: 'Force (skip checks)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -614,9 +614,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Clear
   {
     id: 'clear',
-    label: 'Limpiar Campo',
+    label: 'Clear Field',
     category: 'action',
-    description: 'Limpia el contenido de un campo de entrada',
+    description: 'Clears the content of an input field',
     fields: [
       {
         name: 'selector',
@@ -627,7 +627,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'force',
-        label: 'Forzar (ignorar chequeos)',
+        label: 'Force (skip checks)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -643,15 +643,15 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Blur
   {
     id: 'blur',
-    label: 'Quitar Foco',
+    label: 'Remove Focus',
     category: 'action',
-    description: 'Quita el foco de un elemento (blur)',
+    description: 'Removes focus from an element (blur)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: 'input#campo',
+        placeholder: 'input#field',
         required: true,
       },
       {
@@ -668,13 +668,13 @@ export const nodeTypes: NodeTypeDefinition[] = [
     id: 'focus',
     label: 'Dar Foco',
     category: 'action',
-    description: 'Da foco a un elemento',
+    description: 'Focuses an element',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: 'input#campo',
+        placeholder: 'input#field',
         required: true,
       },
       {
@@ -689,9 +689,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Press Key
   {
     id: 'press',
-    label: 'Presionar Tecla',
+    label: 'Press Key',
     category: 'action',
-    description: 'Presiona una tecla o combinación de teclas',
+    description: 'Presses a key or key combination',
     fields: [
       {
         name: 'selector',
@@ -702,7 +702,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'key',
-        label: 'Tecla',
+        label: 'Key',
         type: 'select',
         options: [
           { value: 'Enter', label: 'Enter' },
@@ -710,19 +710,19 @@ export const nodeTypes: NodeTypeDefinition[] = [
           { value: 'Escape', label: 'Escape' },
           { value: 'Backspace', label: 'Backspace' },
           { value: 'Delete', label: 'Delete' },
-          { value: 'ArrowUp', label: 'Flecha Arriba' },
-          { value: 'ArrowDown', label: 'Flecha Abajo' },
-          { value: 'ArrowLeft', label: 'Flecha Izquierda' },
-          { value: 'ArrowRight', label: 'Flecha Derecha' },
-          { value: 'Home', label: 'Inicio' },
-          { value: 'End', label: 'Fin' },
+          { value: 'ArrowUp', label: 'Arrow Up' },
+          { value: 'ArrowDown', label: 'Arrow Down' },
+          { value: 'ArrowLeft', label: 'Arrow Left' },
+          { value: 'ArrowRight', label: 'Arrow Right' },
+          { value: 'Home', label: 'Home' },
+          { value: 'End', label: 'End' },
           { value: 'PageUp', label: 'Page Up' },
           { value: 'PageDown', label: 'Page Down' },
-          { value: 'Control+a', label: 'Ctrl+A (Seleccionar todo)' },
-          { value: 'Control+c', label: 'Ctrl+C (Copiar)' },
-          { value: 'Control+v', label: 'Ctrl+V (Pegar)' },
-          { value: 'Control+z', label: 'Ctrl+Z (Deshacer)' },
-          { value: 'Control+s', label: 'Ctrl+S (Guardar)' },
+          { value: 'Control+a', label: 'Ctrl+A (Select all)' },
+          { value: 'Control+c', label: 'Ctrl+C (Copy)' },
+          { value: 'Control+v', label: 'Ctrl+V (Paste)' },
+          { value: 'Control+z', label: 'Ctrl+Z (Undo)' },
+          { value: 'Control+s', label: 'Ctrl+S (Save)' },
           { value: 'F1', label: 'F1' },
           { value: 'F5', label: 'F5' },
           { value: 'F12', label: 'F12' },
@@ -731,7 +731,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'customKey',
-        label: 'Tecla personalizada (opcional)',
+        label: 'Custom key (optional)',
         type: 'text',
         placeholder: 'Shift+Control+a',
       },
@@ -753,9 +753,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Press Sequentially (Type character by character)
   {
     id: 'pressSequentially',
-    label: 'Escribir Secuencialmente',
+    label: 'Type Sequentially',
     category: 'action',
-    description: 'Escribe texto carácter por carácter (simula escritura real)',
+    description: 'Types text character by character (simulates real typing)',
     fields: [
       {
         name: 'selector',
@@ -766,14 +766,14 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'text',
-        label: 'Texto',
+        label: 'Text',
         type: 'text',
-        placeholder: 'Texto a escribir...',
+        placeholder: 'Text to type...',
         required: true,
       },
       {
         name: 'delay',
-        label: 'Delay entre teclas (ms)',
+        label: 'Delay between keys (ms)',
         type: 'number',
         defaultValue: 50,
       },
@@ -789,20 +789,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Select Text
   {
     id: 'selectText',
-    label: 'Seleccionar Texto',
+    label: 'Select Text',
     category: 'action',
-    description: 'Selecciona todo el texto de un elemento',
+    description: 'Selects all text in an element',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: 'input#campo, textarea',
+        placeholder: 'input#field, textarea',
         required: true,
       },
       {
         name: 'force',
-        label: 'Forzar (ignorar chequeos)',
+        label: 'Force (skip checks)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -818,22 +818,22 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Set Input Files (Upload)
   {
     id: 'setInputFiles',
-    label: 'Subir Archivo',
+    label: 'Upload File',
     category: 'action',
-    description: 'Sube uno o más archivos a un input de tipo file',
+    description: 'Uploads one or more files to a file input',
     fields: [
       {
         name: 'selector',
-        label: 'Selector del input file',
+        label: 'File input selector',
         type: 'text',
         placeholder: 'input[type="file"]',
         required: true,
       },
       {
         name: 'filePath',
-        label: 'Ruta del archivo',
+        label: 'File path',
         type: 'text',
-        placeholder: '/ruta/al/archivo.pdf',
+        placeholder: '/path/to/file.pdf',
         required: true,
       },
       {
@@ -848,9 +848,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Tap (Mobile)
   {
     id: 'tap',
-    label: 'Tap (Móvil)',
+    label: 'Tap (Mobile)',
     category: 'action',
-    description: 'Realiza un tap en un elemento (para dispositivos táctiles)',
+    description: 'Performs a tap on an element (for touch devices)',
     fields: [
       {
         name: 'selector',
@@ -861,7 +861,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'force',
-        label: 'Forzar (ignorar chequeos)',
+        label: 'Force (skip checks)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -877,27 +877,27 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Drag and Drop
   {
     id: 'dragTo',
-    label: 'Arrastrar y Soltar',
+    label: 'Drag and Drop',
     category: 'action',
-    description: 'Arrastra un elemento hacia otro',
+    description: 'Drags an element to another',
     fields: [
       {
         name: 'sourceSelector',
-        label: 'Selector origen',
+        label: 'Source selector',
         type: 'text',
-        placeholder: '#elemento-arrastrar',
+        placeholder: '#element-to-drag',
         required: true,
       },
       {
         name: 'targetSelector',
-        label: 'Selector destino',
+        label: 'Target selector',
         type: 'text',
-        placeholder: '#zona-soltar',
+        placeholder: '#drop-zone',
         required: true,
       },
       {
         name: 'force',
-        label: 'Forzar (ignorar chequeos)',
+        label: 'Force (skip checks)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -913,15 +913,15 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Scroll Into View
   {
     id: 'scrollIntoView',
-    label: 'Hacer Scroll',
+    label: 'Scroll',
     category: 'action',
-    description: 'Hace scroll hasta que el elemento sea visible',
+    description: 'Scrolls until the element is visible',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '#elemento-abajo',
+        placeholder: '#element-below',
         required: true,
       },
       {
@@ -936,20 +936,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Dispatch Event
   {
     id: 'dispatchEvent',
-    label: 'Disparar Evento',
+    label: 'Dispatch Event',
     category: 'action',
-    description: 'Dispara un evento DOM programáticamente',
+    description: 'Dispatches a DOM event programmatically',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '#elemento',
+        placeholder: '#element',
         required: true,
       },
       {
         name: 'eventType',
-        label: 'Tipo de evento',
+        label: 'Event type',
         type: 'select',
         options: [
           { value: 'click', label: 'click' },
@@ -984,24 +984,24 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Wait For Element
   {
     id: 'waitFor',
-    label: 'Esperar Elemento',
+    label: 'Wait For Element',
     category: 'action',
-    description: 'Espera hasta que el elemento cumpla una condición',
+    description: 'Waits until the element meets a condition',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '#elemento',
+        placeholder: '#element',
         required: true,
       },
       {
         name: 'state',
-        label: 'Estado esperado',
+        label: 'Expected state',
         type: 'select',
         options: [
           { value: 'visible', label: 'Visible' },
-          { value: 'hidden', label: 'Oculto' },
+          { value: 'hidden', label: 'Hidden' },
           { value: 'attached', label: 'En el DOM' },
           { value: 'detached', label: 'Fuera del DOM' },
         ],
@@ -1016,12 +1016,12 @@ export const nodeTypes: NodeTypeDefinition[] = [
     ],
   },
 
-  // Actions - Get Attribute (para usar en variables)
+  // Actions - Get Attribute (for use with variables)
   {
     id: 'getAttribute',
-    label: 'Obtener Atributo',
+    label: 'Get Attribute',
     category: 'action',
-    description: 'Obtiene el valor de un atributo de un elemento',
+    description: 'Gets the value of an attribute from an element',
     fields: [
       {
         name: 'selector',
@@ -1032,16 +1032,16 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'attribute',
-        label: 'Nombre del atributo',
+        label: 'Attribute name',
         type: 'text',
         placeholder: 'href, class, data-id',
         required: true,
       },
       {
         name: 'variableName',
-        label: 'Guardar en variable',
+        label: 'Save to variable',
         type: 'text',
-        placeholder: 'miVariable',
+        placeholder: 'myVariable',
       },
       {
         name: 'timeout',
@@ -1055,9 +1055,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Get Input Value
   {
     id: 'inputValue',
-    label: 'Obtener Valor de Input',
+    label: 'Get Input Value',
     category: 'action',
-    description: 'Obtiene el valor actual de un campo de entrada',
+    description: 'Gets the current value of an input field',
     fields: [
       {
         name: 'selector',
@@ -1068,7 +1068,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'variableName',
-        label: 'Guardar en variable',
+        label: 'Save to variable',
         type: 'text',
         placeholder: 'valorEmail',
       },
@@ -1084,22 +1084,22 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Get Text Content
   {
     id: 'textContent',
-    label: 'Obtener Texto',
+    label: 'Get Text',
     category: 'action',
-    description: 'Obtiene el contenido de texto de un elemento',
+    description: 'Gets the text content of an element',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: 'span.mensaje',
+        placeholder: 'span.message',
         required: true,
       },
       {
         name: 'variableName',
-        label: 'Guardar en variable',
+        label: 'Save to variable',
         type: 'text',
-        placeholder: 'textoMensaje',
+        placeholder: 'messageText',
       },
       {
         name: 'timeout',
@@ -1113,20 +1113,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Assertions
   {
     id: 'assertVisible',
-    label: 'Verificar Visible',
+    label: 'Verify Visible',
     category: 'assertion',
-    description: 'Verifica que un elemento sea visible (toBeVisible)',
+    description: 'Verifies that an element is visible (toBeVisible)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '.mensaje-exito',
+        placeholder: '.success-message',
         required: true,
       },
       {
         name: 'negate',
-        label: 'Negar (NOT visible)',
+        label: 'Negate (NOT visible)',
         type: 'boolean',
         defaultValue: false,
       },
@@ -1141,9 +1141,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertHidden',
-    label: 'Verificar Oculto',
+    label: 'Verify Hidden',
     category: 'assertion',
-    description: 'Verifica que un elemento esté oculto (toBeHidden)',
+    description: 'Verifies that an element is hidden (toBeHidden)',
     fields: [
       {
         name: 'selector',
@@ -1163,15 +1163,15 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertAttached',
-    label: 'Verificar En DOM',
+    label: 'Verify In DOM',
     category: 'assertion',
-    description: 'Verifica que un elemento esté en el DOM (toBeAttached)',
+    description: 'Verifies that an element is in the DOM (toBeAttached)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '#componente',
+        placeholder: '#component',
         required: true,
       },
       {
@@ -1195,9 +1195,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertChecked',
-    label: 'Verificar Marcado',
+    label: 'Verify Checked',
     category: 'assertion',
-    description: 'Verifica si un checkbox/radio está marcado (toBeChecked)',
+    description: 'Verifies if a checkbox/radio is checked (toBeChecked)',
     fields: [
       {
         name: 'selector',
@@ -1208,7 +1208,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'checked',
-        label: 'Estado esperado',
+        label: 'Expected state',
         type: 'select',
         options: [
           { value: 'true', label: 'Marcado' },
@@ -1227,9 +1227,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertEnabled',
-    label: 'Verificar Habilitado',
+    label: 'Verify Enabled',
     category: 'assertion',
-    description: 'Verifica si un elemento está habilitado (toBeEnabled)',
+    description: 'Verifies if an element is enabled (toBeEnabled)',
     fields: [
       {
         name: 'selector',
@@ -1249,9 +1249,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertDisabled',
-    label: 'Verificar Deshabilitado',
+    label: 'Verify Disabled',
     category: 'assertion',
-    description: 'Verifica si un elemento está deshabilitado (toBeDisabled)',
+    description: 'Verifies if an element is disabled (toBeDisabled)',
     fields: [
       {
         name: 'selector',
@@ -1271,20 +1271,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertEditable',
-    label: 'Verificar Editable',
+    label: 'Verify Editable',
     category: 'assertion',
-    description: 'Verifica si un campo es editable (toBeEditable)',
+    description: 'Verifies if a field is editable (toBeEditable)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: 'input#nombre',
+        placeholder: 'input#name',
         required: true,
       },
       {
         name: 'editable',
-        label: 'Estado esperado',
+        label: 'Expected state',
         type: 'select',
         options: [
           { value: 'true', label: 'Editable' },
@@ -1303,15 +1303,15 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertEmpty',
-    label: 'Verificar Vacío',
+    label: 'Verify Empty',
     category: 'assertion',
-    description: 'Verifica si un contenedor está vacío (toBeEmpty)',
+    description: 'Verifies if a container is empty (toBeEmpty)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '.lista-items',
+        placeholder: '.items-list',
         required: true,
       },
       {
@@ -1325,9 +1325,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertFocused',
-    label: 'Verificar Enfocado',
+    label: 'Verify Focused',
     category: 'assertion',
-    description: 'Verifica si un elemento tiene el foco (toBeFocused)',
+    description: 'Verifies if an element has focus (toBeFocused)',
     fields: [
       {
         name: 'selector',
@@ -1347,20 +1347,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertInViewport',
-    label: 'Verificar En Viewport',
+    label: 'Verify In Viewport',
     category: 'assertion',
-    description: 'Verifica si un elemento está visible en el viewport (toBeInViewport)',
+    description: 'Verifies if an element is visible in the viewport (toBeInViewport)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '.seccion-visible',
+        placeholder: '.visible-section',
         required: true,
       },
       {
         name: 'ratio',
-        label: 'Ratio mínimo visible (0-1)',
+        label: 'Minimum visible ratio (0-1)',
         type: 'number',
         defaultValue: 0,
       },
@@ -1375,38 +1375,38 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertText',
-    label: 'Verificar Texto',
+    label: 'Verify Text',
     category: 'assertion',
-    description: 'Verifica el texto de un elemento (toHaveText/toContainText)',
+    description: 'Verifies the text of an element (toHaveText/toContainText)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: 'h1.titulo',
+        placeholder: 'h1.title',
         required: true,
       },
       {
         name: 'expectedText',
-        label: 'Texto esperado',
+        label: 'Expected text',
         type: 'text',
-        placeholder: 'Bienvenido',
+        placeholder: 'Welcome',
         required: true,
       },
       {
         name: 'matchType',
-        label: 'Tipo de coincidencia',
+        label: 'Match type',
         type: 'select',
         options: [
-          { value: 'exact', label: 'Exacto (toHaveText)' },
-          { value: 'contains', label: 'Contiene (toContainText)' },
-          { value: 'regex', label: 'Expresión regular' },
+          { value: 'exact', label: 'Exact (toHaveText)' },
+          { value: 'contains', label: 'Contains (toContainText)' },
+          { value: 'regex', label: 'Regular expression' },
         ],
         defaultValue: 'contains',
       },
       {
         name: 'ignoreCase',
-        label: 'Ignorar mayúsculas/minúsculas',
+        label: 'Ignore case',
         type: 'boolean',
         defaultValue: false,
       },
@@ -1421,9 +1421,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertAttribute',
-    label: 'Verificar Atributo',
+    label: 'Verify Attribute',
     category: 'assertion',
-    description: 'Verifica el valor de un atributo DOM (toHaveAttribute)',
+    description: 'Verifies the value of a DOM attribute (toHaveAttribute)',
     fields: [
       {
         name: 'selector',
@@ -1434,16 +1434,16 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'attribute',
-        label: 'Nombre del atributo',
+        label: 'Attribute name',
         type: 'text',
         placeholder: 'href, class, data-id',
         required: true,
       },
       {
         name: 'expectedValue',
-        label: 'Valor esperado (vacío = solo existencia)',
+        label: 'Expected value (empty = existence only)',
         type: 'text',
-        placeholder: 'valor del atributo',
+        placeholder: 'attribute value',
       },
       {
         name: 'timeout',
@@ -1456,9 +1456,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertClass',
-    label: 'Verificar Clase CSS',
+    label: 'Verify CSS Class',
     category: 'assertion',
-    description: 'Verifica las clases CSS de un elemento (toHaveClass/toContainClass)',
+    description: 'Verifies the CSS classes of an element (toHaveClass/toContainClass)',
     fields: [
       {
         name: 'selector',
@@ -1469,18 +1469,18 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'expectedClass',
-        label: 'Clase(s) esperada(s)',
+        label: 'Expected class(es)',
         type: 'text',
         placeholder: 'active highlighted',
         required: true,
       },
       {
         name: 'matchType',
-        label: 'Tipo de verificación',
+        label: 'Verification type',
         type: 'select',
         options: [
-          { value: 'exact', label: 'Exacto (toHaveClass)' },
-          { value: 'contains', label: 'Contiene (toContainClass)' },
+          { value: 'exact', label: 'Exact (toHaveClass)' },
+          { value: 'contains', label: 'Contains (toContainClass)' },
         ],
         defaultValue: 'contains',
       },
@@ -1495,27 +1495,27 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertCSS',
-    label: 'Verificar Estilo CSS',
+    label: 'Verify CSS Style',
     category: 'assertion',
-    description: 'Verifica una propiedad CSS del elemento (toHaveCSS)',
+    description: 'Verifies a CSS property of the element (toHaveCSS)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '.boton',
+        placeholder: '.button',
         required: true,
       },
       {
         name: 'cssProperty',
-        label: 'Propiedad CSS',
+        label: 'CSS Property',
         type: 'text',
         placeholder: 'background-color, display, opacity',
         required: true,
       },
       {
         name: 'expectedValue',
-        label: 'Valor esperado',
+        label: 'Expected value',
         type: 'text',
         placeholder: 'rgb(255, 0, 0), block, 1',
         required: true,
@@ -1531,20 +1531,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertId',
-    label: 'Verificar ID',
+    label: 'Verify ID',
     category: 'assertion',
-    description: 'Verifica el ID de un elemento (toHaveId)',
+    description: 'Verifies the ID of an element (toHaveId)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '.mi-componente',
+        placeholder: '.my-component',
         required: true,
       },
       {
         name: 'expectedId',
-        label: 'ID esperado',
+        label: 'Expected ID',
         type: 'text',
         placeholder: 'user-profile',
         required: true,
@@ -1560,20 +1560,20 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertRole',
-    label: 'Verificar Rol ARIA',
+    label: 'Verify ARIA Role',
     category: 'assertion',
-    description: 'Verifica el rol ARIA de un elemento (toHaveRole)',
+    description: 'Verifies the ARIA role of an element (toHaveRole)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '.mi-boton',
+        placeholder: '.my-button',
         required: true,
       },
       {
         name: 'expectedRole',
-        label: 'Rol esperado',
+        label: 'Expected role',
         type: 'select',
         options: [
           { value: 'button', label: 'button' },
@@ -1624,9 +1624,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertAccessibleName',
-    label: 'Verificar Nombre Accesible',
+    label: 'Verify Accessible Name',
     category: 'assertion',
-    description: 'Verifica el nombre accesible de un elemento (toHaveAccessibleName)',
+    description: 'Verifies the accessible name of an element (toHaveAccessibleName)',
     fields: [
       {
         name: 'selector',
@@ -1637,9 +1637,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'expectedName',
-        label: 'Nombre accesible esperado',
+        label: 'Expected accessible name',
         type: 'text',
-        placeholder: 'Enviar formulario',
+        placeholder: 'Submit form',
         required: true,
       },
       {
@@ -1653,9 +1653,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertAccessibleDescription',
-    label: 'Verificar Descripción Accesible',
+    label: 'Verify Accessible Description',
     category: 'assertion',
-    description: 'Verifica la descripción accesible de un elemento (toHaveAccessibleDescription)',
+    description: 'Verifies the accessible description of an element (toHaveAccessibleDescription)',
     fields: [
       {
         name: 'selector',
@@ -1666,7 +1666,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'expectedDescription',
-        label: 'Descripción esperada',
+        label: 'Expected description',
         type: 'text',
         placeholder: 'Ingrese su email corporativo',
         required: true,
@@ -1682,25 +1682,25 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertUrl',
-    label: 'Verificar URL',
+    label: 'Verify URL',
     category: 'assertion',
-    description: 'Verifica la URL actual de la página (toHaveURL)',
+    description: 'Verifies the current page URL (toHaveURL)',
     fields: [
       {
         name: 'expectedUrl',
-        label: 'URL esperada',
+        label: 'Expected URL',
         type: 'text',
-        placeholder: '/dashboard o https://...',
+        placeholder: '/dashboard or https://...',
         required: true,
       },
       {
         name: 'matchType',
-        label: 'Tipo de coincidencia',
+        label: 'Match type',
         type: 'select',
         options: [
-          { value: 'exact', label: 'Exacta' },
-          { value: 'contains', label: 'Contiene' },
-          { value: 'regex', label: 'Expresión regular' },
+          { value: 'exact', label: 'Exact' },
+          { value: 'contains', label: 'Contains' },
+          { value: 'regex', label: 'Regular expression' },
         ],
         defaultValue: 'contains',
       },
@@ -1715,25 +1715,25 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertTitle',
-    label: 'Verificar Título',
+    label: 'Verify Title',
     category: 'assertion',
-    description: 'Verifica el título de la página (toHaveTitle)',
+    description: 'Verifies the page title (toHaveTitle)',
     fields: [
       {
         name: 'expectedTitle',
-        label: 'Título esperado',
+        label: 'Expected title',
         type: 'text',
-        placeholder: 'Mi Aplicación - Dashboard',
+        placeholder: 'My App - Dashboard',
         required: true,
       },
       {
         name: 'matchType',
-        label: 'Tipo de coincidencia',
+        label: 'Match type',
         type: 'select',
         options: [
-          { value: 'exact', label: 'Exacto' },
-          { value: 'contains', label: 'Contiene' },
-          { value: 'regex', label: 'Expresión regular' },
+          { value: 'exact', label: 'Exact' },
+          { value: 'contains', label: 'Contains' },
+          { value: 'regex', label: 'Regular expression' },
         ],
         defaultValue: 'contains',
       },
@@ -1748,9 +1748,9 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertValue',
-    label: 'Verificar Valor',
+    label: 'Verify Value',
     category: 'assertion',
-    description: 'Verifica el valor de un input (toHaveValue)',
+    description: 'Verifies the value of an input (toHaveValue)',
     fields: [
       {
         name: 'selector',
@@ -1761,7 +1761,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
       },
       {
         name: 'expectedValue',
-        label: 'Valor esperado',
+        label: 'Expected value',
         type: 'text',
         placeholder: 'user@email.com',
         required: true,
@@ -1777,22 +1777,22 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertValues',
-    label: 'Verificar Valores Select',
+    label: 'Verify Select Values',
     category: 'assertion',
-    description: 'Verifica los valores seleccionados de un select múltiple (toHaveValues)',
+    description: 'Verifies the selected values of a multi-select (toHaveValues)',
     fields: [
       {
         name: 'selector',
-        label: 'Selector del select',
+        label: 'Select selector',
         type: 'text',
-        placeholder: 'select#colores',
+        placeholder: 'select#colors',
         required: true,
       },
       {
         name: 'expectedValues',
-        label: 'Valores esperados (separados por coma)',
+        label: 'Expected values (comma separated)',
         type: 'text',
-        placeholder: 'rojo,azul,verde',
+        placeholder: 'red,blue,green',
         required: true,
       },
       {
@@ -1806,26 +1806,26 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertCount',
-    label: 'Verificar Cantidad',
+    label: 'Verify Count',
     category: 'assertion',
-    description: 'Verifica la cantidad de elementos (toHaveCount)',
+    description: 'Verifies the count of elements (toHaveCount)',
     fields: [
       {
         name: 'selector',
         label: 'Selector',
         type: 'text',
-        placeholder: '.item-lista',
+        placeholder: '.list-item',
         required: true,
       },
       {
         name: 'expectedCount',
-        label: 'Cantidad esperada',
+        label: 'Expected count',
         type: 'number',
         required: true,
       },
       {
         name: 'comparison',
-        label: 'Comparación',
+        label: 'Comparison',
         type: 'select',
         options: [
           { value: 'equal', label: 'Igual a' },
@@ -1847,32 +1847,32 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'assertScreenshot',
-    label: 'Verificar Screenshot',
+    label: 'Verify Screenshot',
     category: 'assertion',
-    description: 'Compara visualmente el elemento con una imagen de referencia (toHaveScreenshot)',
+    description: 'Visually compares the element with a reference image (toHaveScreenshot)',
     fields: [
       {
         name: 'selector',
-        label: 'Selector (vacío = página completa)',
+        label: 'Selector (empty = full page)',
         type: 'text',
-        placeholder: '.componente-visual',
+        placeholder: '.visual-component',
       },
       {
         name: 'screenshotName',
-        label: 'Nombre del screenshot',
+        label: 'Screenshot name',
         type: 'text',
         placeholder: 'login-form',
         required: true,
       },
       {
         name: 'maxDiffPixels',
-        label: 'Máximo píxeles diferentes',
+        label: 'Maximum different pixels',
         type: 'number',
         defaultValue: 0,
       },
       {
         name: 'maxDiffPixelRatio',
-        label: 'Ratio máximo diferencia (0-1)',
+        label: 'Maximum difference ratio (0-1)',
         type: 'number',
         defaultValue: 0,
       },
@@ -1888,27 +1888,27 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Control Flow
   {
     id: 'if',
-    label: 'Condición (If)',
+    label: 'Condition (If)',
     category: 'control',
-    description: 'Ejecuta ramas según una condición',
+    description: 'Executes branches based on a condition',
     fields: [
       {
         name: 'conditionType',
-        label: 'Tipo de condición',
+        label: 'Condition type',
         type: 'select',
         options: [
-          { value: 'elementExists', label: 'Elemento existe' },
-          { value: 'elementVisible', label: 'Elemento visible' },
-          { value: 'textContains', label: 'Texto contiene' },
-          { value: 'urlContains', label: 'URL contiene' },
+          { value: 'elementExists', label: 'Element exists' },
+          { value: 'elementVisible', label: 'Element visible' },
+          { value: 'textContains', label: 'Text contains' },
+          { value: 'urlContains', label: 'URL contains' },
         ],
         defaultValue: 'elementExists',
       },
       {
         name: 'selector',
-        label: 'Selector/Valor',
+        label: 'Selector/Value',
         type: 'text',
-        placeholder: '#elemento o texto',
+        placeholder: '#element or text',
         required: true,
       },
     ],
@@ -1916,26 +1916,26 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'loop',
-    label: 'Bucle (Loop)',
+    label: 'Loop',
     category: 'control',
-    description: 'Repite una secuencia de acciones',
+    description: 'Repeats a sequence of actions',
     fields: [
       {
         name: 'loopType',
-        label: 'Tipo de bucle',
+        label: 'Loop type',
         type: 'select',
         options: [
-          { value: 'count', label: 'Número fijo' },
-          { value: 'elements', label: 'Por cada elemento' },
-          { value: 'data', label: 'Por cada dato' },
+          { value: 'count', label: 'Fixed count' },
+          { value: 'elements', label: 'For each element' },
+          { value: 'data', label: 'For each data item' },
         ],
         defaultValue: 'count',
       },
       {
         name: 'value',
-        label: 'Valor (cantidad o selector)',
+        label: 'Value (count or selector)',
         type: 'text',
-        placeholder: '5 o .item',
+        placeholder: '5 or .item',
         required: true,
       },
     ],
@@ -1943,26 +1943,26 @@ export const nodeTypes: NodeTypeDefinition[] = [
 
   {
     id: 'code',
-    label: 'Código JavaScript',
+    label: 'JavaScript Code',
     category: 'control',
-    description: 'Ejecuta código JavaScript personalizado',
+    description: 'Executes custom JavaScript code',
     fields: [
       {
         name: 'code',
-        label: 'Código',
+        label: 'Code',
         type: 'textarea',
-        placeholder: '// Escribe tu código JavaScript aquí\n// Puedes usar: page, context, browser\n// Ejemplo:\nconst title = await page.title();\nconsole.log(title);',
+        placeholder: '// Write your JavaScript code here\n// You can use: page, context, browser\n// Example:\nconst title = await page.title();\nconsole.log(title);',
         required: true,
       },
       {
         name: 'description',
-        label: 'Descripción',
+        label: 'Description',
         type: 'text',
-        placeholder: 'Qué hace este código...',
+        placeholder: 'What this code does...',
       },
       {
         name: 'awaitResult',
-        label: 'Esperar resultado',
+        label: 'Await result',
         type: 'boolean',
         defaultValue: true,
       },
@@ -1974,19 +1974,19 @@ export const nodeTypes: NodeTypeDefinition[] = [
     id: 'beforeAll',
     label: 'Before All',
     category: 'hook',
-    description: 'Se ejecuta una vez antes de todos los tests del grupo',
+    description: 'Runs once before all tests in the group',
     fields: [
       {
         name: 'hookName',
-        label: 'Nombre del hook',
+        label: 'Hook name',
         type: 'text',
-        placeholder: 'Setup inicial',
+        placeholder: 'Initial setup',
       },
       {
         name: 'description',
-        label: 'Descripción',
+        label: 'Description',
         type: 'textarea',
-        placeholder: 'Qué hace este hook...',
+        placeholder: 'What this hook does...',
       },
     ],
   },
@@ -1995,19 +1995,19 @@ export const nodeTypes: NodeTypeDefinition[] = [
     id: 'beforeEach',
     label: 'Before Each',
     category: 'hook',
-    description: 'Se ejecuta antes de cada test',
+    description: 'Runs before each test',
     fields: [
       {
         name: 'hookName',
-        label: 'Nombre del hook',
+        label: 'Hook name',
         type: 'text',
-        placeholder: 'Setup por test',
+        placeholder: 'Per-test setup',
       },
       {
         name: 'description',
-        label: 'Descripción',
+        label: 'Description',
         type: 'textarea',
-        placeholder: 'Qué hace este hook...',
+        placeholder: 'What this hook does...',
       },
     ],
   },
@@ -2016,19 +2016,19 @@ export const nodeTypes: NodeTypeDefinition[] = [
     id: 'afterEach',
     label: 'After Each',
     category: 'hook',
-    description: 'Se ejecuta después de cada test',
+    description: 'Runs after each test',
     fields: [
       {
         name: 'hookName',
-        label: 'Nombre del hook',
+        label: 'Hook name',
         type: 'text',
-        placeholder: 'Cleanup por test',
+        placeholder: 'Per-test cleanup',
       },
       {
         name: 'description',
-        label: 'Descripción',
+        label: 'Description',
         type: 'textarea',
-        placeholder: 'Qué hace este hook...',
+        placeholder: 'What this hook does...',
       },
     ],
   },
@@ -2037,25 +2037,25 @@ export const nodeTypes: NodeTypeDefinition[] = [
     id: 'afterAll',
     label: 'After All',
     category: 'hook',
-    description: 'Se ejecuta una vez después de todos los tests del grupo',
+    description: 'Runs once after all tests in the group',
     fields: [
       {
         name: 'hookName',
-        label: 'Nombre del hook',
+        label: 'Hook name',
         type: 'text',
-        placeholder: 'Cleanup final',
+        placeholder: 'Final cleanup',
       },
       {
         name: 'description',
-        label: 'Descripción',
+        label: 'Description',
         type: 'textarea',
-        placeholder: 'Qué hace este hook...',
+        placeholder: 'What this hook does...',
       },
     ],
   },
 ];
 
-// Agrupar nodos por categoría
+// Group nodes by category
 export const nodesByCategory = nodeTypes.reduce((acc, node) => {
   if (!acc[node.category]) {
     acc[node.category] = [];
@@ -2066,8 +2066,8 @@ export const nodesByCategory = nodeTypes.reduce((acc, node) => {
 
 export const categoryLabels: Record<NodeCategory, string> = {
   trigger: 'Triggers',
-  action: 'Acciones',
-  assertion: 'Verificaciones',
-  control: 'Control de Flujo',
-  hook: 'Hooks (Ciclo de Vida)',
+  action: 'Actions',
+  assertion: 'Assertions',
+  control: 'Control Flow',
+  hook: 'Hooks (Lifecycle)',
 };

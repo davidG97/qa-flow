@@ -43,7 +43,7 @@ const ProjectsModal = ({
   const [projectDescription, setProjectDescription] = useState('');
   const [saveCurrentFlow, setSaveCurrentFlow] = useState(true);
 
-  // Cargar proyectos al abrir
+  // Load projects on open
   useEffect(() => {
     if (isOpen) {
       loadProjects();
@@ -57,7 +57,7 @@ const ProjectsModal = ({
       const data = await apiService.getProjects();
       setProjects(data);
     } catch (err) {
-      setError('Error cargando proyectos');
+      setError('Error loading projects');
       console.error(err);
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ const ProjectsModal = ({
 
   const handleCreateProject = async () => {
     if (!projectName.trim()) {
-      setError('El nombre del proyecto es requerido');
+      setError('Project name is required');
       return;
     }
 
@@ -86,12 +86,12 @@ const ProjectsModal = ({
       setProjectDescription('');
       setViewMode('list');
       
-      // Si guardamos el flujo actual, notificar que estamos trabajando con este proyecto
+      // If saving current flow, notify that we're working with this project
       if (saveCurrentFlow) {
         onLoadProject(newProject.nodes, newProject.edges, newProject.config, newProject.id);
       }
     } catch (err) {
-      setError('Error creando proyecto');
+      setError('Error creating project');
       console.error(err);
     } finally {
       setLoading(false);
@@ -100,7 +100,7 @@ const ProjectsModal = ({
 
   const handleUpdateProject = async () => {
     if (!selectedProject || !projectName.trim()) {
-      setError('El nombre del proyecto es requerido');
+      setError('Project name is required');
       return;
     }
 
@@ -121,7 +121,7 @@ const ProjectsModal = ({
       setProjectDescription('');
       setViewMode('list');
     } catch (err) {
-      setError('Error actualizando proyecto');
+      setError('Error updating project');
       console.error(err);
     } finally {
       setLoading(false);
@@ -129,7 +129,7 @@ const ProjectsModal = ({
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este proyecto? Esta acción no se puede deshacer.')) {
+    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
       return;
     }
 
@@ -139,7 +139,7 @@ const ProjectsModal = ({
       await apiService.deleteProject(id);
       setProjects(prev => prev.filter(p => p.id !== id));
     } catch (err) {
-      setError('Error eliminando proyecto');
+      setError('Error deleting project');
       console.error(err);
     } finally {
       setLoading(false);
@@ -170,11 +170,11 @@ const ProjectsModal = ({
       });
       setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
       setError(null);
-      // Mostrar mensaje de éxito brevemente
-      setError('✅ Proyecto guardado correctamente');
+      // Show success message briefly
+      setError('✅ Project saved successfully');
       setTimeout(() => setError(null), 2000);
     } catch (err) {
-      setError('Error guardando en proyecto');
+      setError('Error saving to project');
       console.error(err);
     } finally {
       setLoading(false);
@@ -183,7 +183,7 @@ const ProjectsModal = ({
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString('en-US', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -212,9 +212,9 @@ const ProjectsModal = ({
         <div className="modal-header">
           <h2 className="flex items-center gap-2">
             <FiFolder size={20} />
-            {viewMode === 'list' && 'Proyectos'}
-            {viewMode === 'create' && 'Nuevo Proyecto'}
-            {viewMode === 'edit' && 'Editar Proyecto'}
+            {viewMode === 'list' && 'Projects'}
+            {viewMode === 'create' && 'New Project'}
+            {viewMode === 'edit' && 'Edit Project'}
           </h2>
           <button className="modal-close" onClick={onClose}>
             <FiX size={20} />
@@ -237,7 +237,7 @@ const ProjectsModal = ({
             </div>
           )}
 
-          {/* Vista de Lista */}
+          {/* List View */}
           {viewMode === 'list' && (
             <>
               <div className="flex justify-between items-center mb-4">
@@ -246,7 +246,7 @@ const ProjectsModal = ({
                   onClick={() => { resetForm(); setViewMode('create'); }}
                 >
                   <FiPlus size={14} />
-                  <span>Nuevo Proyecto</span>
+                  <span>New Project</span>
                 </button>
                 <button 
                   className="toolbar-btn"
@@ -259,18 +259,18 @@ const ProjectsModal = ({
 
               {loading && projects.length === 0 ? (
                 <div className="text-center py-8 text-dark-500">
-                  Cargando proyectos...
+                  Loading projects...
                 </div>
               ) : projects.length === 0 ? (
                 <div className="text-center py-8">
                   <FiFolder size={48} className="mx-auto mb-4 text-dark-600" />
-                  <p className="text-dark-500 mb-4">No hay proyectos guardados</p>
+                  <p className="text-dark-500 mb-4">No saved projects</p>
                   <button 
                     className="toolbar-btn success"
                     onClick={() => { resetForm(); setViewMode('create'); }}
                   >
                     <FiPlus size={14} />
-                    <span>Crear primer proyecto</span>
+                    <span>Create first project</span>
                   </button>
                 </div>
               ) : (
@@ -288,7 +288,7 @@ const ProjectsModal = ({
                             {formatDate(project.updatedAt)}
                           </span>
                           <span className="project-stats">
-                            {project.nodes.length} nodos · {project.edges.length} conexiones
+                            {project.nodes.length} nodes · {project.edges.length} connections
                           </span>
                         </div>
                       </div>
@@ -296,14 +296,14 @@ const ProjectsModal = ({
                         <button 
                           className="action-btn primary"
                           onClick={() => handleLoadProject(project)}
-                          title="Cargar proyecto"
+                          title="Load project"
                         >
                           <FiDownload size={16} />
                         </button>
                         <button 
                           className="action-btn"
                           onClick={() => handleSaveCurrentToProject(project)}
-                          title="Guardar flujo actual en este proyecto"
+                          title="Save current flow to this project"
                           disabled={loading}
                         >
                           <FiUpload size={16} />
@@ -311,14 +311,14 @@ const ProjectsModal = ({
                         <button 
                           className="action-btn"
                           onClick={() => handleEditProject(project)}
-                          title="Editar proyecto"
+                          title="Edit project"
                         >
                           <FiEdit2 size={16} />
                         </button>
                         <button 
                           className="action-btn danger"
                           onClick={() => handleDeleteProject(project.id)}
-                          title="Eliminar proyecto"
+                          title="Delete project"
                           disabled={loading}
                         >
                           <FiTrash2 size={16} />
@@ -331,26 +331,26 @@ const ProjectsModal = ({
             </>
           )}
 
-          {/* Vista de Crear/Editar */}
+          {/* Create/Edit View */}
           {(viewMode === 'create' || viewMode === 'edit') && (
             <div className="project-form">
               <div className="form-group">
-                <label>Nombre del proyecto *</label>
+                <label>Project name *</label>
                 <input
                   type="text"
                   value={projectName}
                   onChange={e => setProjectName(e.target.value)}
-                  placeholder="Mi proyecto de pruebas"
+                  placeholder="My test project"
                   autoFocus
                 />
               </div>
 
               <div className="form-group">
-                <label>Descripción (opcional)</label>
+                <label>Description (optional)</label>
                 <textarea
                   value={projectDescription}
                   onChange={e => setProjectDescription(e.target.value)}
-                  placeholder="Descripción del proyecto..."
+                  placeholder="Project description..."
                   rows={3}
                 />
               </div>
@@ -364,16 +364,16 @@ const ProjectsModal = ({
                   />
                   <span>
                     {viewMode === 'create' 
-                      ? 'Guardar el flujo actual del canvas' 
-                      : 'Actualizar con el flujo actual del canvas'}
+                      ? 'Save current canvas flow' 
+                      : 'Update with current canvas flow'}
                   </span>
                 </label>
                 <span className="form-hint">
                   {saveCurrentFlow 
-                    ? `Se guardarán ${currentNodes.length} nodos y ${currentEdges.length} conexiones`
+                    ? `Will save ${currentNodes.length} nodes and ${currentEdges.length} connections`
                     : viewMode === 'edit' 
-                      ? 'Se mantendrá el flujo existente del proyecto'
-                      : 'Se creará un proyecto vacío'}
+                      ? 'Will keep existing project flow'
+                      : 'Will create an empty project'}
                 </span>
               </div>
 
@@ -382,7 +382,7 @@ const ProjectsModal = ({
                   className="toolbar-btn"
                   onClick={() => { resetForm(); setViewMode('list'); }}
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button 
                   className="toolbar-btn success"
@@ -390,7 +390,7 @@ const ProjectsModal = ({
                   disabled={loading || !projectName.trim()}
                 >
                   <FiSave size={14} />
-                  <span>{loading ? 'Guardando...' : 'Guardar'}</span>
+                  <span>{loading ? 'Saving...' : 'Save'}</span>
                 </button>
               </div>
             </div>

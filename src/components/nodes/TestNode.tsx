@@ -46,7 +46,7 @@ const TestNode = memo(({ id, data, selected }: NodeProps & { data: CustomNodeDat
         <Handle type="target" position={Position.Left} />
       )}
       
-      {/* Badge de estado de ejecución */}
+      {/* Execution status badge */}
       {data.executionStatus && (
         <div className={`node-execution-badge ${data.executionStatus}`}>
           {data.executionStatus === 'running' && <FiLoader size={12} className="animate-spin" />}
@@ -70,20 +70,20 @@ const TestNode = memo(({ id, data, selected }: NodeProps & { data: CustomNodeDat
         </div>
       )}
       
-      {/* Menú hover: eliminar y desconectar */}
+      {/* Hover menu: delete and disconnect */}
       {isHovered && !data.executionStatus && (
         <div className="node-hover-menu">
           <button 
             className="hover-menu-btn delete" 
             onClick={handleDeleteNode}
-            title="Eliminar nodo"
+            title="Delete node"
           >
             <FiTrash2 size={14} />
           </button>
           <button 
             className="hover-menu-btn disconnect" 
             onClick={handleDisconnectNode}
-            title="Desconectar nodo"
+            title="Disconnect node"
           >
             <FiMinusCircle size={14} />
           </button>

@@ -20,7 +20,7 @@ export default function RegisterPage() {
       await register(email, password, name || undefined);
       navigate('/projects');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ export default function RegisterPage() {
             QA Flow
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.9375rem' }}>
-            Crea tu cuenta gratis
+            Create your free account
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export default function RegisterPage() {
             <FiUser size={16} style={iconStyle} />
             <input
               type="text"
-              placeholder="Nombre (opcional)"
+              placeholder="Name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
               style={inputStyle}
@@ -120,7 +120,7 @@ export default function RegisterPage() {
             <FiLock size={16} style={iconStyle} />
             <input
               type="password"
-              placeholder="Contraseña"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -133,14 +133,14 @@ export default function RegisterPage() {
             className="btn-primary"
             style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
           >
-            {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', color: '#64748b', fontSize: '0.875rem' }}>
-          ¿Ya tienes cuenta?{' '}
+          Already have an account?{' '}
           <Link to="/login" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>
-            Iniciar sesión
+            Sign in
           </Link>
         </p>
       </div>

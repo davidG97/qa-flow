@@ -110,7 +110,7 @@ class ApiService {
     if (response.status === 401) {
       localStorage.removeItem('qa-flow-token');
       globalThis.location.href = '/login';
-      throw new Error('Sesión expirada');
+      throw new Error('Session expired');
     }
 
     return response;
@@ -127,7 +127,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error de inicio de sesión');
+      throw new Error(error.error || 'Login error');
     }
     return response.json();
   }
@@ -139,7 +139,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error de registro');
+      throw new Error(error.error || 'Registration error');
     }
     return response.json();
   }
@@ -324,7 +324,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error ejecutando flujo');
+      throw new Error(error.error || 'Error executing flow');
     }
 
     return response.json();
@@ -373,7 +373,7 @@ class ApiService {
     const response = await this.request(`${API_URL}/record/status/${sessionId}`);
 
     if (!response.ok) {
-      throw new Error('Sesión no encontrada');
+      throw new Error('Session not found');
     }
 
     return response.json();

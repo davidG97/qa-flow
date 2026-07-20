@@ -44,7 +44,7 @@ const PICKER_SCRIPT = `
 
   const banner = document.createElement('div');
   banner.id = '__qaflow-picker-banner';
-  banner.innerHTML = '🎯 QA Flow - Clic para seleccionar • ESC cancelar';
+  banner.innerHTML = '🎯 QA Flow - Click to select • ESC cancel';
   banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#7c3aed);color:white;padding:10px 20px;border-radius:24px;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:500;box-shadow:0 4px 12px rgba(99,102,241,0.4);pointer-events:none;';
   document.body.appendChild(banner);
 

@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error de inicio de sesión');
+      throw new Error(error.error || 'Login error');
     }
 
     const data = await response.json();
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error de registro');
+      throw new Error(error.error || 'Registration error');
     }
 
     const data = await response.json();
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth debe usarse dentro de AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 }

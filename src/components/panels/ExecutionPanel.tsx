@@ -115,12 +115,12 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
   };
 
   const getStatusLabel = () => {
-    if (!status) return 'Errores de validación';
+    if (!status) return 'Validation Errors';
     switch (status.status) {
-      case 'running': return 'Ejecutando...';
-      case 'completed': return stats.failed === 0 ? 'Éxito' : 'Completado';
-      case 'failed': return 'Fallido';
-      default: return 'Pendiente';
+      case 'running': return 'Running...';
+      case 'completed': return stats.failed === 0 ? 'Success' : 'Completed';
+      case 'failed': return 'Failed';
+      default: return 'Pending';
     }
   };
 
@@ -165,7 +165,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
           ) : (
             <div className="ep-status-badge" style={{ background: '#64748b20', borderColor: '#64748b' }}>
               <FiMonitor size={16} style={{ color: '#64748b' }} />
-              <span style={{ color: '#64748b' }}>Panel de Ejecución</span>
+              <span style={{ color: '#64748b' }}>Execution Panel</span>
             </div>
           )}
           
@@ -201,7 +201,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
               <button className="ep-btn-icon" onClick={handleViewReport} title="Ver reporte">
                 <FiFileText size={16} />
               </button>
-              <button className="ep-btn-icon" onClick={handleDownloadReport} title="Descargar">
+              <button className="ep-btn-icon" onClick={handleDownloadReport} title="Download">
                 <FiDownload size={16} />
               </button>
             </>
@@ -217,7 +217,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
         </div>
       </div>
 
-      {/* Contenido oculto cuando está minimizado */}
+      {/* Hidden content when minimized */}
       {!isMinimized && (
         <>
           {/* Progress bar */}
@@ -233,7 +233,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
             <div className="ep-browser-section" style={{ width: browserWidth + '%', flex: 'none' }}>
               <div className="ep-section-header">
                 <FiMonitor size={14} />
-                <span>Navegador</span>
+                <span>Browser</span>
               </div>
               <div className="ep-browser-container">
                 {showBrowser ? (
@@ -241,23 +241,23 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
                 ) : (
                   <div className="ep-browser-placeholder">
                     <FiMonitor size={32} />
-                    <span>Vista del navegador disponible durante la ejecución</span>
+                    <span>Browser view available during execution</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Divisor arrastrable */}
+            {/* Draggable divider */}
             <div className="ep-resizer" onMouseDown={handleMouseDown} />
 
             {/* Right: Logs */}
             <div className="ep-logs-section">
               <div className="ep-section-header">
                 <FiTerminal size={14} />
-                <span>Logs de ejecución</span>
+                <span>Execution Logs</span>
               </div>
               <div className="ep-logs-container">
-                {/* Errores amigables */}
+                {/* Friendly errors */}
                 {status?.friendlyError && (
                   <div className="ep-friendly-error">
                     <div className="ep-error-header">
@@ -267,7 +267,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
                 <p>{status.friendlyError.description}</p>
                 {status.friendlyError.suggestions.length > 0 && (
                   <div className="ep-suggestions">
-                    <span><FiHelpCircle size={11} /> Sugerencias:</span>
+                    <span><FiHelpCircle size={11} /> Suggestions:</span>
                     <ul>
                       {status.friendlyError.suggestions.map((s, i) => (
                         <li key={i}><FiChevronRight size={10} />{s}</li>
@@ -278,7 +278,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
               </div>
             )}
 
-            {/* Validación */}
+            {/* Validation */}
             {validation && validation.issues.length > 0 && !status?.friendlyError && (
               <div className="ep-validation">
                 {validation.issues.filter(i => i.severity !== 'info').slice(0, 5).map((issue, idx) => (
@@ -297,13 +297,13 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
               </div>
             )}
 
-            {/* Resultados */}
+            {/* Results */}
             {status && (
               <div className="ep-results">
                 {status.results.length === 0 && status.status === 'running' && (
                   <div className="ep-empty">
                     <FiLoader className="animate-spin" size={20} />
-                    <span>Iniciando ejecución...</span>
+                    <span>Starting execution...</span>
                   </div>
                 )}
                 
@@ -328,18 +328,18 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
                     <div className="ep-result-num"><FiLoader className="animate-spin" size={10} /></div>
                     <div className="ep-result-icon"><FiActivity size={11} /></div>
                     <div className="ep-result-info">
-                      <span className="ep-result-msg">Procesando...</span>
+                      <span className="ep-result-msg">Processing...</span>
                     </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Estado vacío cuando no hay ejecución */}
+            {/* Empty state when no execution */}
             {!status && !hasValidationErrors && (
               <div className="ep-empty">
                 <FiActivity size={24} />
-                <span>Ejecuta un flujo para ver los resultados aquí</span>
+                <span>Run a flow to see results here</span>
               </div>
             )}
           </div>

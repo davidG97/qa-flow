@@ -1,8 +1,8 @@
 <div align="center">
   <img src="public/logo.png" alt="QA Flow Logo" width="120" />
   <h1>QA Flow</h1>
-  <p><strong>Editor visual de pruebas automatizadas con Playwright</strong></p>
-  <p>Diseña, ejecuta y gestiona tus tests de forma intuitiva mediante un canvas de nodos arrastrables. Sin escribir código.</p>
+  <p><strong>Visual test editor for Playwright</strong></p>
+  <p>Design, run, and manage your tests intuitively using a canvas with draggable nodes. No code required.</p>
 
   <br />
 
@@ -13,8 +13,8 @@
   <br />
   
   <a href="#quick-start">Quick Start</a> •
-  <a href="#-características">Características</a> •
-  <a href="#-guía-de-uso">Guía</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-user-guide">Guide</a> •
   <a href="#-docker">Docker</a> •
   <a href="https://davidg97.github.io/qa-flow">Website</a>
 </div>
@@ -29,105 +29,105 @@
 
 ## Quick Start
 
-Prueba QA Flow al instante con [npx](https://docs.npmjs.com/cli/v7/commands/npx) (requiere [Node.js](https://nodejs.org/) y [Docker](https://docs.docker.com/get-docker/)):
+Try QA Flow instantly with [npx](https://docs.npmjs.com/cli/v7/commands/npx) (requires [Node.js](https://nodejs.org/) and [Docker](https://docs.docker.com/get-docker/)):
 
-```bash
+\`\`\`bash
 npx @davidg97/qa-flow
-```
+\`\`\`
 
-O ejecuta directamente con Docker:
+Or run directly with Docker:
 
-```bash
+\`\`\`bash
 docker run -it --rm -p 3001:3001 -v qa-flow-data:/app/data davidg1997/qa-flow
-```
+\`\`\`
 
-Abre **http://localhost:3001** → Login: `admin@qa-flow.local` / `admin123`
-
----
-
-## ✨ Características
-
-| Categoría | Funcionalidades |
-|-----------|----------------|
-| **Editor** | Canvas interactivo, nodos arrastrables, conexiones visuales |
-| **Ejecución** | Tiempo real vía WebSocket, paralela con workers, reintentos |
-| **Vista en vivo** | 📺 Screencast integrado en el panel de ejecución |
-| **Navegador** | Chrome/Chromium + emulación de dispositivos |
-| **Reportes** | HTML estilo Playwright, screenshots, historial |
-| **Código** | Genera Playwright ejecutable, graba interacciones |
-| **Gestión** | Page Objects, locators reutilizables, import/export JSON |
-| **Seguridad** | Autenticación JWT, roles (Admin/Usuario) |
+Open **http://localhost:3001** → Login: \`admin@qa-flow.local\` / \`admin123\`
 
 ---
 
-## 📖 Guía de Uso
+## ✨ Features
 
-### 1. Crear Proyecto
+| Category | Functionality |
+|----------|---------------|
+| **Editor** | Interactive canvas, draggable nodes, visual connections |
+| **Execution** | Real-time via WebSocket, parallel with workers, retries |
+| **Live View** | 📺 Integrated screencast in execution panel |
+| **Browser** | Chrome/Chromium + device emulation |
+| **Reports** | Playwright-style HTML, screenshots, history |
+| **Code** | Generates executable Playwright, records interactions |
+| **Management** | Page Objects, reusable locators, JSON import/export |
+| **Security** | JWT authentication, roles (Admin/User) |
 
-1. Inicia sesión con `admin@qa-flow.local` / `admin123`
-2. Click en "Nuevo Proyecto"
-3. Nombra tu proyecto
+---
 
-### 2. Diseñar Test
+## 📖 User Guide
 
-1. **Arrastra el nodo "Inicio"** → configura URL y navegador
-2. **Agrega acciones**: Navegar, Click, Escribir, Verificar
-3. **Conecta los nodos** arrastrando entre puntos
+### 1. Create Project
 
-### 3. Configurar Selectores
+1. Log in with \`admin@qa-flow.local\` / \`admin123\`
+2. Click "New Project"
+3. Name your project
 
-- **Picker Visual** 🎯: Selecciona elementos directamente en el navegador
-  - Local: Abre Chrome y muestra el picker nativo
-  - Docker: Screencast interactivo (click sobre la imagen para seleccionar)
-  - Ejecuta automáticamente los pasos previos antes de mostrar el selector
-- **Manual**: Escribe selector CSS/XPath
+### 2. Design Test
 
-### 4. Ejecutar
+1. **Drag the "Start" node** → configure URL and browser
+2. **Add actions**: Navigate, Click, Type, Verify
+3. **Connect nodes** by dragging between points
 
-1. Click en **▶️ Ejecutar**
-2. **📺 Ve la ejecución en tiempo real** en el panel lateral (screencast automático)
-3. Observa progreso: 🟢 éxito, 🔴 fallo, 🟡 en curso
-4. Revisa el **reporte HTML** generado
+### 3. Configure Selectors
 
-### Ejemplo: Test de Login
+- **Visual Picker** 🎯: Select elements directly in the browser
+  - Local: Opens Chrome and shows native picker
+  - Docker: Interactive screencast (click on image to select)
+  - Automatically runs previous steps before showing selector
+- **Manual**: Write CSS/XPath selector
 
-```
-[Inicio] → [Navegar: /login] → [Escribir: email] → [Escribir: password] → [Click: Enviar] → [Verificar: Dashboard]
-```
+### 4. Execute
+
+1. Click **▶️ Run**
+2. **📺 Watch execution in real-time** in the side panel (automatic screencast)
+3. Observe progress: 🟢 success, 🔴 failure, 🟡 in progress
+4. Review the generated **HTML report**
+
+### Example: Login Test
+
+\`\`\`
+[Start] → [Navigate: /login] → [Type: email] → [Type: password] → [Click: Submit] → [Verify: Dashboard]
+\`\`\`
 
 <details>
-<summary>Ver configuración</summary>
+<summary>View configuration</summary>
 
-| Nodo | Configuración |
+| Node | Configuration |
 |------|---------------|
-| Inicio | URL: `https://miapp.com`, Navegador: Chromium |
-| Navegar | Path: `/login` |
-| Escribir | Selector: `#email`, Texto: `usuario@test.com` |
-| Escribir | Selector: `#password`, Texto: `mipassword` |
-| Click | Selector: `button[type="submit"]` |
-| Verificar | Selector: `.dashboard`, Tipo: `visible` |
+| Start | URL: \`https://myapp.com\`, Browser: Chromium |
+| Navigate | Path: \`/login\` |
+| Type | Selector: \`#email\`, Text: \`user@test.com\` |
+| Type | Selector: \`#password\`, Text: \`mypassword\` |
+| Click | Selector: \`button[type="submit"]\` |
+| Verify | Selector: \`.dashboard\`, Type: \`visible\` |
 
 </details>
 
 ---
 
-## 🎯 Tipos de Nodos
+## 🎯 Node Types
 
-| Tipo | Nodos |
+| Type | Nodes |
 |------|-------|
-| **Trigger** | Inicio (URL, navegador, viewport) |
+| **Trigger** | Start (URL, browser, viewport) |
 | **Hooks** | beforeAll, beforeEach, afterEach, afterAll |
-| **Acciones** | Navegar, Click, Escribir, Esperar, Screenshot, Scroll, Hover, Tecla |
-| **Aserciones** | Verificar texto, visible, URL, atributo |
+| **Actions** | Navigate, Click, Type, Wait, Screenshot, Scroll, Hover, Key |
+| **Assertions** | Verify text, visible, URL, attribute |
 
-### Emulación de Dispositivos
+### Device Emulation
 
-El nodo Inicio permite emular:
-- **Dispositivos**: iPhone, Pixel, iPad, Galaxy
-- **Viewport**: Ancho, alto, escala
-- **Localización**: Idioma, zona horaria, geolocalización
-- **Apariencia**: Tema claro/oscuro
-- **Red**: Modo offline, User Agent
+The Start node allows emulating:
+- **Devices**: iPhone, Pixel, iPad, Galaxy
+- **Viewport**: Width, height, scale
+- **Location**: Language, timezone, geolocation
+- **Appearance**: Light/dark theme
+- **Network**: Offline mode, User Agent
 
 ---
 
@@ -135,132 +135,140 @@ El nodo Inicio permite emular:
 
 ### Local (SQLite)
 
-```bash
-docker run -it --rm \
-  -p 3001:3001 \
-  -v qa-flow-data:/app/data \
+\`\`\`bash
+docker run -it --rm \\
+  -p 3001:3001 \\
+  -v qa-flow-data:/app/data \\
   davidg1997/qa-flow
-```
+\`\`\`
 
 ### Cloud (Turso)
 
-```bash
-docker run -it --rm \
-  -p 3001:3001 \
-  -e DATABASE_URL="libsql://tu-db.turso.io" \
-  -e TURSO_AUTH_TOKEN="tu-token" \
+\`\`\`bash
+docker run -it --rm \\
+  -p 3001:3001 \\
+  -e DATABASE_URL="libsql://your-db.turso.io" \\
+  -e TURSO_AUTH_TOKEN="your-token" \\
   davidg1997/qa-flow
-```
+\`\`\`
 
-### Variables de Entorno
+### Environment Variables
 
-| Variable | Descripción | Default |
+| Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Puerto del servidor | `3001` |
-| `JWT_SECRET` | Secret para tokens JWT | ⚠️ Requerido |
-| `DATABASE_URL` | URL de conexión a BD | SQLite local |
-| `CDP_URL` | URL de Chrome remoto (opcional) | - |
+| \`PORT\` | Server port | \`3001\` |
+| \`JWT_SECRET\` | Secret for JWT tokens | ⚠️ Required |
+| \`DATABASE_URL\` | Database connection URL | Local SQLite |
+| \`CDP_URL\` | Remote Chrome URL (optional) | - |
 
 ---
 
-## 📺 Ver Ejecución en Tiempo Real
+## 📺 Watch Execution in Real-Time
 
-QA Flow ofrece **dos formas** de visualizar la ejecución de tests:
+QA Flow offers **two ways** to visualize test execution:
 
-### Opción 1: Screencast Integrado (Recomendado) ✨
+### Option 1: Integrated Screencast (Recommended) ✨
 
-**Sin configuración**. Al ejecutar un test, el panel de ejecución muestra automáticamente lo que hace el navegador:
+**No configuration needed**. When running a test, the execution panel automatically shows what the browser is doing:
 
-1. Click en **▶️ Ejecutar**
-2. El panel lateral muestra la vista del navegador en tiempo real
-3. Ve cada acción mientras se ejecuta
+1. Click **▶️ Run**
+2. The side panel shows browser view in real-time
+3. Watch each action as it executes
 
-> El screencast usa CDP internamente para transmitir frames del navegador headless al frontend.
+> The screencast uses CDP internally to stream frames from headless browser to frontend.
 
-### Opción 2: CDP Remoto (Avanzado)
+### Option 2: Remote CDP (Advanced)
 
-Si prefieres ver la ejecución en tu propio Chrome:
+If you prefer watching execution in your own Chrome:
 
 <details>
-<summary>Ver instrucciones CDP</summary>
+<summary>View CDP instructions</summary>
 
-#### 1. Abre Chrome con remote debugging
+#### 1. Open Chrome with remote debugging
+
+> ⚠️ **Important**: Close all Chrome instances before running. The \`--user-data-dir\` flag is required.
 
 **Windows:**
-```cmd
-"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
-```
+\`\`\`cmd
+"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --remote-debugging-port=9222 --user-data-dir="%TEMP%\\chrome-cdp"
+\`\`\`
 
 **macOS:**
-```bash
-/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
-```
+\`\`\`bash
+/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-cdp
+\`\`\`
 
 **Linux:**
-```bash
-google-chrome --remote-debugging-port=9222
-```
+\`\`\`bash
+google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-cdp
+\`\`\`
 
-#### 2. Configura QA Flow
+**Verify it works:**
+\`\`\`bash
+curl http://127.0.0.1:9222/json/version
+\`\`\`
 
-En el nodo **Inicio**, sección "Avanzado":
-- **CDP URL**: `http://localhost:9222`
+#### 2. Configure QA Flow
 
-O con Docker:
-```bash
+In the **Start** node, "Advanced" section:
+- **CDP URL**: \`http://127.0.0.1:9222\`
+
+Or with Docker:
+\`\`\`bash
 docker run -p 3001:3001 -e CDP_URL="http://host.docker.internal:9222" davidg1997/qa-flow
-```
+\`\`\`
 
-> **Windows/Mac**: Usa `host.docker.internal`  
-> **Linux**: Usa `--network=host` o tu IP local
+> **Windows/Mac**: Use \`host.docker.internal\`  
+> **Linux**: Use \`--network=host\` or your local IP
 
-#### 3. Ejecuta
+#### 3. Execute
 
-El test se ejecutará en tu Chrome y podrás interactuar con él.
+The test will run in your Chrome and you can interact with it.
 
-> **💡 Picker Visual en Docker**: Con CDP configurado, el selector visual de elementos también funciona en Docker. Ejecuta los pasos previos en tu Chrome antes de mostrar el picker.
+> **💡 Visual Picker in Docker**: With CDP configured, the visual element selector also works in Docker. Runs previous steps in your Chrome before showing the picker.
 
 </details>
+
 ---
 
-## ⚙️ Configuración del Proyecto
+## ⚙️ Project Configuration
 
-En el modal de configuración:
+In the configuration modal:
 
-| Opción | Descripción |
+| Option | Description |
 |--------|-------------|
-| **Modo** | Serial o Paralelo |
-| **Workers** | Instancias paralelas (1-10) |
-| **Reintentos** | Veces a reintentar fallidos |
-| **Timeout** | Tiempo máximo por acción |
-| **Max Failures** | Detener después de N fallos |
+| **Mode** | Serial or Parallel |
+| **Workers** | Parallel instances (1-10) |
+| **Retries** | Times to retry failed tests |
+| **Timeout** | Maximum time per action |
+| **Max Failures** | Stop after N failures |
 
 ---
 
-## 🔐 Seguridad en Producción
+## 🔐 Production Security
 
-⚠️ **Antes de desplegar**:
+⚠️ **Before deploying**:
 
-1. Configura `JWT_SECRET` (mínimo 32 caracteres)
-2. Cambia credenciales del admin inicial
-3. Usa HTTPS
-
----
-
-## 🤝 Contribuir
-
-¿Quieres contribuir? Ver [CONTRIBUTING.md](CONTRIBUTING.md) para:
-- Setup de desarrollo local
-- Estructura del proyecto
-- Base de datos y API
-- Guía de commits
+1. Configure \`JWT_SECRET\` (minimum 32 characters)
+2. Change initial admin credentials
+3. Use HTTPS
 
 ---
 
-## 📄 Licencia
+## 🤝 Contributing
+
+Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Local development setup
+- Project structure
+- Database and API
+- Commit guidelines
+
+---
+
+## 📄 License
 
 [Apache License 2.0](LICENSE)
 
 ---
 
-Desarrollado con ❤️ usando React, Playwright y Prisma
+Built with ❤️ using React, Playwright and Prisma

@@ -96,7 +96,7 @@ const PICKER_SCRIPT = `
   // Crear badge de instrucciones (pequeño, esquina inferior)
   const banner = document.createElement('div');
   banner.id = '__qaflow-picker-banner';
-  banner.innerHTML = '🎯 Clic para seleccionar • ESC cancelar';
+  banner.innerHTML = '🎯 Click to select • ESC cancel';
   banner.style.cssText = \`
     position: fixed;
     bottom: 16px;
@@ -647,7 +647,7 @@ class PickerService {
     try {
       for (let i = 0; i < pathNodes.length; i++) {
         const node = pathNodes[i];
-        onProgress?.(`Ejecutando: ${node.data.label} (${i + 1}/${pathNodes.length})`);
+        onProgress?.(`Running: ${node.data.label} (${i + 1}/${pathNodes.length})`);
         await this.executeNodeAction(node, page);
         // Small delay between nodes for stability
         await page.waitForTimeout(100);
@@ -657,7 +657,7 @@ class PickerService {
     } catch (error) {
       console.error('Error executing path nodes:', error);
       await browser.close();
-      throw new Error(`Error ejecutando nodos: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Error running nodes: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // Inject picker script
@@ -750,7 +750,7 @@ class PickerService {
     try {
       for (let i = 0; i < pathNodes.length; i++) {
         const node = pathNodes[i];
-        onProgress?.(`Ejecutando: ${node.data.label} (${i + 1}/${pathNodes.length})`);
+        onProgress?.(`Running: ${node.data.label} (${i + 1}/${pathNodes.length})`);
         await this.executeNodeAction(node, page);
         await page.waitForTimeout(100);
       }
@@ -758,7 +758,7 @@ class PickerService {
     } catch (error) {
       console.error(`[Picker] Error executing nodes:`, error);
       await browser.close();
-      throw new Error(`Error ejecutando nodos: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Error running nodes: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // Start screencast via CDP
@@ -821,7 +821,7 @@ class PickerService {
     const session = this.sessions.get(sessionId);
     
     if (!session) {
-      throw new Error('Sesión no encontrada');
+      throw new Error('Session not found');
     }
 
     try {
@@ -1049,7 +1049,7 @@ class PickerService {
     };
     
     if (!session?.page) {
-      throw new Error('Sesión no encontrada');
+      throw new Error('Session not found');
     }
 
     // Use mouse wheel scroll

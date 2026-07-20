@@ -18,13 +18,13 @@ const IfNode = memo(({ id, data, selected }: NodeProps & { data: CustomNodeData 
   const [isHovered, setIsHovered] = useState(false);
   const { deleteElements, getEdges, setEdges } = useReactFlow();
 
-  // Eliminar nodo
+  // Delete node
   const handleDeleteNode = (e: React.MouseEvent) => {
     e.stopPropagation();
     deleteElements({ nodes: [{ id }] });
   };
 
-  // Desconectar nodo (eliminar todas sus conexiones)
+  // Disconnect node (eliminar todas sus conexiones)
   const handleDisconnectNode = (e: React.MouseEvent) => {
     e.stopPropagation();
     const allEdges = getEdges();
@@ -45,26 +45,26 @@ const IfNode = memo(({ id, data, selected }: NodeProps & { data: CustomNodeData 
       
       <span className="node-label">{displayLabel}</span>
 
-      {/* Menú de acciones rápidas en hover */}
+      {/* Quick actions menu on hover */}
       {isHovered && (
         <div className="node-hover-menu">
           <button 
             className="hover-menu-btn delete" 
             onClick={handleDeleteNode}
-            title="Eliminar nodo"
+            title="Delete node"
           >
             <FiTrash2 size={14} />
           </button>
           <button 
             className="hover-menu-btn disconnect" 
             onClick={handleDisconnectNode}
-            title="Desconectar nodo"
+            title="Disconnect node"
           >
             <FiMinusCircle size={14} />
           </button>
           <button 
             className="hover-menu-btn config" 
-            title="Configurar nodo (clic en el nodo)"
+            title="Configure node (click on node)"
           >
             <FiSettings size={14} />
           </button>

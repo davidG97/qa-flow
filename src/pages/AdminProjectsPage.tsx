@@ -31,7 +31,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('El nombre es requerido');
+      setError('Name is required');
       return;
     }
     setSaving(true);
@@ -44,7 +44,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
       });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error guardando');
+      setError(err instanceof Error ? err.message : 'Error saving');
     } finally {
       setSaving(false);
     }
@@ -62,7 +62,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
         border: '1px solid rgba(51, 65, 85, 0.5)',
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'white' }}>Editar Proyecto</h2>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'white' }}>Edit Project</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--color-dark-400)', cursor: 'pointer' }}>
             <FiX size={20} />
           </button>
@@ -81,7 +81,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
-              Nombre *
+              Name *
             </label>
             <input
               type="text"
@@ -92,13 +92,13 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
                 background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(51, 65, 85, 0.5)',
                 borderRadius: '0.5rem', color: 'white', fontSize: '0.875rem',
               }}
-              placeholder="Nombre del proyecto"
+              placeholder="Project name"
             />
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
-              Descripción
+              Description
             </label>
             <textarea
               value={description}
@@ -109,13 +109,13 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
                 background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(51, 65, 85, 0.5)',
                 borderRadius: '0.5rem', color: 'white', fontSize: '0.875rem', resize: 'vertical',
               }}
-              placeholder="Descripción opcional"
+              placeholder="Optional description"
             />
           </div>
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
-              Propietario
+              Owner
             </label>
             <select
               value={ownerId}
@@ -141,7 +141,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
               className="btn-secondary"
               style={{ padding: '0.5rem 1rem' }}
             >
-              Cancelar
+              Cancel
             </button>
             <button
               type="submit"
@@ -150,7 +150,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
               style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
               <FiSave size={14} />
-              {saving ? 'Guardando...' : 'Guardar'}
+              {saving ? 'Saving...' : 'Save'}
             </button>
           </div>
         </form>
@@ -177,7 +177,7 @@ export default function AdminProjectsPage() {
       setProjects(projectsData);
       setUsers(usersData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error cargando datos');
+      setError(err instanceof Error ? err.message : 'Error loading data');
     } finally {
       setLoading(false);
     }
@@ -188,12 +188,12 @@ export default function AdminProjectsPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este proyecto?')) return;
+    if (!confirm('Are you sure you want to delete this project?')) return;
     try {
       await apiService.deleteProject(id);
       loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error eliminando proyecto');
+      setError(err instanceof Error ? err.message : 'Error deleting project');
     }
   };
 
@@ -204,7 +204,7 @@ export default function AdminProjectsPage() {
 
   const formatDate = (d: string) => {
     const date = new Date(d);
-    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   const totalNodes = projects.reduce((acc, p) => acc + p.nodes.length, 0);
@@ -225,14 +225,14 @@ export default function AdminProjectsPage() {
         </Link>
         <img src="/logo.png" alt="QA Flow" width="28" height="28" style={{ borderRadius: '0.5rem' }} />
         <h1 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'white', flex: 1 }}>
-          Administración de Proyectos
+          Project Administration
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', color: 'var(--color-dark-400)', fontSize: '0.875rem' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <FiFolder size={14} /> {projects.length} proyectos
+            <FiFolder size={14} /> {projects.length} projects
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <FiLayers size={14} /> {totalNodes} nodos
+            <FiLayers size={14} /> {totalNodes} nodes
           </span>
         </div>
       </header>
@@ -251,7 +251,7 @@ export default function AdminProjectsPage() {
 
         {loading ? (
           <div style={{ color: 'var(--color-dark-500)', textAlign: 'center', padding: '4rem' }}>
-            Cargando proyectos...
+            Loading projects...
           </div>
         ) : (
           <div style={{
@@ -263,12 +263,12 @@ export default function AdminProjectsPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(30, 41, 59, 0.5)' }}>
-                  <th style={thStyle}>Nombre</th>
-                  <th style={thStyle}>Descripción</th>
-                  <th style={thStyle}>Propietario</th>
-                  <th style={thStyle}>Miembros</th>
-                  <th style={thStyle}>Nodos</th>
-                  <th style={thStyle}>Actualizado</th>
+                  <th style={thStyle}>Name</th>
+                  <th style={thStyle}>Description</th>
+                  <th style={thStyle}>Owner</th>
+                  <th style={thStyle}>Members</th>
+                  <th style={thStyle}>Nodes</th>
+                  <th style={thStyle}>Updated</th>
                   <th style={thStyle}></th>
                 </tr>
               </thead>
@@ -297,7 +297,7 @@ export default function AdminProjectsPage() {
                       <td style={tdStyle}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                           <FiUsers size={12} style={{ color: 'var(--color-dark-500)' }} />
-                          {owner?.user.name || owner?.user.email || 'Sin propietario'}
+                          {owner?.user.name || owner?.user.email || 'No owner'}
                         </span>
                       </td>
                       <td style={tdStyle}>
@@ -323,7 +323,7 @@ export default function AdminProjectsPage() {
                             className="btn-secondary"
                             style={{ padding: '0.375rem 0.5rem' }}
                             onClick={() => setEditingProject(p)}
-                            title="Editar proyecto"
+                            title="Edit project"
                           >
                             <FiEdit2 size={14} />
                           </button>
@@ -331,7 +331,7 @@ export default function AdminProjectsPage() {
                             className="btn-secondary"
                             style={{ padding: '0.375rem 0.5rem', color: '#ef4444' }}
                             onClick={() => handleDelete(p.id)}
-                            title="Eliminar proyecto"
+                            title="Delete project"
                           >
                             <FiTrash2 size={14} />
                           </button>
@@ -343,7 +343,7 @@ export default function AdminProjectsPage() {
                 {projects.length === 0 && (
                   <tr>
                     <td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-dark-500)' }}>
-                      No hay proyectos
+                      No projects
                     </td>
                   </tr>
                 )}

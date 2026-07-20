@@ -19,7 +19,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/projects');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export default function LoginPage() {
             QA Flow
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.9375rem' }}>
-            Inicia sesión en tu cuenta
+            Sign in to your account
           </p>
         </div>
 
@@ -109,7 +109,7 @@ export default function LoginPage() {
             <FiLock size={16} style={iconStyle} />
             <input
               type="password"
-              placeholder="Contraseña"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -122,14 +122,14 @@ export default function LoginPage() {
             className="btn-primary"
             style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
           >
-            {loading ? 'Entrando...' : 'Iniciar sesión'}
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', color: '#64748b', fontSize: '0.875rem' }}>
-          ¿No tienes cuenta?{' '}
+          Don't have an account?{' '}
           <Link to="/register" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>
-            Crear cuenta
+            Create account
           </Link>
         </p>
       </div>

@@ -89,7 +89,7 @@ const Sidebar = ({ onDragStart }: SidebarProps) => {
           <FiSearch className="search-icon" size={14} />
           <input
             type="text"
-            placeholder="Buscar nodos..."
+            placeholder="Search nodes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"

@@ -33,7 +33,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
         <div className="modal-header">
           <h2 className="flex items-center gap-2">
             <FiSettings size={20} />
-            Configuración del Proyecto
+            Project Configuration
           </h2>
           <button className="modal-close" onClick={onClose}>
             <FiX size={20} />
@@ -41,15 +41,15 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
         </div>
 
         <div className="modal-body">
-          {/* Sección de Paralelismo */}
+          {/* Parallelism Section */}
           <div className="config-section">
             <h3 className="config-section-title">
               <FiCpu size={16} />
-              Ejecución y Paralelismo
+              Execution and Parallelism
             </h3>
             
             <div className="config-field">
-              <label>Modo de Ejecución</label>
+              <label>Execution Mode</label>
               <select
                 value={localConfig.executionMode}
                 onChange={(e) => setLocalConfig({
@@ -57,12 +57,12 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                   executionMode: e.target.value as ProjectConfig['executionMode']
                 })}
               >
-                <option value="default">Por defecto (archivos en paralelo)</option>
-                <option value="parallel">Paralelo (todos los tests)</option>
-                <option value="serial">Serial (secuencial)</option>
+                <option value="default">Default (files in parallel)</option>
+                <option value="parallel">Parallel (all tests)</option>
+                <option value="serial">Serial (sequential)</option>
               </select>
               <span className="config-hint">
-                Define cómo se ejecutan los tests dentro de cada archivo
+                Defines how tests run within each file
               </span>
             </div>
 
@@ -79,21 +79,21 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 })}
               />
               <span className="config-hint">
-                Número de procesos paralelos (recomendado: núcleos de CPU)
+                Number of parallel processes (recommended: CPU cores)
               </span>
             </div>
 
           </div>
 
-          {/* Sección de Reintentos y Timeouts */}
+          {/* Retries and Timeouts Section */}
           <div className="config-section">
             <h3 className="config-section-title">
               <FiRefreshCw size={16} />
-              Reintentos y Límites
+              Retries and Limits
             </h3>
 
             <div className="config-field">
-              <label>Reintentos en fallo</label>
+              <label>Retries on failure</label>
               <input
                 type="number"
                 min="0"
@@ -105,14 +105,14 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 })}
               />
               <span className="config-hint">
-                Número de reintentos cuando un test falla (0 = sin reintentos)
+                Number of retries when a test fails (0 = no retries)
               </span>
             </div>
 
             <div className="config-field">
               <label>
                 <FiAlertTriangle size={14} className="inline mr-1" />
-                Máximo de Fallos
+                Maximum Failures
               </label>
               <input
                 type="number"
@@ -124,12 +124,12 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 })}
               />
               <span className="config-hint">
-                Detener ejecución después de N fallos (0 = sin límite)
+                Stop execution after N failures (0 = no limit)
               </span>
             </div>
           </div>
 
-          {/* Sección de Timeouts */}
+          {/* Timeouts Section */}
           <div className="config-section">
             <h3 className="config-section-title">
               <FiClock size={16} />
@@ -137,7 +137,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
             </h3>
 
             <div className="config-field">
-              <label>Timeout por test (ms)</label>
+              <label>Timeout per test (ms)</label>
               <input
                 type="number"
                 min="1000"
@@ -149,20 +149,20 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 })}
               />
               <span className="config-hint">
-                Tiempo máximo de espera por test ({localConfig.timeout / 1000}s)
+                Maximum wait time per test ({localConfig.timeout / 1000}s)
               </span>
             </div>
           </div>
 
-          {/* Sección de Visualización */}
+          {/* Visualization Section */}
           <div className="config-section">
             <h3 className="config-section-title">
               <FiMonitor size={16} />
-              Vista en Tiempo Real
+              Real-Time View
             </h3>
 
             <div className="config-field">
-              <label>CDP URL (opcional)</label>
+              <label>CDP URL (optional)</label>
               <input
                 type="text"
                 placeholder="http://localhost:9222"
@@ -173,7 +173,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 })}
               />
               <span className="config-hint">
-                Conecta a un Chrome con --remote-debugging-port=9222 para ver la ejecución en tu navegador
+                Connect to a Chrome with --remote-debugging-port=9222 to view execution in your browser
               </span>
             </div>
           </div>
@@ -181,14 +181,14 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
 
         <div className="modal-footer">
           <button className="btn-secondary" onClick={handleReset}>
-            Restaurar Valores
+            Reset Values
           </button>
           <div className="flex gap-2">
             <button className="btn-secondary" onClick={onClose}>
-              Cancelar
+              Cancel
             </button>
             <button className="btn-primary" onClick={handleSave}>
-              Guardar
+              Save
             </button>
           </div>
         </div>
