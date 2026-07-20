@@ -642,7 +642,7 @@ export class ReporterService {
     const html = this.generateHtmlReport(report);
     await fs.writeFile(filepath, html, 'utf-8');
     
-    console.log(`📊 Reporte guardado: ${filepath}`);
+    console.log(`📊 Report saved: ${filepath}`);
     return filepath;
   }
 

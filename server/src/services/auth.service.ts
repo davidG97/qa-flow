@@ -8,7 +8,7 @@ const JWT_EXPIRES_IN = '24h';
 
 if (JWT_SECRET === 'qa-flow-default-secret-change-me') {
   console.warn(
-    '⚠️  WARNING: Usando JWT_SECRET por defecto. Establece JWT_SECRET en tu .env para producción.'
+    '⚠️  WARNING: Using default JWT_SECRET. Set JWT_SECRET in your .env for production.'
   );
 }
 
@@ -41,8 +41,8 @@ function mapUser(user: {
 
 export const authService = {
   /**
-   * Crea el usuario admin por defecto si la tabla de usuarios está vacía.
-   * Se llama al iniciar el servidor.
+   * Creates the default admin user if the users table is empty.
+   * Called when the server starts.
    */
   async seedAdmin(): Promise<void> {
     const count = await prisma.user.count();
@@ -60,24 +60,24 @@ export const authService = {
 
     console.log('\n╔════════════════════════════════════════════════════════════╗');
     console.log('║                                                            ║');
-    console.log('║   ⚠️  USUARIO ADMIN POR DEFECTO CREADO                     ║');
+    console.log('║   ⚠️  DEFAULT ADMIN USER CREATED                           ║');
     console.log('║                                                            ║');
     console.log('║   Email:    admin@qa-flow.local                            ║');
     console.log('║   Password: admin123                                       ║');
     console.log('║                                                            ║');
-    console.log('║   Cambia esta contraseña inmediatamente tras el primer     ║');
-    console.log('║   inicio de sesión.                                        ║');
+    console.log('║   Change this password immediately after the first         ║');
+    console.log('║   login.                                                   ║');
     console.log('║                                                            ║');
     console.log('╚════════════════════════════════════════════════════════════╝\n');
   },
 
   /**
-   * Registra un nuevo usuario.
+   * Registers a new user.
    */
   async register(input: RegisterInput): Promise<{ user: AuthUser; token: string }> {
     const existing = await prisma.user.findUnique({ where: { email: input.email } });
     if (existing) {
-      throw new Error('El email ya está registrado');
+      throw new Error('Email is already registered');
     }
 
     const passwordHash = await bcrypt.hash(input.password, 10);
@@ -99,17 +99,17 @@ export const authService = {
   },
 
   /**
-   * Inicia sesión y devuelve token JWT.
+   * Logs in and returns JWT token.
    */
   async login(input: LoginInput): Promise<{ user: AuthUser; token: string }> {
     const user = await prisma.user.findUnique({ where: { email: input.email } });
     if (!user) {
-      throw new Error('Credenciales inválidas');
+      throw new Error('Invalid credentials');
     }
 
     const valid = await bcrypt.compare(input.password, user.passwordHash);
     if (!valid) {
-      throw new Error('Credenciales inválidas');
+      throw new Error('Invalid credentials');
     }
 
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {

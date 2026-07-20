@@ -18,7 +18,7 @@ declare global {
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'No autorizado: token requerido' });
+    res.status(401).json({ error: 'Unauthorized: token required' });
     return;
   }
 
@@ -29,7 +29,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     req.userRole = payload.role;
     next();
   } catch {
-    res.status(401).json({ error: 'No autorizado: token inválido o expirado' });
+    res.status(401).json({ error: 'Unauthorized: invalid or expired token' });
   }
 }
 
@@ -38,7 +38,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
  */
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   if (req.userRole !== UserRole.ADMIN) {
-    res.status(403).json({ error: 'Prohibido: se requiere rol de administrador' });
+    res.status(403).json({ error: 'Forbidden: admin role required' });
     return;
   }
   next();

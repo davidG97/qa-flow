@@ -25,19 +25,19 @@ export function setupWebSocket(server: Server): WebSocketServer {
       try {
         const data = JSON.parse(message.toString());
         
-        // Suscribirse a actualizaciones de una ejecución
+        // Subscribe to execution updates
         if (data.type === 'subscribe' && data.executionId) {
           subscribeToExecution(data.executionId, ws);
-          console.log(`📡 Cliente suscrito a ejecución: ${data.executionId}`);
+          console.log(`📡 Client subscribed to execution: ${data.executionId}`);
         }
       } catch (error) {
-        console.error('Error procesando mensaje WS:', error);
+        console.error('Error processing WS message:', error);
       }
     });
 
     ws.on('close', () => {
-      console.log(`🔌 Cliente WebSocket desconectado: ${clientId}`);
-      // Limpiar suscripciones
+      console.log(`🔌 WebSocket client disconnected: ${clientId}`);
+      // Clean up subscriptions
       wsClients.forEach((clients) => {
         clients.delete(ws);
       });

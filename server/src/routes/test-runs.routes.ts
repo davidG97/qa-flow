@@ -26,19 +26,19 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const testRun = await testRunsService.findById(req.params.id);
     if (!testRun) {
-      res.status(404).json({ error: 'Ejecución no encontrada' });
+      res.status(404).json({ error: 'Execution not found' });
       return;
     }
     res.json(testRun);
   } catch (error) {
-    console.error('Error obteniendo ejecución:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error getting execution:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 /**
  * GET /api/test-runs/project/:projectId
- * Obtiene las ejecuciones de un proyecto
+ * Gets executions for a project
  */
 router.get('/project/:projectId', async (req: Request, res: Response) => {
   try {

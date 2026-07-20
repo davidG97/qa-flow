@@ -14,7 +14,7 @@ export const pickerController = {
       const wss = getWebSocketServer();
 
       if (!targetNodeId || !nodes || !edges) {
-        return res.status(400).json({ error: 'targetNodeId, nodes y edges son requeridos' });
+        return res.status(400).json({ error: 'targetNodeId, nodes and edges are required' });
       }
 
       const sendProgress = (message: string) => {
@@ -55,7 +55,7 @@ export const pickerController = {
     } catch (error) {
       console.error('Error starting picker session:', error);
       res.status(500).json({
-        error: error instanceof Error ? error.message : 'Error iniciando selector visual',
+        error: error instanceof Error ? error.message : 'Error starting visual picker',
       });
     }
   },
@@ -68,10 +68,10 @@ export const pickerController = {
     try {
       const { sessionId } = req.params;
       await pickerService.closeSession(sessionId);
-      res.json({ success: true, message: 'Sesión cancelada' });
+      res.json({ success: true, message: 'Session cancelled' });
     } catch (error) {
       console.error('Error cancelling picker session:', error);
-      res.status(500).json({ error: 'Error cancelando sesión' });
+      res.status(500).json({ error: 'Error cancelling session' });
     }
   },
 
@@ -95,7 +95,7 @@ export const pickerController = {
       });
     } catch (error) {
       console.error('Error getting picker status:', error);
-      res.status(500).json({ error: 'Error obteniendo estado' });
+      res.status(500).json({ error: 'Error getting session status' });
     }
   },
 
@@ -111,7 +111,7 @@ export const pickerController = {
       const wss = getWebSocketServer();
 
       if (!targetNodeId || !nodes || !edges) {
-        return res.status(400).json({ error: 'targetNodeId, nodes y edges son requeridos' });
+        return res.status(400).json({ error: 'targetNodeId, nodes and edges are required' });
       }
 
       const sendProgress = (message: string) => {
@@ -161,13 +161,13 @@ export const pickerController = {
       res.json({
         success: true,
         sessionId,
-        message: 'Sesión interactiva iniciada. Haz click sobre un elemento.',
+        message: 'Interactive session started. Click on an element.',
         interactive: true,
       });
     } catch (error) {
       console.error('Error starting interactive picker:', error);
       res.status(500).json({
-        error: error instanceof Error ? error.message : 'Error iniciando selector interactivo',
+        error: error instanceof Error ? error.message : 'Error starting interactive picker',
       });
     }
   },
@@ -182,13 +182,13 @@ export const pickerController = {
       const { sessionId, x, y } = req.body;
 
       if (!sessionId || typeof x !== 'number' || typeof y !== 'number') {
-        return res.status(400).json({ error: 'sessionId, x e y son requeridos' });
+        return res.status(400).json({ error: 'sessionId, x and y are required' });
       }
 
       const result = await pickerService.selectAtCoordinates(sessionId, x, y);
 
       if (!result) {
-        return res.status(404).json({ error: 'No se encontró elemento en esas coordenadas' });
+        return res.status(404).json({ error: 'No element found at those coordinates' });
       }
 
       res.json({
@@ -198,7 +198,7 @@ export const pickerController = {
     } catch (error) {
       console.error('Error selecting element:', error);
       res.status(500).json({
-        error: error instanceof Error ? error.message : 'Error seleccionando elemento',
+        error: error instanceof Error ? error.message : 'Error selecting element',
       });
     }
   },
@@ -212,12 +212,12 @@ export const pickerController = {
     try {
       const { sessionId, x, y } = req.body;
       if (!sessionId || typeof x !== 'number' || typeof y !== 'number') {
-        return res.status(400).json({ error: 'sessionId, x e y son requeridos' });
+        return res.status(400).json({ error: 'sessionId, x and y are required' });
       }
       const result = await pickerService.hoverAtCoordinates(sessionId, x, y);
       res.json({ success: true, result });
     } catch (error) {
-      res.status(500).json({ error: 'Error en hover' });
+      res.status(500).json({ error: 'Error in hover' });
     }
   },
 
@@ -231,7 +231,7 @@ export const pickerController = {
       const { sessionId, x, y, deltaY } = req.body;
 
       if (!sessionId || typeof x !== 'number' || typeof y !== 'number' || typeof deltaY !== 'number') {
-        return res.status(400).json({ error: 'sessionId, x, y y deltaY son requeridos' });
+        return res.status(400).json({ error: 'sessionId, x, y, and deltaY are required' });
       }
 
       await pickerService.scroll(sessionId, x, y, deltaY);

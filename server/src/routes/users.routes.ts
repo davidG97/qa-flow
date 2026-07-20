@@ -35,13 +35,13 @@ router.post('/', requireAdmin, async (req: Request, res: Response) => {
     const { email, password, name, role } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+      res.status(400).json({ error: 'Email and password are required' });
       return;
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      res.status(400).json({ error: 'El email ya está registrado' });
+      res.status(400).json({ error: 'Email is already registered' });
       return;
     }
 

@@ -18,8 +18,8 @@ router.get('/', async (req: Request, res: Response) => {
     const projects = await projectsService.findAll(req.userId!, isAdmin);
     res.json(projects);
   } catch (error) {
-    console.error('Error obteniendo proyectos:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error getting projects:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -32,13 +32,13 @@ router.get('/:id', async (req: Request, res: Response) => {
     const isAdmin = req.userRole === UserRole.ADMIN;
     const project = await projectsService.findById(req.params.id, req.userId!, isAdmin);
     if (!project) {
-      res.status(404).json({ error: 'Proyecto no encontrado' });
+      res.status(404).json({ error: 'Project not found' });
       return;
     }
     res.json(project);
   } catch (error) {
-    console.error('Error obteniendo proyecto:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error getting project:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -51,7 +51,7 @@ router.post('/', async (req: Request, res: Response) => {
     const { name, description, nodes, edges, config } = req.body;
 
     if (!name || !nodes || !edges) {
-      res.status(400).json({ error: 'Faltan campos requeridos: name, nodes, edges' });
+      res.status(400).json({ error: 'Missing required fields: name, nodes, edges' });
       return;
     }
 
@@ -68,8 +68,8 @@ router.post('/', async (req: Request, res: Response) => {
 
     res.status(201).json(project);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Error creando proyecto';
-    console.error('Error creando proyecto:', error);
+    const message = error instanceof Error ? error.message : 'Error creating project';
+    console.error('Error creating project:', error);
     res.status(500).json({ error: message });
   }
 });
@@ -91,15 +91,15 @@ router.put('/:id', async (req: Request, res: Response) => {
     );
 
     if (!project) {
-      res.status(404).json({ error: 'Proyecto no encontrado' });
+      res.status(404).json({ error: 'Project not found' });
       return;
     }
 
     res.json(project);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Error actualizando proyecto';
-    console.error('Error actualizando proyecto:', error);
-    res.status(message.includes('permiso') ? 403 : 500).json({ error: message });
+    const message = error instanceof Error ? error.message : 'Error updating project';
+    console.error('Error updating project:', error);
+    res.status(message.includes('permission') ? 403 : 500).json({ error: message });
   }
 });
 
@@ -112,14 +112,14 @@ router.delete('/:id', async (req: Request, res: Response) => {
     const isAdmin = req.userRole === UserRole.ADMIN;
     const deleted = await projectsService.delete(req.params.id, req.userId!, isAdmin);
     if (!deleted) {
-      res.status(404).json({ error: 'Proyecto no encontrado' });
+      res.status(404).json({ error: 'Project not found' });
       return;
     }
     res.status(204).send();
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Error eliminando proyecto';
-    console.error('Error eliminando proyecto:', error);
-    res.status(message.includes('permiso') ? 403 : 500).json({ error: message });
+    const message = error instanceof Error ? error.message : 'Error deleting project';
+    console.error('Error deleting project:', error);
+    res.status(message.includes('permission') ? 403 : 500).json({ error: message });
   }
 });
 
@@ -132,13 +132,13 @@ router.get('/:id/flow', async (req: Request, res: Response) => {
     const isAdmin = req.userRole === UserRole.ADMIN;
     const flow = await projectsService.toTestFlow(req.params.id, req.userId!, isAdmin);
     if (!flow) {
-      res.status(404).json({ error: 'Proyecto no encontrado' });
+      res.status(404).json({ error: 'Project not found' });
       return;
     }
     res.json(flow);
   } catch (error) {
-    console.error('Error obteniendo flow:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error getting flow:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

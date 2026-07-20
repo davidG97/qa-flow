@@ -153,7 +153,7 @@ export class FlowExecutor {
     const selector = config.selector as string;
 
     if (!selector) {
-      throw new Error('El selector es requerido para evaluar la condición');
+      throw new Error('Selector is required to evaluate condition');
     }
 
     try {
@@ -181,11 +181,11 @@ export class FlowExecutor {
           return currentUrl.includes(selector);
         }
         default:
-          console.warn(`Tipo de condición no soportado: ${conditionType}`);
+          console.warn(`Unsupported condition type: ${conditionType}`);
           return false;
       }
     } catch (error) {
-      console.error(`Error evaluando condición: ${error}`);
+      console.error(`Error evaluating condition: ${error}`);
       return false;
     }
   }
@@ -267,16 +267,16 @@ export class FlowExecutor {
     visited.add(startNodeId); // Marcar start como visitado
 
     while (currentNodeId) {
-      // Prevenir bucles infinitos
+      // Prevent infinite loops
       if (visited.has(currentNodeId)) {
-        console.warn(`Detectado bucle en nodo ${currentNodeId}, deteniendo ejecución`);
+        console.warn(`Loop detected in node ${currentNodeId}, stopping execution`);
         break;
       }
       visited.add(currentNodeId);
 
       const node = this.flowNodes.find(n => n.id === currentNodeId);
       if (!node) {
-        console.warn(`Nodo no encontrado: ${currentNodeId}`);
+        console.warn(`Node not found: ${currentNodeId}`);
         break;
       }
 
@@ -301,7 +301,7 @@ export class FlowExecutor {
             success: false,
             nodeId: node.id,
             nodeType: node.data.nodeType,
-            message: `[${testName}] Error evaluando condición en ${node.data.label}`,
+            message: `[${testName}] Error evaluating condition in ${node.data.label}`,
             duration: Date.now() - startTime,
             error: errorMessage,
           });
@@ -310,14 +310,14 @@ export class FlowExecutor {
         continue;
       }
 
-      // Ejecutar nodo normal
+      // Execute normal node
       try {
         await this.executeNodeWithPage(node, page);
         this.addResult({
           success: true,
           nodeId: node.id,
           nodeType: node.data.nodeType,
-          message: `[${testName}] ${node.data.label} ejecutado correctamente`,
+          message: `[${testName}] ${node.data.label} executed successfully`,
           duration: Date.now() - startTime,
         });
         currentNodeId = this.getNextNodeId(currentNodeId!);
@@ -327,7 +327,7 @@ export class FlowExecutor {
           success: false,
           nodeId: node.id,
           nodeType: node.data.nodeType,
-          message: `[${testName}] Error en ${node.data.label}`,
+          message: `[${testName}] Error in ${node.data.label}`,
           duration: Date.now() - startTime,
           error: errorMessage,
         });
@@ -356,7 +356,7 @@ export class FlowExecutor {
     if (nodes.length === 0) return;
 
     const prefix = testName ? `[${testName}][${hookName}]` : `[${hookName}]`;
-    console.log(`${prefix} Running (${nodes.length} nodos)`);
+    console.log(`${prefix} Running (${nodes.length} nodes)`);
 
     for (const node of nodes) {
       const startTime = Date.now();
@@ -367,7 +367,7 @@ export class FlowExecutor {
           success: true,
           nodeId: node.id,
           nodeType: node.data.nodeType,
-          message: `${prefix} ${node.data.label} ejecutado correctamente`,
+          message: `${prefix} ${node.data.label} executed successfully`,
           duration: Date.now() - startTime,
         });
       } catch (error) {
@@ -377,12 +377,12 @@ export class FlowExecutor {
           success: false,
           nodeId: node.id,
           nodeType: node.data.nodeType,
-          message: `${prefix} Error en ${node.data.label}`,
+          message: `${prefix} Error in ${node.data.label}`,
           duration: Date.now() - startTime,
           error: errorMessage,
         });
         
-        throw error; // Los hooks fallidos detienen la ejecución
+        throw error; // Failed hooks stop execution
       }
     }
   }
@@ -398,7 +398,7 @@ export class FlowExecutor {
   ): Promise<void> {
     if (nodes.length === 0) return;
 
-    console.log(`[${testName}][${hookName}] Running (${nodes.length} nodos)`);
+    console.log(`[${testName}][${hookName}] Running (${nodes.length} nodes)`);
 
     for (const node of nodes) {
       const startTime = Date.now();
@@ -409,7 +409,7 @@ export class FlowExecutor {
           success: true,
           nodeId: node.id,
           nodeType: node.data.nodeType,
-          message: `[${testName}][${hookName}] ${node.data.label} ejecutado correctamente`,
+          message: `[${testName}][${hookName}] ${node.data.label} executed successfully`,
           duration: Date.now() - startTime,
         });
       } catch (error) {
@@ -439,7 +439,7 @@ export class FlowExecutor {
 
     if (deviceName && devices[deviceName]) {
       contextOptions = { ...devices[deviceName] };
-      console.log(`[Emulation] Usando dispositivo: ${deviceName}`);
+      console.log(`[Emulation] Using device: ${deviceName}`);
     }
 
     // Viewport personalizado (sobrescribe el del dispositivo)
@@ -604,9 +604,9 @@ export class FlowExecutor {
         everyNthFrame: 2, // Reducir framerate para menos tráfico
       });
       
-      console.log('[Executor] Screencast iniciado');
+      console.log('[Executor] Screencast started');
     } catch (error) {
-      console.warn('[Executor] No se pudo iniciar screencast:', error);
+      console.warn('[Executor] Could not start screencast:', error);
     }
   }
 
@@ -641,13 +641,13 @@ export class FlowExecutor {
       const config = flow.config;
       
       if (tests.length === 0) {
-        throw new Error('No se encontraron nodos de inicio');
+        throw new Error('No start nodes found');
       }
 
-      console.log(`Ejecutando ${tests.length} test(s) en modo: ${config?.executionMode || 'default'}`);
+      console.log(`Executing ${tests.length} test(s) in mode: ${config?.executionMode || 'default'}`);
       
       if (hooks.beforeAll.length > 0 || hooks.afterAll.length > 0) {
-        console.log(`Hooks detectados: beforeAll=${hooks.beforeAll.length}, beforeEach=${hooks.beforeEach.length}, afterEach=${hooks.afterEach.length}, afterAll=${hooks.afterAll.length}`);
+        console.log(`Hooks detected: beforeAll=${hooks.beforeAll.length}, beforeEach=${hooks.beforeEach.length}, afterEach=${hooks.afterEach.length}, afterAll=${hooks.afterAll.length}`);
       }
 
       // Ejecutar beforeAll (requiere crear un browser/page temporal)
@@ -708,9 +708,9 @@ export class FlowExecutor {
       
       while (attempt <= retries && !success) {
         if (attempt > 0) {
-          console.log(`[Serial] Reintento ${attempt}/${retries} para test: ${testName}`);
+          console.log(`[Serial] Retry ${attempt}/${retries} for test: ${testName}`);
         } else {
-          console.log(`[Serial] Iniciando test: ${testName}`);
+          console.log(`[Serial] Starting test: ${testName}`);
         }
         
         try {
@@ -726,10 +726,10 @@ export class FlowExecutor {
             await this.executeHookNodes('afterEach', hooks.afterEach, this.page);
           }
           
-          console.log(`[Serial] Completado test: ${testName}`);
+          console.log(`[Serial] Completed test: ${testName}`);
           success = true;
         } catch (error) {
-          console.error(`[Serial] Error en test ${testName} (intento ${attempt + 1}):`, error);
+          console.error(`[Serial] Error in test ${testName} (attempt ${attempt + 1}):`, error);
           attempt++;
           
           if (attempt <= retries) {
@@ -756,7 +756,7 @@ export class FlowExecutor {
     let failureCount = 0;
     let shouldStop = false;
 
-    console.log(`[Parallel] Running ${tests.length} tests con ${maxWorkers} workers${maxRetries > 0 ? `, ${maxRetries} retries` : ''}`);
+    console.log(`[Parallel] Running ${tests.length} tests with ${maxWorkers} workers${maxRetries > 0 ? `, ${maxRetries} retries` : ''}`);
 
     // Pool de tareas pendientes con conteo de intentos
     const pending: Array<{ test: TestCase; attempt: number }> = tests.map(t => ({ test: t, attempt: 0 }));
@@ -770,8 +770,8 @@ export class FlowExecutor {
       const testName = (test.startNode.data.config.testName as string) || test.startNode.data.label;
       
       if (attempt > 0) {
-        console.log(`[Parallel] Reintento ${attempt}/${maxRetries} para: ${testName}`);
-        // Limpiar resultados del intento anterior
+        console.log(`[Parallel] Retry ${attempt}/${maxRetries} for: ${testName}`);
+        // Clean up results from previous attempt
         this.status.results = this.status.results.filter(r => 
           !test.nodes.some(n => n.id === r.nodeId)
         );
@@ -779,21 +779,21 @@ export class FlowExecutor {
       
       const promise = this.executeTestInIsolation(test, hooks)
         .then(() => {
-          console.log(`[Parallel] ✓ Completado: ${testName}${attempt > 0 ? ` (intento ${attempt + 1})` : ''}`);
+          console.log(`[Parallel] ✓ Completed: ${testName}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`);
         })
         .catch((error) => {
-          console.error(`[Parallel] ✗ Fallido: ${testName} (intento ${attempt + 1})`, error);
+          console.error(`[Parallel] ✗ Failed: ${testName} (attempt ${attempt + 1})`, error);
           
-          // Si hay retries disponibles, volver a encolar
+          // If retries available, re-queue
           if (attempt < maxRetries) {
-            console.log(`[Parallel] Reencolando para reintento: ${testName}`);
+            console.log(`[Parallel] Re-queuing for retry: ${testName}`);
             pending.push({ test, attempt: attempt + 1 });
           } else {
-            // Sin más retries, contar como fallo
+            // No more retries, count as failure
             failureCount++;
             
             if (maxFailures > 0 && failureCount >= maxFailures) {
-              console.log(`[Parallel] Máximo de fallos alcanzado (${maxFailures}), deteniendo...`);
+              console.log(`[Parallel] Max failures reached (${maxFailures}), stopping...`);
               shouldStop = true;
             }
           }
@@ -826,15 +826,15 @@ export class FlowExecutor {
       }
     }
 
-    console.log(`[Parallel] Finalizado. Tests: ${tests.length}, Fallos: ${failureCount}`);
+    console.log(`[Parallel] Finished. Tests: ${tests.length}, Failures: ${failureCount}`);
   }
 
   /**
-   * Ejecuta un test en aislamiento (con su propio browser)
+   * Executes a test in isolation (with its own browser)
    */
   private async executeTestInIsolation(test: TestCase, hooks?: HookNodes): Promise<void> {
     const testName = (test.startNode.data.config.testName as string) || test.startNode.data.label;
-    console.log(`[Parallel] Iniciando test aislado: ${testName}`);
+    console.log(`[Parallel] Starting isolated test: ${testName}`);
 
     // Crear instancia aislada para este test
     let browser: Browser | null = null;
@@ -873,7 +873,7 @@ export class FlowExecutor {
         await this.executeHookNodesWithPage('beforeEach', hooks.beforeEach, page, testName);
       }
 
-      // Ejecutar nodos del test (excluyendo el start que ya procesamos)
+      // Execute test nodes (excluding start which was already processed)
       for (const node of test.nodes) {
         if (node.data.nodeType === 'start') continue;
 
@@ -885,7 +885,7 @@ export class FlowExecutor {
             success: true,
             nodeId: node.id,
             nodeType: node.data.nodeType,
-            message: `[${testName}] ${node.data.label} ejecutado correctamente`,
+            message: `[${testName}] ${node.data.label} executed successfully`,
             duration: Date.now() - startTime,
           });
         } catch (error) {
@@ -895,36 +895,36 @@ export class FlowExecutor {
             success: false,
             nodeId: node.id,
             nodeType: node.data.nodeType,
-            message: `[${testName}] Error en ${node.data.label}`,
+            message: `[${testName}] Error in ${node.data.label}`,
             duration: Date.now() - startTime,
             error: errorMessage,
           });
           
-          throw error; // Re-lanzar para marcar el test como fallido
+          throw error; // Re-throw to mark test as failed
         }
       }
 
-      // Ejecutar afterEach hooks
+      // Execute afterEach hooks
       if (hooks?.afterEach && hooks.afterEach.length > 0) {
         await this.executeHookNodesWithPage('afterEach', hooks.afterEach, page, testName);
       }
 
-      // Agregar resultado de éxito para el test
+      // Add success result for the test
       this.addResult({
         success: true,
         nodeId: test.startNode.id,
         nodeType: 'test-complete',
-        message: `[${testName}] Test completado exitosamente`,
+        message: `[${testName}] Test completed successfully`,
         duration: 0,
       });
 
-      console.log(`[Parallel] Completado test: ${testName}`);
+      console.log(`[Parallel] Completed test: ${testName}`);
 
     } catch (error) {
-      console.error(`[Parallel] Error en test ${testName}:`, error);
+      console.error(`[Parallel] Error in test ${testName}:`, error);
       throw error;
     } finally {
-      // Limpiar recursos de este test
+      // Clean up resources for this test
       if (page) await page.close().catch(() => {});
       if (context) await context.close().catch(() => {});
       if (browser) await browser.close().catch(() => {});
@@ -932,17 +932,17 @@ export class FlowExecutor {
   }
 
   /**
-   * Ejecuta un test individual usando el browser compartido de la clase
+   * Executes a single test using the shared class browser
    */
   private async executeSingleTest(test: TestCase, beforeEachNodes?: FlowNode[]): Promise<void> {
     const testName = (test.startNode.data.config.testName as string) || test.startNode.data.label;
     
-    // Verificar si el flujo contiene nodos "if" para usar ejecución dinámica
+    // Check if flow contains "if" nodes to use dynamic execution
     if (this.hasIfNodes(test.startNode.id)) {
-      // Primero inicializar el browser con el nodo start
+      // First initialize browser with start node
       await this.initBrowser(test.startNode);
       if (!this.page) {
-        throw new Error('No se pudo inicializar el browser');
+        throw new Error('Could not initialize browser');
       }
       // Usar ejecución dinámica
       await this.executeDynamicFlow(test.startNode.id, testName, this.page, beforeEachNodes);
@@ -1125,7 +1125,7 @@ export class FlowExecutor {
         }
         break;
       default:
-        console.warn(`Tipo de nodo no soportado en paralelo: ${nodeType}`);
+      console.warn(`Unsupported node type in parallel: ${nodeType}`);
     }
   }
 
@@ -1332,7 +1332,7 @@ export class FlowExecutor {
         await this.executeCode(config);
         break;
       default:
-        console.warn(`Tipo de nodo no soportado: ${nodeType}`);
+        console.warn(`Unsupported node type: ${nodeType}`);
     }
   }
 
@@ -1352,22 +1352,22 @@ export class FlowExecutor {
         this.browser = await chromium.connectOverCDP(cdpUrl);
       } else {
         // ponytail: always headless - user sees execution via screencast
-        console.log(`[Executor] Lanzando chromium (headless: true)...`);
+        console.log(`[Executor] Launching chromium (headless: true)...`);
         this.browser = await chromium.launch({
           headless: true,
           slowMo: this.options.slowMo,
         });
       }
-      console.log(`[Executor] Browser listo`);
+      console.log(`[Executor] Browser ready`);
 
       this.context = await this.browser.newContext({
         viewport: { width: 1280, height: 720 },
       });
-      console.log(`[Executor] Contexto creado`);
+      console.log(`[Executor] Context created`);
 
       this.page = await this.context.newPage();
       this.page.setDefaultTimeout(this.options.timeout || 30000);
-      console.log(`[Executor] Página creada`);
+      console.log(`[Executor] Page created`);
 
       // Iniciar screencast si hay callback configurado
       if (this.options.onScreencastFrame) {
@@ -1376,10 +1376,10 @@ export class FlowExecutor {
 
       if (baseUrl) {
         await this.page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
-        console.log(`[Executor] Navegado a ${baseUrl}`);
+        console.log(`[Executor] Navigated to ${baseUrl}`);
       }
     } catch (error) {
-      console.error(`[Executor] Error inicializando browser:`, error);
+      console.error(`[Executor] Error initializing browser:`, error);
       throw error;
     }
   }
@@ -1871,7 +1871,7 @@ export class FlowExecutor {
     
     const code = config.code as string;
     if (!code) {
-      console.warn('Nodo de código sin código para ejecutar');
+      console.warn('Code node without code to execute');
       return;
     }
 

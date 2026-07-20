@@ -18,7 +18,7 @@ export const executionController = {
       const { flow, options } = req.body as RunFlowRequest;
       
       if (!flow || !flow.nodes || !flow.edges) {
-        return res.status(400).json({ error: 'Flujo inválido' });
+        return res.status(400).json({ error: 'Invalid flow' });
       }
 
       // Crear el ejecutor con callback para notificar progreso y screencast
@@ -39,24 +39,24 @@ export const executionController = {
       // Guardar el flujo para generar reporte después
       executionFlows.set(executionId, flow);
       
-      // Responder inmediatamente con el ID de ejecución
+      // Respond immediately with execution ID
       res.json({ 
         executionId, 
-        message: 'Ejecución iniciada',
+        message: 'Execution started',
         wsUrl: `ws://localhost:3001`,
       });
 
       // Ejecutar en background
-      console.log(`🚀 Iniciando ejecución: ${executionId}`);
+      console.log(`🚀 Starting execution: ${executionId}`);
       const finalStatus = await executor.execute(flow);
       executions.set(executionId, finalStatus);
       
-      console.log(`✅ Ejecución completada: ${executionId} - ${finalStatus.status}`);
+      console.log(`✅ Execution completed: ${executionId} - ${finalStatus.status}`);
       
       // Generar reporte automáticamente
       try {
         const report = ReporterService.generateReport(executionId, finalStatus, flow);
-        console.log(`📊 Reporte generado: ${report.id} (${report.status})`);
+        console.log(`📊 Report generated: ${report.id} (${report.status})`);
         
         // Notificar a los clientes que hay un reporte disponible
         notifyClients(executionId, {
@@ -64,7 +64,7 @@ export const executionController = {
           reportId: report.id,
         } as ExecutionStatus & { reportId: string });
       } catch (reportError) {
-        console.error('Error generando reporte:', reportError);
+        console.error('Error generating report:', reportError);
       }
       
       // Limpiar suscripciones después de un tiempo
@@ -73,7 +73,7 @@ export const executionController = {
     } catch (error) {
       console.error('Error running flow:', error);
       res.status(500).json({ 
-        error: 'Error interno del servidor',
+        error: 'Internal server error',
         details: error instanceof Error ? error.message : String(error)
       });
     }
@@ -87,7 +87,7 @@ export const executionController = {
     const status = executions.get(executionId);
     
     if (!status) {
-      return res.status(404).json({ error: 'Ejecución no encontrada' });
+      return res.status(404).json({ error: 'Execution not found' });
     }
     
     res.json(status);

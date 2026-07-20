@@ -570,7 +570,7 @@ class PickerService {
     const startNode = pathNodes.find(n => n.data.nodeType === 'start');
     
     if (!startNode?.data.config.baseUrl) {
-      throw new Error('No se encontró URL base en el nodo de inicio');
+      throw new Error('Base URL not found in start node');
     }
 
     // Check for CDP URL (from param, startNode config, or env)
@@ -597,7 +597,7 @@ class PickerService {
           page = await context.newPage();
         }
       } catch (error) {
-        throw new Error(`No se pudo conectar a Chrome en ${effectiveCdpUrl}. Asegúrate de tener Chrome abierto con --remote-debugging-port=9222`);
+        throw new Error(`Could not connect to Chrome at ${effectiveCdpUrl}. Make sure Chrome is open with --remote-debugging-port=9222`);
       }
     } else {
       // ponytail: try GUI mode, if fails (no display/Docker) frontend uses interactive picker
@@ -728,10 +728,10 @@ class PickerService {
     const startNode = pathNodes.find(n => n.data.nodeType === 'start');
     
     if (!startNode?.data.config.baseUrl) {
-      throw new Error('No se encontró URL base en el nodo de inicio');
+      throw new Error('Base URL not found in start node');
     }
 
-    onProgress?.('Iniciando navegador...');
+    onProgress?.('Starting browser...');
     
     // Always headless for Docker compatibility
     const browser = await chromium.launch({

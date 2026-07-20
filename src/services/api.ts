@@ -157,13 +157,13 @@ class ApiService {
   }
 
   // ==========================================
-  // ADMIN - USUARIOS
+  // ADMIN - USERS
   // ==========================================
 
   async getUsers(): Promise<Array<{ id: string; email: string; name: string | null; role: string; createdAt: string }>> {
     const response = await this.request(`${API_URL}/users`);
     if (!response.ok) {
-      throw new Error('Error obteniendo usuarios');
+      throw new Error('Error fetching users');
     }
     return response.json();
   }
@@ -175,7 +175,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error creando usuario');
+      throw new Error(error.error || 'Error creating user');
     }
     return response.json();
   }
@@ -187,7 +187,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error actualizando usuario');
+      throw new Error(error.error || 'Error updating user');
     }
     return response.json();
   }
@@ -197,7 +197,7 @@ class ApiService {
       method: 'DELETE',
     });
     if (!response.ok) {
-      throw new Error('Error eliminando usuario');
+      throw new Error('Error deleting user');
     }
   }
 
@@ -337,7 +337,7 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error('Error generando código');
+      throw new Error('Error generating code');
     }
 
     const data = await response.json();
@@ -356,7 +356,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error iniciando grabación');
+      throw new Error(error.error || 'Error starting recording');
     }
 
     return response.json();
@@ -385,7 +385,7 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error('Error deteniendo grabación');
+      throw new Error('Error stopping recording');
     }
   }
 
@@ -414,7 +414,7 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error('Error parseando código');
+      throw new Error('Error parsing code');
     }
 
     return response.json();
@@ -445,7 +445,7 @@ class ApiService {
   async getReport(id: string): Promise<TestReport> {
     const response = await this.request(`${API_URL}/reports/${id}`);
     if (!response.ok) {
-      throw new Error('Reporte no encontrado');
+      throw new Error('Report not found');
     }
     return response.json();
   }

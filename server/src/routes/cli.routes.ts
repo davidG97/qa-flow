@@ -19,7 +19,7 @@ router.post('/run', async (req: Request, res: Response): Promise<void> => {
     if (!flow?.nodes || !flow?.edges) {
       res.status(400).json({
         success: false,
-        error: 'Se requiere un flujo válido con nodos y edges',
+        error: 'A valid flow with nodes and edges is required',
       });
       return;
     }
@@ -63,7 +63,7 @@ router.get('/tests', async (_req: Request, res: Response): Promise<void> => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error listando tests',
+      error: error instanceof Error ? error.message : 'Error listing generated tests',
     });
   }
 });
@@ -89,7 +89,7 @@ router.delete('/tests', async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error limpiando tests',
+      error: error instanceof Error ? error.message : 'Error cleaning generated tests',
     });
   }
 });
@@ -112,13 +112,13 @@ router.get('/report', async (_req: Request, res: Response): Promise<void> => {
     } else {
       res.status(404).json({
         success: false,
-        error: 'No hay reporte HTML disponible',
+        error: 'No HTML report available',
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error obteniendo reporte',
+      error: error instanceof Error ? error.message : 'Error getting report path',
     });
   }
 });
@@ -133,12 +133,12 @@ router.post('/show-report', async (_req: Request, res: Response): Promise<void> 
     
     res.json({
       success: true,
-      message: 'Reporte abierto en el navegador',
+      message: 'Report opened in the browser',
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error abriendo reporte',
+      error: error instanceof Error ? error.message : 'Error opening report',
     });
   }
 });

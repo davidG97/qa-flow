@@ -146,7 +146,7 @@ export class ProjectsService {
       // Verify new owner exists
       const newOwner = await prisma.user.findUnique({ where: { id: input.newOwnerId } });
       if (!newOwner) {
-        throw new Error('El nuevo propietario no existe');
+        throw new Error('New owner does not exist');
       }
 
       // Find current owner and demote to EDITOR

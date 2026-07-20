@@ -20,8 +20,8 @@ export const reportController = {
         })),
       });
     } catch (error) {
-      console.error('Error listando reportes:', error);
-      res.status(500).json({ error: 'Error obteniendo reportes' });
+      console.error('Error getting reports:', error);
+      res.status(500).json({ error: 'Error getting reports' });
     }
   },
 
@@ -34,13 +34,13 @@ export const reportController = {
       const report = ReporterService.getReport(id);
 
       if (!report) {
-        return res.status(404).json({ error: 'Reporte no encontrado' });
+        return res.status(404).json({ error: 'Report not found' });
       }
 
       res.json(report);
     } catch (error) {
-      console.error('Error obteniendo reporte:', error);
-      res.status(500).json({ error: 'Error obteniendo reporte' });
+      console.error('Error getting report:', error);
+      res.status(500).json({ error: 'Error getting report' });
     }
   },
 
@@ -53,15 +53,15 @@ export const reportController = {
       const report = ReporterService.getReport(id);
 
       if (!report) {
-        return res.status(404).json({ error: 'Reporte no encontrado' });
+        return res.status(404).json({ error: 'Report not found' });
       }
 
       const html = ReporterService.generateHtmlReport(report);
       res.setHeader('Content-Type', 'text/html');
       res.send(html);
     } catch (error) {
-      console.error('Error generando HTML:', error);
-      res.status(500).json({ error: 'Error generando reporte HTML' });
+      console.error('Error generating HTML report:', error);
+      res.status(500).json({ error: 'Error generating HTML report' });
     }
   },
 
@@ -74,7 +74,7 @@ export const reportController = {
       const report = ReporterService.getReport(id);
 
       if (!report) {
-        return res.status(404).json({ error: 'Reporte no encontrado' });
+        return res.status(404).json({ error: 'Report not found' });
       }
 
       const html = ReporterService.generateHtmlReport(report);
@@ -84,8 +84,8 @@ export const reportController = {
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.send(html);
     } catch (error) {
-      console.error('Error descargando reporte:', error);
-      res.status(500).json({ error: 'Error descargando reporte' });
+      console.error('Error downloading report:', error);
+      res.status(500).json({ error: 'Error downloading report' });
     }
   },
 
@@ -98,13 +98,13 @@ export const reportController = {
       const deleted = ReporterService.deleteReport(id);
 
       if (!deleted) {
-        return res.status(404).json({ error: 'Reporte no encontrado' });
+        return res.status(404).json({ error: 'Report not found' });
       }
 
-      res.json({ message: 'Reporte eliminado' });
+      res.json({ message: 'Report deleted' });
     } catch (error) {
-      console.error('Error eliminando reporte:', error);
-      res.status(500).json({ error: 'Error eliminando reporte' });
+      console.error('Error deleting report:', error);
+      res.status(500).json({ error: 'Error deleting report' });
     }
   },
 };

@@ -204,7 +204,7 @@ export function useFlowNodes() {
             
             // Validar estructura básica
             if (!project.nodes || !Array.isArray(project.nodes)) {
-              alert('Archivo inválido: no contiene nodos');
+              alert('Invalid file: does not contain nodes');
               resolve(null);
               return;
             }
@@ -228,7 +228,7 @@ export function useFlowNodes() {
             resolve({ config });
           } catch (error) {
             console.error('Error parseando archivo:', error);
-            alert('Error al leer el archivo. Asegúrate de que sea un archivo JSON válido.');
+            alert('Error reading file. Make sure it is a valid JSON file.');
             resolve(null);
           }
         };
