@@ -398,7 +398,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error obteniendo nodos');
+      throw new Error(error.error || 'Error getting recorded nodes');
     }
 
     return response.json();
@@ -479,7 +479,7 @@ class ApiService {
   async getProjects(): Promise<ProjectDTO[]> {
     const response = await this.request(`${API_URL}/projects`);
     if (!response.ok) {
-      throw new Error('Error obteniendo proyectos');
+      throw new Error('Error getting projects');
     }
     return response.json();
   }
@@ -487,7 +487,7 @@ class ApiService {
   async getProject(id: string): Promise<ProjectDTO> {
     const response = await this.request(`${API_URL}/projects/${id}`);
     if (!response.ok) {
-      throw new Error('Error obteniendo proyecto');
+      throw new Error('Error getting project');
     }
     return response.json();
   }
@@ -498,7 +498,7 @@ class ApiService {
       body: JSON.stringify(project),
     });
     if (!response.ok) {
-      throw new Error('Error creando proyecto');
+      throw new Error('Error creating project');
     }
     return response.json();
   }
@@ -509,7 +509,7 @@ class ApiService {
       body: JSON.stringify(project),
     });
     if (!response.ok) {
-      throw new Error('Error actualizando proyecto');
+      throw new Error('Error updating project');
     }
     return response.json();
   }
@@ -519,7 +519,7 @@ class ApiService {
       method: 'DELETE',
     });
     if (!response.ok) {
-      throw new Error('Error eliminando proyecto');
+      throw new Error('Error deleting project');
     }
   }
 
@@ -552,7 +552,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error iniciando selector visual');
+      throw new Error(error.error || 'Error starting visual picker');
     }
 
     return response.json();
@@ -596,7 +596,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error iniciando selector interactivo');
+      throw new Error(error.error || 'Error starting interactive picker');
     }
 
     return response.json();
@@ -610,7 +610,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error seleccionando elemento');
+      throw new Error(error.error || 'Error selecting element at coordinates');
     }
 
     return response.json();

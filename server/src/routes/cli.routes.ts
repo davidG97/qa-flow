@@ -6,11 +6,11 @@ const router = Router();
 
 /**
  * POST /cli/run
- * Ejecuta un flujo usando el Playwright Test Runner CLI
+ * Runs a flow using the Playwright Test Runner CLI
  * 
  * Body:
- * - flow: TestFlow (requerido)
- * - options: CLIRunnerOptions (opcional)
+ * - flow: TestFlow (required)
+ * - options: CLIRunnerOptions (optional)
  */
 router.post('/run', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -50,7 +50,7 @@ router.post('/run', async (req: Request, res: Response): Promise<void> => {
 
 /**
  * GET /cli/tests
- * Lista los tests generados disponibles
+ * Lists available generated tests
  */
 router.get('/tests', async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -70,10 +70,10 @@ router.get('/tests', async (_req: Request, res: Response): Promise<void> => {
 
 /**
  * DELETE /cli/tests
- * Limpia tests generados antiguos
+ * Cleans old generated tests
  * 
  * Query:
- * - olderThanHours: número de horas (default: 24)
+ * - olderThanHours: number of hours (default: 24)
  */
 router.delete('/tests', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -96,7 +96,7 @@ router.delete('/tests', async (req: Request, res: Response): Promise<void> => {
 
 /**
  * GET /cli/report
- * Obtiene la ruta del reporte HTML de la última ejecución
+ * Gets the HTML report path from the last execution
  */
 router.get('/report', async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -125,7 +125,7 @@ router.get('/report', async (_req: Request, res: Response): Promise<void> => {
 
 /**
  * POST /cli/show-report
- * Abre el reporte HTML en el navegador (solo para desarrollo local)
+ * Opens the HTML report in the browser (only for local development)
  */
 router.post('/show-report', async (_req: Request, res: Response): Promise<void> => {
   try {

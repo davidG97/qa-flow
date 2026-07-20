@@ -6,13 +6,13 @@ import { TestFlow, ProjectConfig } from '../types/index.js';
 import { CodeGeneratorService } from './code-generator.service.js';
 
 export interface CLIRunnerOptions {
-  /** Navegador a usar: chromium, firefox, webkit, mobile-chrome, mobile-safari */
+  /** Browser to use: chromium, firefox, webkit, mobile-chrome, mobile-safari */
   browser?: string;
-  /** Ejecutar en modo headed (visible) */
+  /** Run in headed mode (visible) */
   headed?: boolean;
-  /** Número de workers paralelos */
+  /** Number of parallel workers */
   workers?: number;
-  /** Número de reintentos */
+  /** Number of retries */
   retries?: number;
   /** Timeout por test en ms */
   timeout?: number;
@@ -96,8 +96,8 @@ export interface PlaywrightTestResult {
 }
 
 /**
- * Servicio para ejecutar tests de Playwright usando el CLI
- * Útil para ejecución en CI/CD con reportes nativos
+ * Service to run Playwright tests using the CLI
+ * Useful for CI/CD execution with native reporters
  */
 export class CLIRunnerService {
   private readonly codeGenerator: CodeGeneratorService;
@@ -111,31 +111,31 @@ export class CLIRunnerService {
   }
 
   /**
-   * Ejecuta un flujo usando el Playwright Test Runner CLI
+   * Runs a flow using the Playwright Test Runner CLI
    */
   async runFlow(flow: TestFlow, options: CLIRunnerOptions = {}): Promise<CLIRunResult> {
     const startTime = Date.now();
     const runId = uuidv4();
     
-    // Crear directorios si no existen
+    // Create directories if they don't exist
     await this.ensureDirectories();
     
-    // Generar código del test
+    // Generate test code
     const testCode = this.codeGenerator.generate(flow);
     
-    // Escribir archivo .spec.ts
+    // Write .spec.ts file
     const specFileName = `${this.sanitizeFileName(flow.name || 'test')}-${runId}.spec.ts`;
     const specFilePath = path.join(this.testsDir, specFileName);
     await fs.writeFile(specFilePath, testCode, 'utf-8');
     
     try {
-      // Construir argumentos del CLI
+      // Build CLI arguments
       const args = this.buildArgs(specFilePath, options, flow.config);
       
-      // Ejecutar playwright test
+      // Execute playwright test
       const result = await this.executePlaywright(args);
       
-      // Leer reporte JSON si existe
+      // Read JSON report if it exists
       const jsonReportPath = path.join(this.resultsDir, 'results.json');
       let jsonReport: PlaywrightJSONReport | undefined;
       
@@ -143,7 +143,7 @@ export class CLIRunnerService {
         const jsonContent = await fs.readFile(jsonReportPath, 'utf-8');
         jsonReport = JSON.parse(jsonContent);
       } catch {
-        // El reporte puede no existir si el test falló muy temprano
+        // Report may not exist if test failed early
       }
       
       const htmlReportPath = path.join(this.resultsDir, 'html-report', 'index.html');
@@ -172,7 +172,7 @@ export class CLIRunnerService {
   }
 
   /**
-   * Lista los tests generados disponibles
+   * Lists available generated tests
    */
   async listGeneratedTests(): Promise<string[]> {
     try {
@@ -184,7 +184,7 @@ export class CLIRunnerService {
   }
 
   /**
-   * Limpia tests generados antiguos
+   * Cleans old generated tests
    */
   async cleanGeneratedTests(olderThanHours = 24): Promise<number> {
     try {
@@ -210,7 +210,7 @@ export class CLIRunnerService {
   }
 
   /**
-   * Obtiene el reporte HTML de la última ejecución
+   * Gets the HTML report from the last execution
    */
   async getHtmlReportPath(): Promise<string | null> {
     const htmlReportPath = path.join(this.resultsDir, 'html-report', 'index.html');
@@ -219,7 +219,7 @@ export class CLIRunnerService {
   }
 
   /**
-   * Abre el reporte HTML en el navegador por defecto
+   * Opens the HTML report in the default browser
    */
   async showReport(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -251,12 +251,12 @@ export class CLIRunnerService {
   private buildArgs(specFile: string, options: CLIRunnerOptions, flowConfig?: ProjectConfig): string[] {
     const args = ['playwright', 'test', specFile];
     
-    // Navegador/Proyecto
+    // Browser/Project
     if (options.browser) {
       args.push('--project', options.browser);
     }
     
-    // Modo headed
+    // Headed mode
     if (options.headed) {
       args.push('--headed');
     }
@@ -289,7 +289,7 @@ export class CLIRunnerService {
       args.push('--update-snapshots');
     }
     
-    // Filtro por tags
+    // Filter by tags
     if (options.grep) {
       args.push('--grep', options.grep);
     }
@@ -298,7 +298,7 @@ export class CLIRunnerService {
       args.push('--grep-invert', options.grepInvert);
     }
     
-    // Reporter JSON siempre activo para parsing
+    // JSON reporter always active for parsing
     args.push('--reporter', 'json,list');
     
     return args;
@@ -345,5 +345,5 @@ export class CLIRunnerService {
   }
 }
 
-// Singleton para uso en rutas
+// Singleton for use in routes
 export const cliRunnerService = new CLIRunnerService();

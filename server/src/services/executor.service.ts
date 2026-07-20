@@ -553,7 +553,7 @@ export class FlowExecutor {
 
     // CDP remoto: conectar al browser del usuario
     if (cdpUrl) {
-      console.log(`[Executor] Conectando a browser remoto via CDP: ${cdpUrl}`);
+      console.log(`[Executor] Connecting to remote browser via CDP: ${cdpUrl}`);
       this.browser = await chromium.connectOverCDP(cdpUrl);
     } else {
       // ponytail: always headless - user sees execution via screencast
@@ -962,7 +962,7 @@ export class FlowExecutor {
             success: true,
             nodeId: node.id,
             nodeType: node.data.nodeType,
-            message: `[${testName}] ${node.data.label} ejecutado correctamente`,
+            message: `[${testName}] ${node.data.label} executed successfully`,
             duration: Date.now() - startTime,
           });
         } catch (error) {
@@ -971,7 +971,7 @@ export class FlowExecutor {
             success: false,
             nodeId: node.id,
             nodeType: node.data.nodeType,
-            message: `[${testName}] Error en ${node.data.label}`,
+            message: `[${testName}] Error in ${node.data.label}`,
             duration: Date.now() - startTime,
             error: errorMessage,
           });
@@ -995,7 +995,7 @@ export class FlowExecutor {
           success: true,
           nodeId: node.id,
           nodeType: node.data.nodeType,
-          message: `[${testName}] ${node.data.label} ejecutado correctamente`,
+          message: `[${testName}] ${node.data.label} executed successfully`,
           duration: Date.now() - startTime,
         });
       } catch (error) {
@@ -1005,7 +1005,7 @@ export class FlowExecutor {
           success: false,
           nodeId: node.id,
           nodeType: node.data.nodeType,
-          message: `[${testName}] Error en ${node.data.label}`,
+          message: `[${testName}] Error in ${node.data.label}`,
           duration: Date.now() - startTime,
           error: errorMessage,
         });
@@ -1348,7 +1348,7 @@ export class FlowExecutor {
       if (cdpUrl) {
         // ponytail: localhost → 127.0.0.1 para evitar IPv6 issues
         cdpUrl = cdpUrl.replace('localhost', '127.0.0.1');
-        console.log(`[Executor] Conectando a browser remoto via CDP: ${cdpUrl}`);
+        console.log(`[Executor] Connecting to remote browser via CDP: ${cdpUrl}`);
         this.browser = await chromium.connectOverCDP(cdpUrl);
       } else {
         // ponytail: always headless - user sees execution via screencast
@@ -1385,7 +1385,7 @@ export class FlowExecutor {
   }
 
   private async executeNavigate(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const url = config.url as string;
     const waitUntil = config.waitUntil as 'load' | 'domcontentloaded' | 'networkidle' || 'load';
@@ -1394,7 +1394,7 @@ export class FlowExecutor {
   }
 
   private async executeClick(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const button = (config.button as 'left' | 'right' | 'middle') || 'left';
@@ -1407,7 +1407,7 @@ export class FlowExecutor {
   }
 
   private async executeCheck(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const action = config.action as string || 'check';
@@ -1422,7 +1422,7 @@ export class FlowExecutor {
   }
 
   private async executeType(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const text = config.text as string;
@@ -1436,7 +1436,7 @@ export class FlowExecutor {
   }
 
   private async executeFill(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const value = config.value as string;
@@ -1445,7 +1445,7 @@ export class FlowExecutor {
   }
 
   private async executeSelect(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const value = config.value as string;
@@ -1461,14 +1461,14 @@ export class FlowExecutor {
   }
 
   private async executeHover(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     await this.page.hover(selector);
   }
 
   private async executeWait(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const waitType = config.waitType as string;
     const value = config.value as string;
@@ -1491,7 +1491,7 @@ export class FlowExecutor {
   }
 
   private async executeScreenshot(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const name = config.name as string || `screenshot-${Date.now()}`;
     const fullPage = config.fullPage === true;
@@ -1517,7 +1517,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertVisible(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const negate = config.negate === true;
@@ -1531,7 +1531,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertText(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedText = config.expectedText as string;
@@ -1555,7 +1555,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertUrl(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const expectedUrl = config.expectedUrl as string;
     const matchType = config.matchType as string || 'contains';
@@ -1575,7 +1575,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertValue(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedValue = config.expectedValue as string;
@@ -1585,7 +1585,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertCount(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedCount = config.expectedCount as number;
@@ -1631,7 +1631,7 @@ export class FlowExecutor {
   // ===============================
 
   private async executeAssertHidden(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 5000;
@@ -1640,7 +1640,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertAttached(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const attached = config.attached !== 'false';
@@ -1650,7 +1650,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertChecked(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const checked = config.checked !== 'false';
@@ -1660,7 +1660,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertEnabled(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 5000;
@@ -1669,7 +1669,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertDisabled(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 5000;
@@ -1678,7 +1678,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertEditable(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const editable = config.editable !== 'false';
@@ -1692,7 +1692,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertEmpty(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 5000;
@@ -1701,7 +1701,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertFocused(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 5000;
@@ -1710,7 +1710,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertInViewport(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const ratio = (config.ratio as number) || 0;
@@ -1720,7 +1720,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertAttribute(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const attribute = config.attribute as string;
@@ -1736,7 +1736,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertClass(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedClass = config.expectedClass as string;
@@ -1751,7 +1751,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertCSS(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const cssProperty = config.cssProperty as string;
@@ -1762,7 +1762,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertId(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedId = config.expectedId as string;
@@ -1772,7 +1772,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertRole(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedRole = config.expectedRole as 
@@ -1796,7 +1796,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertAccessibleName(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedName = config.expectedName as string;
@@ -1806,7 +1806,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertAccessibleDescription(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedDescription = config.expectedDescription as string;
@@ -1816,7 +1816,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertTitle(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const expectedTitle = config.expectedTitle as string;
     const matchType = config.matchType as string || 'contains';
@@ -1832,7 +1832,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertValues(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const expectedValuesStr = config.expectedValues as string;
@@ -1843,7 +1843,7 @@ export class FlowExecutor {
   }
 
   private async executeAssertScreenshot(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = config.selector as string;
     const screenshotName = config.screenshotName as string;
@@ -1867,7 +1867,7 @@ export class FlowExecutor {
   }
 
   private async executeCode(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const code = config.code as string;
     if (!code) {
@@ -1896,7 +1896,7 @@ export class FlowExecutor {
   // ===============================
 
   private async executeDblClick(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const button = (config.button as 'left' | 'right' | 'middle') || 'left';
@@ -1908,7 +1908,7 @@ export class FlowExecutor {
   }
 
   private async executeClear(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const force = config.force === true;
@@ -1918,7 +1918,7 @@ export class FlowExecutor {
   }
 
   private async executeBlur(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 30000;
@@ -1927,8 +1927,7 @@ export class FlowExecutor {
   }
 
   private async executeFocus(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
-    
+    if (!this.page) throw new Error('Browser not initialized');
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 30000;
     
@@ -1936,7 +1935,7 @@ export class FlowExecutor {
   }
 
   private async executePress(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const key = (config.customKey as string) || (config.key as string) || 'Enter';
@@ -1947,7 +1946,7 @@ export class FlowExecutor {
   }
 
   private async executePressSequentially(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const text = config.text as string;
@@ -1958,7 +1957,7 @@ export class FlowExecutor {
   }
 
   private async executeSelectText(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const force = config.force === true;
@@ -1968,7 +1967,7 @@ export class FlowExecutor {
   }
 
   private async executeSetInputFiles(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const filePath = config.filePath as string;
@@ -1978,7 +1977,7 @@ export class FlowExecutor {
   }
 
   private async executeTap(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const force = config.force === true;
@@ -1988,7 +1987,7 @@ export class FlowExecutor {
   }
 
   private async executeDragTo(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const sourceSelector = config.sourceSelector as string;
     const targetSelector = config.targetSelector as string;
@@ -2002,7 +2001,7 @@ export class FlowExecutor {
   }
 
   private async executeScrollIntoView(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const timeout = (config.timeout as number) || 30000;
@@ -2011,7 +2010,7 @@ export class FlowExecutor {
   }
 
   private async executeDispatchEvent(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const eventType = config.eventType as string || 'click';
@@ -2021,7 +2020,7 @@ export class FlowExecutor {
   }
 
   private async executeWaitFor(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const state = (config.state as 'visible' | 'hidden' | 'attached' | 'detached') || 'visible';
@@ -2031,7 +2030,7 @@ export class FlowExecutor {
   }
 
   private async executeGetAttribute(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const attribute = config.attribute as string;
@@ -2047,7 +2046,7 @@ export class FlowExecutor {
   }
 
   private async executeInputValue(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const variableName = config.variableName as string;
@@ -2061,7 +2060,7 @@ export class FlowExecutor {
   }
 
   private async executeTextContent(config: Record<string, unknown>): Promise<void> {
-    if (!this.page) throw new Error('Browser no inicializado');
+    if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
     const variableName = config.variableName as string;

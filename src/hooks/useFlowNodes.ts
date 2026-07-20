@@ -224,17 +224,17 @@ export function useFlowNodes() {
             // Devolver la configuración para que App.tsx la use
             const config = project.config || defaultProjectConfig;
             
-            alert(`Proyecto "${project.name || 'Sin nombre'}" importado correctamente`);
+            alert(`Project "${project.name || 'Untitled'}" imported successfully`);
             resolve({ config });
           } catch (error) {
-            console.error('Error parseando archivo:', error);
+            console.error('Error parsing file:', error);
             alert('Error reading file. Make sure it is a valid JSON file.');
             resolve(null);
           }
         };
 
         reader.onerror = () => {
-          alert('Error al leer el archivo');
+          alert('Error reading file');
           resolve(null);
         };
 

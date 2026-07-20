@@ -5,7 +5,7 @@ const router = Router();
 
 /**
  * GET /api/test-runs
- * Obtiene las ejecuciones recientes
+ * Gets recent test runs
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
@@ -13,25 +13,25 @@ router.get('/', async (req: Request, res: Response) => {
     const testRuns = await testRunsService.findRecent(limit);
     res.json(testRuns);
   } catch (error) {
-    console.error('Error obteniendo ejecuciones:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error getting recent test runs:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 /**
  * GET /api/test-runs/:id
- * Obtiene una ejecución con sus resultados
+ * Gets a test run with its results
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const testRun = await testRunsService.findById(req.params.id);
     if (!testRun) {
-      res.status(404).json({ error: 'Execution not found' });
+      res.status(404).json({ error: 'Test run not found' });
       return;
     }
     res.json(testRun);
   } catch (error) {
-    console.error('Error getting execution:', error);
+    console.error('Error getting test run:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -46,24 +46,24 @@ router.get('/project/:projectId', async (req: Request, res: Response) => {
     const testRuns = await testRunsService.findByProject(req.params.projectId, limit);
     res.json(testRuns);
   } catch (error) {
-    console.error('Error obteniendo ejecuciones del proyecto:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error getting project executions:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 /**
  * GET /api/test-runs/:id/report
- * Obtiene el reporte HTML de una ejecución
+ * Gets the HTML report of a test run
  */
 router.get('/:id/report', async (req: Request, res: Response) => {
   try {
     const report = await testRunsService.getReport(req.params.id);
     if (!report) {
-      res.status(404).json({ error: 'Reporte no encontrado' });
+      res.status(404).json({ error: 'Report not found' });
       return;
     }
 
-    // Si piden HTML, devolver el contenido directamente
+    // If HTML is requested, return the content directly
     if (req.accepts('html')) {
       res.type('html').send(report.htmlContent);
       return;
@@ -71,8 +71,8 @@ router.get('/:id/report', async (req: Request, res: Response) => {
 
     res.json(report);
   } catch (error) {
-    console.error('Error obteniendo reporte:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error getting report:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
