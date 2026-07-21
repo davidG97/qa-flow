@@ -1,12 +1,11 @@
 import { useRef, useState, useCallback } from 'react';
-import { FiTrash2, FiSave, FiCode, FiVideo, FiPlay, FiLoader, FiSettings, FiDownload, FiUpload, FiArrowLeft, FiCheck, FiMoreHorizontal } from 'react-icons/fi';
+import { FiTrash2, FiSave, FiCode, FiPlay, FiLoader, FiSettings, FiDownload, FiUpload, FiArrowLeft, FiCheck, FiMoreHorizontal } from 'react-icons/fi';
 
 interface ToolbarProps {
   onRun: () => void;
   onSave: () => void;
   onClear: () => void;
   onGenerateCode?: () => void;
-  onRecord?: () => void;
   onConfig?: () => void;
   onExport?: () => void;
   onImport?: (file: File) => void;
@@ -17,11 +16,17 @@ interface ToolbarProps {
 }
 
 // ponytail: simplified toolbar - fewer visible buttons, menu for secondary actions
-const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, onExport, onImport, onProjects, isRunning, hasStartNodes, projectName }: ToolbarProps) => {
+const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onConfig, onExport, onImport, onProjects, isRunning, hasStartNodes, projectName }: ToolbarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+
+  const getSaveIcon = () => {
+    if (saveState === 'saving') return <FiLoader size={16} className="animate-spin" />;
+    if (saveState === 'saved') return <FiCheck size={16} />;
+    return <FiSave size={16} />;
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,7 +64,7 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
     <div className="toolbar">
       {/* Left: Navigation */}
       {onProjects && (
-        <button className="toolbar-btn ghost" onClick={onProjects} title="Proyectos">
+        <button className="toolbar-btn ghost" onClick={onProjects} title="Projects">
           <FiArrowLeft size={16} />
         </button>
       )}
@@ -72,15 +77,13 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
           className={`toolbar-btn icon-only ${saveState === 'saved' ? 'saved' : ''}`}
           onClick={handleSave}
           disabled={saveState === 'saving'}
-          title="Guardar (Ctrl+S)"
+          title="Save (Ctrl+S)"
         >
-          {saveState === 'saving' ? <FiLoader size={16} className="animate-spin" /> 
-           : saveState === 'saved' ? <FiCheck size={16} /> 
-           : <FiSave size={16} />}
+          {getSaveIcon()}
         </button>
 
         {onConfig && (
-          <button className="toolbar-btn icon-only" onClick={onConfig} title="Configuración">
+          <button className="toolbar-btn icon-only" onClick={onConfig} title="Configuration">
             <FiSettings size={16} />
           </button>
         )}
@@ -90,33 +93,28 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
           <button 
             className={`toolbar-btn icon-only ${showMenu ? 'active' : ''}`} 
             onClick={() => setShowMenu(!showMenu)}
-            title="Más opciones"
+            title="More options"
           >
             <FiMoreHorizontal size={16} />
           </button>
           
           {showMenu && (
             <>
-              <div className="toolbar-menu-backdrop" onClick={() => setShowMenu(false)} />
+              <div className="toolbar-menu-backdrop" onClick={() => setShowMenu(false)} role="none" />
               <div className="toolbar-menu">
                 {onGenerateCode && (
                   <button onClick={() => menuAction(onGenerateCode)}>
-                    <FiCode size={14} /> Generar código
-                  </button>
-                )}
-                {onRecord && (
-                  <button onClick={() => menuAction(onRecord)}>
-                    <FiVideo size={14} /> Grabar sesión
+                    <FiCode size={14} /> Generate code
                   </button>
                 )}
                 {onExport && (
                   <button onClick={() => menuAction(onExport)}>
-                    <FiDownload size={14} /> Exportar JSON
+                    <FiDownload size={14} /> Export JSON
                   </button>
                 )}
                 {onImport && (
                   <button onClick={() => { setShowMenu(false); fileInputRef.current?.click(); }}>
-                    <FiUpload size={14} /> Importar JSON
+                    <FiUpload size={14} /> Import JSON
                   </button>
                 )}
               </div>
@@ -127,7 +125,7 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
         <button 
           className={`toolbar-btn icon-only ${showClearConfirm ? 'danger' : ''}`}
           onClick={handleClear}
-          title={showClearConfirm ? 'Click para confirmar' : 'Limpiar canvas'}
+          title={showClearConfirm ? 'Click to confirm' : 'Clear canvas'}
         >
           <FiTrash2 size={16} />
         </button>
@@ -142,10 +140,10 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
         className="toolbar-btn primary"
         onClick={onRun}
         disabled={isRunning || !hasStartNodes}
-        title={hasStartNodes ? 'Ejecutar (F5)' : 'Agrega un nodo Inicio'}
+        title={hasStartNodes ? 'Run (F5)' : 'Add a Start node'}
       >
         {isRunning ? <FiLoader size={16} className="animate-spin" /> : <FiPlay size={16} />}
-        <span>{isRunning ? 'Ejecutando...' : 'Ejecutar'}</span>
+        <span>{isRunning ? 'Running...' : 'Run'}</span>
       </button>
     </div>
   );

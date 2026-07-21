@@ -49,6 +49,7 @@ interface NodeData extends Record<string, unknown> {
   category: NodeCategory;
   config: Record<string, unknown>;
   customLabel?: string;
+  executionStatus?: 'running' | 'success' | 'error';
 }
 
 const EditorPage = () => {
@@ -65,6 +66,7 @@ const EditorPage = () => {
   const [projectName, setProjectName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isPanelMinimized, setIsPanelMinimized] = useState(false);
 
   // Custom hooks
   const { backendConnected } = useBackendConnection();
@@ -93,12 +95,11 @@ const EditorPage = () => {
     executionId,
     validation,
     runFlow,
-    clearExecutionStatus,
   } = useFlowExecution(nodes, edges, backendConnected, projectConfig);
 
-  // Cargar proyecto al montar - solo una vez
+  // Load project on mount - only once
   useEffect(() => {
-    // Evitar múltiples cargas del mismo proyecto
+    // Avoid multiple loads of the same project
     if (hasLoadedProject.current) {
       return;
     }
@@ -123,7 +124,7 @@ const EditorPage = () => {
           importNodes(project.nodes, project.edges, true);
         }
       } catch (err) {
-        console.error('Error cargando proyecto:', err);
+        console.error('Error loading project:', err);
         hasLoadedProject.current = false;
         navigate('/projects', { replace: true });
       } finally {
@@ -134,10 +135,47 @@ const EditorPage = () => {
     loadProject();
   }, [projectId, importNodes, navigate]);
 
-  // Guardar proyecto en base de datos
+  // Update execution state on nodes
+  useEffect(() => {
+    if (!executionStatus && !isRunning) {
+      // Clear execution states when there is no execution
+      setNodes((nds) =>
+        nds.map((node) => ({
+          ...node,
+          data: { ...node.data, executionStatus: undefined },
+        }))
+      );
+      return;
+    }
+
+    setNodes((nds) =>
+      nds.map((node) => {
+        // Check if this node has result
+        const result = executionStatus?.results.find((r) => r.nodeId === node.id);
+        
+        let status: 'running' | 'success' | 'error' | undefined;
+        
+        if (result) {
+          status = result.success ? 'success' : 'error';
+        } else if (executionStatus?.currentNode === node.id) {
+          status = 'running';
+        } else if (isRunning && !result) {
+          // Pending node during execution
+          status = undefined;
+        }
+
+        return {
+          ...node,
+          data: { ...node.data, executionStatus: status },
+        };
+      })
+    );
+  }, [executionStatus, isRunning, setNodes]);
+
+  // Save project to database
   const handleSaveProject = useCallback(async () => {
     if (!projectId) {
-      alert('No hay proyecto seleccionado');
+      alert('No project selected');
       return;
     }
 
@@ -148,21 +186,21 @@ const EditorPage = () => {
         edges: edges as FlowEdge[],
         config: projectConfig,
       });
-      console.log('Proyecto guardado exitosamente');
+      console.log('Project saved successfully');
     } catch (err) {
-      console.error('Error guardando proyecto:', err);
-      alert('Error al guardar el proyecto');
+      console.error('Error saving project:', err);
+      alert('Error saving project');
     } finally {
       setSaving(false);
     }
   }, [projectId, nodes, edges, projectConfig]);
 
-  // Exportar proyecto
+  // Export project
   const handleExportProject = useCallback(() => {
     exportProject(projectConfig, projectName);
   }, [exportProject, projectConfig, projectName]);
 
-  // Importar proyecto
+  // Import project
   const handleImportProject = useCallback(async (file: File) => {
     const result = await importProject(file);
     if (result?.config) {
@@ -170,7 +208,7 @@ const EditorPage = () => {
     }
   }, [importProject]);
 
-  // Navegar a proyectos
+  // Navigate to projects
   const handleGoToProjects = useCallback(() => {
     navigate('/projects');
   }, [navigate]);
@@ -199,7 +237,7 @@ const EditorPage = () => {
         y: event.clientY - reactFlowBounds.top,
       });
 
-      // Crear configuración inicial con valores por defecto
+      // Create initial config with default values
       const initialConfig: Record<string, unknown> = {};
       nodeType.fields.forEach((field) => {
         if (field.defaultValue !== undefined) {
@@ -210,7 +248,7 @@ const EditorPage = () => {
       // Determinar el tipo de componente de nodo a usar
       const nodeComponentType = nodeType.id === 'if' ? 'ifNode' : 'testNode';
 
-      // Generar label único
+      // Generate unique label
       const uniqueLabel = getUniqueLabel(nodeType.label);
 
       const newNode: Node<NodeData> = {
@@ -235,7 +273,7 @@ const EditorPage = () => {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  // Generar código Playwright
+  // Generate Playwright code
   const onGenerateCode = useCallback(async () => {
     if (!backendConnected) {
       alert('⚠️ Backend no conectado');
@@ -266,11 +304,11 @@ const EditorPage = () => {
 
       const code = await apiService.generateCode(flow);
       
-      // Mostrar el código en el modal
+      // Show code in modal
       setGeneratedCode(code);
       setShowCodeModal(true);
     } catch {
-      alert('Error generando código');
+      alert('Error generating code');
     }
   }, [nodes, edges, backendConnected, projectId, projectName, projectConfig]);
 
@@ -280,7 +318,7 @@ const EditorPage = () => {
     return (
       <div className="editor-loading">
         <div className="loading-spinner" />
-        <p>Cargando proyecto...</p>
+        <p>Loading project...</p>
       </div>
     );
   }
@@ -289,7 +327,7 @@ const EditorPage = () => {
     <div className="app-container">
       <Sidebar onDragStart={onDragStart} />
       
-      <div className="canvas-area">
+      <div className={`canvas-area ${isPanelMinimized ? 'panel-minimized' : ''}`}>
         <Toolbar
           onRun={runFlow}
           onSave={handleSaveProject}
@@ -341,7 +379,7 @@ const EditorPage = () => {
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#0f3460" />
           </ReactFlow>
           
-          {/* Indicador de conexión con backend */}
+          {/* Backend connection indicator */}
           <BackendStatusIndicator connected={backendConnected} />
         </div>
       </div>
@@ -361,7 +399,7 @@ const EditorPage = () => {
         validation={validation}
         executionId={executionId}
         isRunning={isRunning}
-        onClose={clearExecutionStatus}
+        onMinimizeChange={setIsPanelMinimized}
       />
 
       <ProjectConfigModal
@@ -409,7 +447,7 @@ function BackendStatusIndicator({ connected }: Readonly<{ connected: boolean }>)
         borderRadius: '50%',
         background: connected ? '#22c55e' : '#ef4444',
       }} />
-      {connected ? 'Backend conectado' : 'Desconectado'}
+      {connected ? 'Backend connected' : 'Disconnected'}
     </div>
   );
 }

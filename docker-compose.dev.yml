@@ -25,9 +25,8 @@ services:
     volumes:
       # Persist SQLite database
       - qa-flow-dev-data:/app/data
-      # Persist screenshots and recordings
+      # Persist screenshots
       - qa-flow-dev-screenshots:/app/server/screenshots
-      - qa-flow-dev-recordings:/app/server/recordings
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s
@@ -40,5 +39,3 @@ volumes:
     name: qa-flow-dev-data
   qa-flow-dev-screenshots:
     name: qa-flow-dev-screenshots
-  qa-flow-dev-recordings:
-    name: qa-flow-dev-recordings

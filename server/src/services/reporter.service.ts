@@ -1,7 +1,7 @@
 import { ExecutionStatus, ExecutionResult, TestFlow } from '../types/index.js';
 import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 export interface TestReport {
   id: string;
@@ -124,7 +124,6 @@ export class ReporterService {
     const startNodes = flow.nodes.filter(n => n.data.nodeType === 'start');
     
     if (startNodes.length === 0) {
-      // Si no hay nodos start, tratar todo como un solo test
       return [{
         testName: flow.name || 'Test',
         startNodeId: 'flow',
@@ -642,7 +641,7 @@ export class ReporterService {
     const html = this.generateHtmlReport(report);
     await fs.writeFile(filepath, html, 'utf-8');
     
-    console.log(`📊 Reporte guardado: ${filepath}`);
+    console.log(`📊 Report saved: ${filepath}`);
     return filepath;
   }
 

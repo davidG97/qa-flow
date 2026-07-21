@@ -6,6 +6,14 @@ import { FiX, FiPlus, FiChevronDown, FiChevronRight, FiCrosshair } from 'react-i
 import { apiService, PickerResult } from '../../services/api';
 import InteractivePicker from './InteractivePicker';
 
+// Helper to safely convert unknown values to string
+const safeString = (value: unknown, fallback = ''): string => {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return fallback;
+};
+
 // ponytail: simplified selector types - only what Playwright actually uses
 const SELECTOR_TYPES = [
   { value: 'css', label: 'CSS' },
@@ -60,7 +68,7 @@ const SelectorField = ({
       disabled={isPickerActive}
     >
       <FiCrosshair size={18} />
-      <span>{isPickerActive ? (pickerProgress || 'Ejecutando...') : 'Seleccionar visualmente'}</span>
+      <span>{isPickerActive ? (pickerProgress || 'Running...') : 'Select visually'}</span>
     </button>
     
     {/* Row 2: Type dropdown + input */}
@@ -78,7 +86,7 @@ const SelectorField = ({
         type="text"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="ej: #submit-btn, .login-form, [data-testid='email']"
+        placeholder="e.g.: #submit-btn, .login-form, [data-testid='email']"
         className="selector-input"
       />
     </div>
@@ -125,10 +133,10 @@ const FieldRenderer = ({
       
       {field.type === 'text' && isSelector && (
         <SelectorField
-          value={String(config.selector || '')}
-          selectorType={String(config.selectorType || 'css')}
-          onChange={(v) => onSelectorChange(v, String(config.selectorType || 'css'))}
-          onTypeChange={(t) => onSelectorChange(String(config.selector || ''), t)}
+          value={safeString(config.selector)}
+          selectorType={safeString(config.selectorType, 'css')}
+          onChange={(v) => onSelectorChange(v, safeString(config.selectorType, 'css'))}
+          onTypeChange={(t) => onSelectorChange(safeString(config.selector), t)}
           onStartPicker={onStartPicker}
           isPickerActive={isPickerActive}
           pickerProgress={pickerProgress}
@@ -139,7 +147,7 @@ const FieldRenderer = ({
         <input
           type="text"
           placeholder={field.placeholder}
-          value={String(value || '')}
+          value={safeString(value)}
           onChange={(e) => onChange(e.target.value)}
         />
       )}
@@ -155,7 +163,7 @@ const FieldRenderer = ({
       
       {field.type === 'select' && (
         <select
-          value={String(value || field.defaultValue || '')}
+          value={safeString(value, safeString(field.defaultValue))}
           onChange={(e) => onChange(e.target.value)}
         >
           {field.options?.map((option) => (
@@ -169,7 +177,7 @@ const FieldRenderer = ({
       {field.type === 'textarea' && (
         <textarea
           placeholder={field.placeholder}
-          value={String(value || '')}
+          value={safeString(value)}
           onChange={(e) => onChange(e.target.value)}
         />
       )}
@@ -181,7 +189,7 @@ const FieldRenderer = ({
             checked={Boolean(value ?? field.defaultValue)}
             onChange={(e) => onChange(e.target.checked)}
           />
-          <span className="checkbox-text">{value ? 'Activado' : 'Desactivado'}</span>
+          <span className="checkbox-text">{value ? 'Enabled' : 'Disabled'}</span>
         </label>
       )}
       
@@ -255,7 +263,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
     );
     
     if (!hasStartWithUrl) {
-      alert('Configura una URL base en el nodo de Inicio.');
+      alert('Configure a base URL in the Start node.');
       return;
     }
 
@@ -276,7 +284,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
 
     try {
       setIsPickerActive(true);
-      setPickerProgress('Iniciando selector visual...');
+      setPickerProgress('Starting visual selector...');
 
       const { sessionId } = await apiService.startInteractivePicker(
         selectedNode.id,
@@ -297,7 +305,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
       setIsPickerActive(false);
       setPickerProgress('');
       setPickerSessionId(null);
-      alert('Error iniciando selector visual');
+      alert('Error starting visual selector');
     }
   };
 
@@ -404,13 +412,13 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
         <div className="modal-body">
           {selectedNode.data.nodeType !== 'start' && (
             <div className="panel-section">
-              <h3>Identificación</h3>
+              <h3>Identification</h3>
               <div className="panel-field">
                 <label>
-                  Título del nodo{' '}
+                  Node title{' '}
                   <input
                     type="text"
-                    placeholder={nodeDefinition?.label || 'Título personalizado'}
+                    placeholder={nodeDefinition?.label || 'Custom title'}
                     value={selectedNode.data.customLabel || ''}
                     onChange={(e) => handleLabelChange(e.target.value)}
                   />
@@ -420,7 +428,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
           )}
 
           <div className="panel-section">
-            <h3>Configuración</h3>
+            <h3>Configuration</h3>
             {renderFields(nodeDefinition?.fields.filter(f => !f.group) || [])}
           </div>
 
@@ -440,7 +448,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
                   <span className="group-toggle">
                     {collapsedGroups.has(groupName) ? <FiChevronRight size={14} /> : <FiChevronDown size={14} />}
                   </span>
-                  <h3>⚙️ Opciones Avanzadas</h3>
+                  <h3>⚙️ Advanced Options</h3>
                   <span className="group-count">{fields.length}</span>
                 </button>
                 {!collapsedGroups.has(groupName) && <div className="group-content">{renderFields(fields)}</div>}
@@ -449,7 +457,7 @@ const PropertiesPanel = ({ selectedNode, onUpdateNode, isOpen, onClose, allNodes
           })()}
           
           <div className="panel-section">
-            <h3>Información</h3>
+            <h3>Information</h3>
             <p className="info-text">{nodeDefinition?.description}</p>
           </div>
         </div>

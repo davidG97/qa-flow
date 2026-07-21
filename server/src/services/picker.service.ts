@@ -96,7 +96,7 @@ const PICKER_SCRIPT = `
   // Crear badge de instrucciones (pequeño, esquina inferior)
   const banner = document.createElement('div');
   banner.id = '__qaflow-picker-banner';
-  banner.innerHTML = '🎯 Clic para seleccionar • ESC cancelar';
+  banner.innerHTML = '🎯 Click to select • ESC cancel';
   banner.style.cssText = \`
     position: fixed;
     bottom: 16px;
@@ -114,11 +114,38 @@ const PICKER_SCRIPT = `
   \`;
   document.body.appendChild(banner);
 
+  // Verificar unicidad y agregar nth si hay múltiples coincidencias
+  function makeUnique(selector, type, element) {
+    try {
+      let matches = [];
+      if (type === 'css') {
+        matches = Array.from(document.querySelectorAll(selector));
+      } else if (type === 'text') {
+        // Para text, buscar elementos que contengan ese texto exacto
+        const allEls = document.querySelectorAll('a, button, label, span');
+        matches = Array.from(allEls).filter(el => el.textContent?.trim() === selector);
+      } else if (type === 'testId') {
+        matches = Array.from(document.querySelectorAll('[data-testid="' + selector + '"], [data-test-id="' + selector + '"]'));
+      }
+      
+      if (matches.length > 1) {
+        const idx = matches.indexOf(element);
+        if (idx >= 0) {
+          // Usar sintaxis Playwright >> nth=N
+          return { selector: selector + ' >> nth=' + idx, isUnique: true, matchCount: matches.length };
+        }
+      }
+      return { selector: selector, isUnique: matches.length === 1, matchCount: matches.length };
+    } catch (e) {
+      return { selector: selector, isUnique: true, matchCount: 1 };
+    }
+  }
+
   // Generar selectores para un elemento
   function generateSelectors(element) {
     const selectors = [];
     
-    // Por ID
+    // Por ID (IDs deberían ser únicos)
     if (element.id) {
       selectors.push({
         selector: '#' + element.id,
@@ -130,10 +157,11 @@ const PICKER_SCRIPT = `
     // Por data-testid
     const testId = element.getAttribute('data-testid') || element.getAttribute('data-test-id');
     if (testId) {
+      const unique = makeUnique(testId, 'testId', element);
       selectors.push({
-        selector: testId,
+        selector: unique.selector,
         type: 'testId',
-        confidence: 100
+        confidence: unique.isUnique ? 100 : 95
       });
     }
     
@@ -157,30 +185,33 @@ const PICKER_SCRIPT = `
     // Por texto visible (para botones, links, etc.)
     const text = element.textContent?.trim();
     if (text && text.length < 50 && ['A', 'BUTTON', 'LABEL', 'SPAN'].includes(element.tagName)) {
+      const unique = makeUnique(text, 'text', element);
       selectors.push({
-        selector: text,
+        selector: unique.selector,
         type: 'text',
-        confidence: 85
+        confidence: unique.isUnique ? 85 : 80
       });
     }
     
     // Por placeholder
     const placeholder = element.getAttribute('placeholder');
     if (placeholder) {
+      const unique = makeUnique('[placeholder="' + placeholder + '"]', 'css', element);
       selectors.push({
-        selector: '[placeholder="' + placeholder + '"]',
+        selector: unique.selector,
         type: 'css',
-        confidence: 80
+        confidence: unique.isUnique ? 80 : 75
       });
     }
     
     // Por name attribute
     const name = element.getAttribute('name');
     if (name) {
+      const unique = makeUnique('[name="' + name + '"]', 'css', element);
       selectors.push({
-        selector: '[name="' + name + '"]',
+        selector: unique.selector,
         type: 'css',
-        confidence: 75
+        confidence: unique.isUnique ? 75 : 70
       });
     }
     
@@ -190,10 +221,23 @@ const PICKER_SCRIPT = `
       c.length < 30
     );
     if (classes.length > 0 && classes.length <= 2) {
+      const classSelector = '.' + classes.join('.');
+      const unique = makeUnique(classSelector, 'css', element);
       selectors.push({
-        selector: '.' + classes.join('.'),
+        selector: unique.selector,
         type: 'css',
-        confidence: 60
+        confidence: unique.isUnique ? 60 : 55
+      });
+    }
+    
+    // Por tag + clases (selector completo)
+    if (classes.length > 0) {
+      const fullSelector = element.tagName.toLowerCase() + '.' + classes.join('.');
+      const unique = makeUnique(fullSelector, 'css', element);
+      selectors.push({
+        selector: unique.selector,
+        type: 'css',
+        confidence: unique.isUnique ? 65 : 58
       });
     }
     
@@ -526,7 +570,7 @@ class PickerService {
     const startNode = pathNodes.find(n => n.data.nodeType === 'start');
     
     if (!startNode?.data.config.baseUrl) {
-      throw new Error('No se encontró URL base en el nodo de inicio');
+      throw new Error('Base URL not found in start node');
     }
 
     // Check for CDP URL (from param, startNode config, or env)
@@ -553,7 +597,7 @@ class PickerService {
           page = await context.newPage();
         }
       } catch (error) {
-        throw new Error(`No se pudo conectar a Chrome en ${effectiveCdpUrl}. Asegúrate de tener Chrome abierto con --remote-debugging-port=9222`);
+        throw new Error(`Could not connect to Chrome at ${effectiveCdpUrl}. Make sure Chrome is open with --remote-debugging-port=9222`);
       }
     } else {
       // ponytail: try GUI mode, if fails (no display/Docker) frontend uses interactive picker
@@ -603,7 +647,7 @@ class PickerService {
     try {
       for (let i = 0; i < pathNodes.length; i++) {
         const node = pathNodes[i];
-        onProgress?.(`Ejecutando: ${node.data.label} (${i + 1}/${pathNodes.length})`);
+        onProgress?.(`Running: ${node.data.label} (${i + 1}/${pathNodes.length})`);
         await this.executeNodeAction(node, page);
         // Small delay between nodes for stability
         await page.waitForTimeout(100);
@@ -613,7 +657,7 @@ class PickerService {
     } catch (error) {
       console.error('Error executing path nodes:', error);
       await browser.close();
-      throw new Error(`Error ejecutando nodos: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Error running nodes: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // Inject picker script
@@ -684,10 +728,10 @@ class PickerService {
     const startNode = pathNodes.find(n => n.data.nodeType === 'start');
     
     if (!startNode?.data.config.baseUrl) {
-      throw new Error('No se encontró URL base en el nodo de inicio');
+      throw new Error('Base URL not found in start node');
     }
 
-    onProgress?.('Iniciando navegador...');
+    onProgress?.('Starting browser...');
     
     // Always headless for Docker compatibility
     const browser = await chromium.launch({
@@ -706,7 +750,7 @@ class PickerService {
     try {
       for (let i = 0; i < pathNodes.length; i++) {
         const node = pathNodes[i];
-        onProgress?.(`Ejecutando: ${node.data.label} (${i + 1}/${pathNodes.length})`);
+        onProgress?.(`Running: ${node.data.label} (${i + 1}/${pathNodes.length})`);
         await this.executeNodeAction(node, page);
         await page.waitForTimeout(100);
       }
@@ -714,7 +758,7 @@ class PickerService {
     } catch (error) {
       console.error(`[Picker] Error executing nodes:`, error);
       await browser.close();
-      throw new Error(`Error ejecutando nodos: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Error running nodes: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // Start screencast via CDP
@@ -777,12 +821,13 @@ class PickerService {
     const session = this.sessions.get(sessionId);
     
     if (!session) {
-      throw new Error('Sesión no encontrada');
+      throw new Error('Session not found');
     }
 
     try {
       // ponytail: elementFromPoint handles scroll correctly and traverses open shadows
-      const jsResult = await session.page.evaluate(`
+      // Also checks for uniqueness and returns index if multiple matches
+      const jsResult = await session.page.evaluate(String.raw`
         (function(px, py) {
           function traverse(root, x, y) {
             var el = root.elementFromPoint ? root.elementFromPoint(x, y) : document.elementFromPoint(x, y);
@@ -800,19 +845,59 @@ class PickerService {
               attrs[el.attributes[i].name] = el.attributes[i].value;
             }
             
+            // Build candidate selectors and check uniqueness
+            var candidates = [];
+            var tag = el.tagName.toLowerCase();
+            
+            if (attrs['data-testid']) {
+              var sel = '[data-testid="' + attrs['data-testid'] + '"]';
+              var matches = document.querySelectorAll(sel);
+              var idx = Array.from(matches).indexOf(el);
+              candidates.push({ selector: attrs['data-testid'], type: 'testId', count: matches.length, index: idx });
+            }
+            
+            if (attrs.id && !attrs.id.match(/^[0-9]|[:\s]/)) {
+              candidates.push({ selector: '#' + attrs.id, type: 'css', count: 1, index: 0 });
+            }
+            
+            if (attrs.class) {
+              var classes = attrs.class.split(/\s+/).filter(function(c) { return c && !c.match(/^[0-9]/); }).slice(0, 2);
+              if (classes.length > 0) {
+                var sel = tag + '.' + classes.join('.');
+                var matches = document.querySelectorAll(sel);
+                var idx = Array.from(matches).indexOf(el);
+                candidates.push({ selector: sel, type: 'css', count: matches.length, index: idx });
+              }
+            }
+            
+            if (attrs.placeholder) {
+              var sel = '[placeholder="' + attrs.placeholder + '"]';
+              var matches = document.querySelectorAll(sel);
+              var idx = Array.from(matches).indexOf(el);
+              candidates.push({ selector: sel, type: 'css', count: matches.length, index: idx });
+            }
+            
+            candidates.push({ selector: tag, type: 'css', count: 9999, index: -1 });
+            
             return {
-              tagName: el.tagName.toLowerCase(),
+              tagName: tag,
               attrs: attrs,
-              rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+              rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+              candidates: candidates
             };
           }
           return traverse(document, px, py);
         })(${Math.round(x)}, ${Math.round(y)})
-      `) as { tagName: string; attrs: Record<string, string>; rect: { x: number; y: number; width: number; height: number } } | null;
+      `) as { 
+        tagName: string; 
+        attrs: Record<string, string>; 
+        rect: { x: number; y: number; width: number; height: number };
+        candidates: Array<{ selector: string; type: string; count: number; index: number }>;
+      } | null;
 
       if (!jsResult) return null;
 
-      return this.buildPickerResult(jsResult.tagName, jsResult.attrs, jsResult.rect);
+      return this.buildPickerResult(jsResult.tagName, jsResult.attrs, jsResult.rect, jsResult.candidates);
     } catch (error) {
       console.error('Error selecting element:', error);
       throw error;
@@ -821,22 +906,51 @@ class PickerService {
 
   /**
    * Build PickerResult from element info
+   * Uses candidates with uniqueness info to add >> nth=N when needed
    */
   private buildPickerResult(
     tagName: string, 
     attrs: Record<string, string>, 
-    rect: { x: number; y: number; width: number; height: number }
+    rect: { x: number; y: number; width: number; height: number },
+    candidates?: Array<{ selector: string; type: string; count: number; index: number }>
   ): PickerResult {
     const selectors: Array<{ selector: string; type: string; confidence: number }> = [];
 
-    if (attrs['data-testid']) {
-      selectors.push({ selector: attrs['data-testid'], type: 'testId', confidence: 100 });
+    // If we have candidates with uniqueness info, use them
+    if (candidates && candidates.length > 0) {
+      for (const c of candidates) {
+        if (c.count === 9999) continue; // skip fallback
+        
+        let selector = c.selector;
+        let confidence = c.type === 'testId' ? 100 : c.type === 'css' && c.selector.startsWith('#') ? 95 : 70;
+        
+        // If multiple matches, add >> nth=N
+        if (c.count > 1 && c.index >= 0) {
+          selector = `${c.selector} >> nth=${c.index}`;
+          confidence -= 5; // slightly lower confidence for nth selectors
+        }
+        
+        selectors.push({ selector, type: c.type, confidence });
+      }
+    } else {
+      // Fallback: build selectors without uniqueness check (legacy path)
+      if (attrs['data-testid']) {
+        selectors.push({ selector: attrs['data-testid'], type: 'testId', confidence: 100 });
+      }
+
+      if (attrs.id && !/(?:^\d)|[:\s]/.exec(attrs.id)) {
+        selectors.push({ selector: `#${attrs.id}`, type: 'css', confidence: 95 });
+      }
+
+      if (attrs.class) {
+        const classes = attrs.class.split(/\s+/).filter(c => c && !/^\d/.exec(c)).slice(0, 2);
+        if (classes.length > 0) {
+          selectors.push({ selector: `${tagName}.${classes.join('.')}`, type: 'css', confidence: 70 });
+        }
+      }
     }
 
-    if (attrs.id && !attrs.id.match(/^[0-9]|[:\s]/)) {
-      selectors.push({ selector: `#${attrs.id}`, type: 'css', confidence: 95 });
-    }
-
+    // Add additional selectors based on attrs
     const roleMap: Record<string, string> = { button: 'button', a: 'link', input: 'textbox', select: 'combobox', textarea: 'textbox' };
     let role = attrs.role || roleMap[tagName];
     if (tagName === 'input') {
@@ -847,26 +961,15 @@ class PickerService {
     }
     const name = attrs['aria-label'] || attrs.placeholder || attrs.title;
     if (role && name) {
-      selectors.push({ selector: `getByRole('${role}', { name: '${name.replace(/'/g, "\\'")}' })`, type: 'role', confidence: 92 });
+      selectors.push({ selector: `getByRole('${role}', { name: '${name.replaceAll("'", String.raw`\'`)}' })`, type: 'role', confidence: 92 });
     }
 
-    if (attrs.placeholder) {
-      selectors.push({ selector: `getByPlaceholder('${attrs.placeholder.replace(/'/g, "\\'")}')`, type: 'placeholder', confidence: 90 });
+    if (attrs.placeholder && !candidates) {
+      selectors.push({ selector: `getByPlaceholder('${attrs.placeholder.replaceAll("'", String.raw`\'`)}')`, type: 'placeholder', confidence: 90 });
     }
 
     if (attrs.title) {
-      selectors.push({ selector: `getByTitle('${attrs.title.replace(/'/g, "\\'")}')`, type: 'title', confidence: 88 });
-    }
-
-    if (attrs.class) {
-      const classes = attrs.class.split(/\s+/).filter(c => c && !c.match(/^[0-9]/)).slice(0, 2);
-      if (classes.length > 0) {
-        selectors.push({ selector: `${tagName}.${classes.join('.')}`, type: 'css', confidence: 70 });
-      }
-    }
-
-    if (attrs.type) {
-      selectors.push({ selector: `${tagName}[type="${attrs.type}"]`, type: 'css', confidence: 60 });
+      selectors.push({ selector: `getByTitle('${attrs.title.replaceAll("'", String.raw`\'`)}')`, type: 'title', confidence: 88 });
     }
 
     selectors.push({ selector: tagName, type: 'css', confidence: 30 });
@@ -946,7 +1049,7 @@ class PickerService {
     };
     
     if (!session?.page) {
-      throw new Error('Sesión no encontrada');
+      throw new Error('Session not found');
     }
 
     // Use mouse wheel scroll
@@ -972,7 +1075,7 @@ class PickerService {
     }
 
     // Priority 2: id
-    if (attributes.id && !attributes.id.match(/^[0-9]|[:\s]/)) {
+    if (attributes.id && !/(?:^\d)|[:\s]/.exec(attributes.id)) {
       alternatives.push({ selector: `#${attributes.id}`, type: 'css', confidence: 95 });
     }
 
@@ -991,7 +1094,7 @@ class PickerService {
 
     // Priority 5: CSS class selector
     if (attributes.class) {
-      const classes = attributes.class.split(/\s+/).filter(c => c && !c.match(/^[0-9]|--/));
+      const classes = attributes.class.split(/\s+/).filter(c => c && !/(?:^\d)|--/.exec(c));
       if (classes.length > 0) {
         const selector = `${tagName}.${classes.slice(0, 2).join('.')}`;
         alternatives.push({ selector, type: 'css', confidence: 70 });

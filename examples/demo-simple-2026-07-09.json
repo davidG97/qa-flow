@@ -6,8 +6,8 @@
       "id": "1",
       "type": "testNode",
       "position": {
-        "x": -45,
-        "y": -210
+        "x": -225,
+        "y": -45
       },
       "data": {
         "label": "Inicio",
@@ -16,7 +16,7 @@
         "config": {
           "baseUrl": "https://playwright.dev/",
           "browser": "chromium",
-          "headless": false,
+          "headless": true,
           "testName": "Playwright search",
           "tags": [
             "@smoke"
@@ -148,8 +148,8 @@
       "id": "6",
       "type": "testNode",
       "position": {
-        "x": -45,
-        "y": 120
+        "x": 645,
+        "y": -45
       },
       "data": {
         "label": "Verificar Texto",
@@ -206,11 +206,11 @@
     }
   ],
   "config": {
-    "executionMode": "default",
+    "executionMode": "parallel",
     "workers": 4,
     "maxFailures": 0,
     "retries": 0,
     "timeout": 30000
   },
-  "savedAt": "2026-07-02T01:05:23.265Z"
+  "savedAt": "2026-07-09T14:22:27.075Z"
 }

@@ -100,7 +100,6 @@ async function main() {
     '-e', `JWT_SECRET=${jwtSecret}`,
     '-v', 'qa-flow-data:/app/data',
     '-v', 'qa-flow-screenshots:/app/server/screenshots',
-    '-v', 'qa-flow-recordings:/app/server/recordings',
     `${IMAGE}:latest`
   ], { stdio: 'inherit' });
 

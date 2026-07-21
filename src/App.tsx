@@ -13,11 +13,11 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rutas públicas */}
+      {/* Public routes */}
       <Route path="/login" element={user ? <Navigate to="/projects" replace /> : <LoginPage />} />
       <Route path="/register" element={user ? <Navigate to="/projects" replace /> : <RegisterPage />} />
 
-      {/* Rutas protegidas (cualquier usuario autenticado) */}
+      {/* Protected routes (any authenticated user) */}
       <Route element={<ProtectedRoute />}>
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/:projectId" element={<EditorPage />} />

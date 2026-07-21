@@ -35,13 +35,13 @@ router.post('/', requireAdmin, async (req: Request, res: Response) => {
     const { email, password, name, role } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+      res.status(400).json({ error: 'Email and password are required' });
       return;
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      res.status(400).json({ error: 'El email ya está registrado' });
+      res.status(400).json({ error: 'Email is already registered' });
       return;
     }
 
@@ -60,8 +60,8 @@ router.post('/', requireAdmin, async (req: Request, res: Response) => {
 
     res.status(201).json(user);
   } catch (error) {
-    console.error('Error creando usuario:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -77,19 +77,19 @@ router.put('/:id', async (req: Request, res: Response) => {
     const isSelf = req.userId === id;
 
     if (!isAdmin && !isSelf) {
-      res.status(403).json({ error: 'No tienes permiso para editar este usuario' });
+      res.status(403).json({ error: 'You do not have permission to edit this user' });
       return;
     }
 
     const existing = await prisma.user.findUnique({ where: { id } });
     if (!existing) {
-      res.status(404).json({ error: 'Usuario no encontrado' });
+      res.status(404).json({ error: 'User not found' });
       return;
     }
 
     // Solo admin puede cambiar role y editar otros usuarios
     if (!isAdmin && (role !== undefined || email !== undefined)) {
-      res.status(403).json({ error: 'Solo un administrador puede modificar el rol o el email' });
+      res.status(403).json({ error: 'Only an administrator can modify the role or email' });
       return;
     }
 
@@ -113,8 +113,8 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     res.json(user);
   } catch (error) {
-    console.error('Error actualizando usuario:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -127,15 +127,15 @@ router.delete('/:id', requireAdmin, async (req: Request, res: Response) => {
     const { id } = req.params;
 
     if (req.userId === id) {
-      res.status(400).json({ error: 'No puedes eliminar tu propia cuenta' });
+      res.status(400).json({ error: 'You cannot delete your own account' });
       return;
     }
 
     await prisma.user.delete({ where: { id } });
     res.status(204).send();
   } catch (error) {
-    console.error('Error eliminando usuario:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

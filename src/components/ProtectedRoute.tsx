@@ -12,7 +12,7 @@ function LoadingScreen() {
       background: 'var(--color-dark-950)',
       color: 'var(--color-dark-400)',
     }}>
-      Cargando...
+      Loading...
     </div>
   );
 }

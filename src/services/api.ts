@@ -1,7 +1,15 @@
 // Servicio API para comunicarse con el backend
 
-const API_URL = 'http://localhost:3001/api';
-const WS_URL = 'ws://localhost:3001';
+// Use same origin in production, fallback to localhost:3001 in development
+const isProduction = import.meta.env.PROD;
+const API_URL = isProduction ? '/api' : 'http://localhost:3001/api';
+
+function getWebSocketUrl(): string {
+  if (!isProduction) return 'ws://localhost:3001';
+  const wsProtocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${wsProtocol}//${globalThis.location.host}`;
+}
+const WS_URL = getWebSocketUrl();
 
 export interface ExecutionResult {
   success: boolean;
@@ -110,7 +118,7 @@ class ApiService {
     if (response.status === 401) {
       localStorage.removeItem('qa-flow-token');
       globalThis.location.href = '/login';
-      throw new Error('Sesión expirada');
+      throw new Error('Session expired');
     }
 
     return response;
@@ -127,7 +135,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error de inicio de sesión');
+      throw new Error(error.error || 'Login error');
     }
     return response.json();
   }
@@ -139,7 +147,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error de registro');
+      throw new Error(error.error || 'Registration error');
     }
     return response.json();
   }
@@ -157,13 +165,13 @@ class ApiService {
   }
 
   // ==========================================
-  // ADMIN - USUARIOS
+  // ADMIN - USERS
   // ==========================================
 
   async getUsers(): Promise<Array<{ id: string; email: string; name: string | null; role: string; createdAt: string }>> {
     const response = await this.request(`${API_URL}/users`);
     if (!response.ok) {
-      throw new Error('Error obteniendo usuarios');
+      throw new Error('Error fetching users');
     }
     return response.json();
   }
@@ -175,7 +183,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error creando usuario');
+      throw new Error(error.error || 'Error creating user');
     }
     return response.json();
   }
@@ -187,7 +195,7 @@ class ApiService {
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error actualizando usuario');
+      throw new Error(error.error || 'Error updating user');
     }
     return response.json();
   }
@@ -197,7 +205,7 @@ class ApiService {
       method: 'DELETE',
     });
     if (!response.ok) {
-      throw new Error('Error eliminando usuario');
+      throw new Error('Error deleting user');
     }
   }
 
@@ -224,7 +232,7 @@ class ApiService {
       this.ws = new WebSocket(WS_URL);
 
       this.ws.onopen = () => {
-        console.log('✅ WebSocket conectado');
+        console.log('✅ WebSocket connected');
         resolve();
       };
 
@@ -275,12 +283,12 @@ class ApiService {
             }
           }
         } catch (error) {
-          console.error('Error procesando mensaje WS:', error);
+          console.error('Error processing WS message:', error);
         }
       };
 
       this.ws.onclose = () => {
-        console.log('🔌 WebSocket desconectado');
+        console.log('🔌 WebSocket disconnected');
         this.ws = null;
       };
     });
@@ -324,7 +332,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error ejecutando flujo');
+      throw new Error(error.error || 'Error executing flow');
     }
 
     return response.json();
@@ -337,71 +345,11 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error('Error generando código');
+      throw new Error('Error generating code');
     }
 
     const data = await response.json();
     return data.code;
-  }
-
-  // ========================
-  // Recording
-  // ========================
-
-  async startRecording(url?: string): Promise<{ sessionId: string; message: string }> {
-    const response = await this.request(`${API_URL}/record/start`, {
-      method: 'POST',
-      body: JSON.stringify({ url }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error iniciando grabación');
-    }
-
-    return response.json();
-  }
-
-  async getRecordingStatus(sessionId: string): Promise<{
-    id: string;
-    status: 'recording' | 'completed' | 'error';
-    startedAt: string;
-    completedAt?: string;
-    hasCode: boolean;
-    error?: string;
-  }> {
-    const response = await this.request(`${API_URL}/record/status/${sessionId}`);
-
-    if (!response.ok) {
-      throw new Error('Sesión no encontrada');
-    }
-
-    return response.json();
-  }
-
-  async stopRecording(sessionId: string): Promise<void> {
-    const response = await this.request(`${API_URL}/record/stop/${sessionId}`, {
-      method: 'POST',
-    });
-
-    if (!response.ok) {
-      throw new Error('Error deteniendo grabación');
-    }
-  }
-
-  async getRecordingNodes(sessionId: string): Promise<{
-    nodes: FlowNode[];
-    edges: FlowEdge[];
-    code: string;
-  }> {
-    const response = await this.request(`${API_URL}/record/nodes/${sessionId}`);
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error obteniendo nodos');
-    }
-
-    return response.json();
   }
 
   async parsePlaywrightCode(code: string): Promise<{
@@ -414,7 +362,7 @@ class ApiService {
     });
 
     if (!response.ok) {
-      throw new Error('Error parseando código');
+      throw new Error('Error parsing code');
     }
 
     return response.json();
@@ -437,7 +385,7 @@ class ApiService {
   }> {
     const response = await this.request(`${API_URL}/reports`);
     if (!response.ok) {
-      throw new Error('Error obteniendo reportes');
+      throw new Error('Error getting reports');
     }
     return response.json();
   }
@@ -445,7 +393,7 @@ class ApiService {
   async getReport(id: string): Promise<TestReport> {
     const response = await this.request(`${API_URL}/reports/${id}`);
     if (!response.ok) {
-      throw new Error('Reporte no encontrado');
+      throw new Error('Report not found');
     }
     return response.json();
   }
@@ -468,7 +416,7 @@ class ApiService {
       method: 'DELETE',
     });
     if (!response.ok) {
-      throw new Error('Error eliminando reporte');
+      throw new Error('Error deleting report');
     }
   }
 
@@ -479,7 +427,7 @@ class ApiService {
   async getProjects(): Promise<ProjectDTO[]> {
     const response = await this.request(`${API_URL}/projects`);
     if (!response.ok) {
-      throw new Error('Error obteniendo proyectos');
+      throw new Error('Error getting projects');
     }
     return response.json();
   }
@@ -487,7 +435,7 @@ class ApiService {
   async getProject(id: string): Promise<ProjectDTO> {
     const response = await this.request(`${API_URL}/projects/${id}`);
     if (!response.ok) {
-      throw new Error('Error obteniendo proyecto');
+      throw new Error('Error getting project');
     }
     return response.json();
   }
@@ -498,7 +446,7 @@ class ApiService {
       body: JSON.stringify(project),
     });
     if (!response.ok) {
-      throw new Error('Error creando proyecto');
+      throw new Error('Error creating project');
     }
     return response.json();
   }
@@ -509,7 +457,7 @@ class ApiService {
       body: JSON.stringify(project),
     });
     if (!response.ok) {
-      throw new Error('Error actualizando proyecto');
+      throw new Error('Error updating project');
     }
     return response.json();
   }
@@ -519,7 +467,7 @@ class ApiService {
       method: 'DELETE',
     });
     if (!response.ok) {
-      throw new Error('Error eliminando proyecto');
+      throw new Error('Error deleting project');
     }
   }
 
@@ -552,7 +500,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error iniciando selector visual');
+      throw new Error(error.error || 'Error starting visual picker');
     }
 
     return response.json();
@@ -581,8 +529,8 @@ class ApiService {
 
   // === Interactive Picker (works in Docker) ===
   
-  private pickerFrameCallbacks: Map<string, (frameBase64: string) => void> = new Map();
-  private pickerFrameBuffer: Map<string, string> = new Map();  // Buffer frames until subscriber connects
+  private readonly pickerFrameCallbacks: Map<string, (frameBase64: string) => void> = new Map();
+  private readonly pickerFrameBuffer: Map<string, string> = new Map();  // Buffer frames until subscriber connects
 
   async startInteractivePicker(
     targetNodeId: string,
@@ -596,7 +544,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error iniciando selector interactivo');
+      throw new Error(error.error || 'Error starting interactive picker');
     }
 
     return response.json();
@@ -610,7 +558,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error seleccionando elemento');
+      throw new Error(error.error || 'Error selecting element at coordinates');
     }
 
     return response.json();

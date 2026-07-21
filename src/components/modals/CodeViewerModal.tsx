@@ -19,15 +19,8 @@ export default function CodeViewerModal({ isOpen, onClose, code, filename = 'tes
       await navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = code;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
     }
   };
 
@@ -39,19 +32,19 @@ export default function CodeViewerModal({ isOpen, onClose, code, filename = 'tes
     a.download = filename;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
     URL.revokeObjectURL(url);
   };
 
   return createPortal(
-    <div className="code-viewer-overlay" onClick={onClose}>
-      <div className="code-viewer-modal" onClick={e => e.stopPropagation()}>
+    <div className="code-viewer-overlay" onClick={onClose} role="none">
+      <div className="code-viewer-modal" onClick={e => e.stopPropagation()} role="none">
         <div className="code-viewer-header">
-          <h3>Código Generado</h3>
+          <h3>Generated Code</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button 
               onClick={handleCopy}
-              title="Copiar al portapapeles"
+              title="Copy to clipboard"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                 height: '32px', padding: '0 12px',
@@ -62,11 +55,11 @@ export default function CodeViewerModal({ isOpen, onClose, code, filename = 'tes
               }}
             >
               {copied ? <FiCheck size={14} /> : <FiCopy size={14} />}
-              {copied ? 'Copiado!' : 'Copiar'}
+              {copied ? 'Copied!' : 'Copy'}
             </button>
             <button 
               onClick={handleDownload}
-              title="Descargar archivo"
+              title="Download file"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                 height: '32px', padding: '0 12px',
@@ -77,11 +70,11 @@ export default function CodeViewerModal({ isOpen, onClose, code, filename = 'tes
               }}
             >
               <FiDownload size={14} />
-              Descargar
+              Download
             </button>
             <button 
               onClick={onClose} 
-              title="Cerrar"
+              title="Close"
               style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 width: '32px', height: '32px', padding: 0,

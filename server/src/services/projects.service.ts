@@ -1,6 +1,6 @@
 import prisma from './database.service.js';
 import { TestFlow, ProjectConfig, FlowNode, FlowEdge } from '../types/index.js';
-import { ProjectMemberRole, UserRole } from '../generated/prisma/client.js';
+import { ProjectMemberRole } from '../generated/prisma/client.js';
 
 export interface ProjectDTO {
   id: string;
@@ -138,7 +138,7 @@ export class ProjectsService {
     if (!existing) return null;
 
     if (!isAdmin && !existing.members.some((m) => m.userId === userId && m.role === ProjectMemberRole.OWNER)) {
-      throw new Error('No tienes permiso para editar este proyecto');
+      throw new Error("Don't have permission to update this project");
     }
 
     // Handle ownership transfer if requested
@@ -146,15 +146,15 @@ export class ProjectsService {
       // Verify new owner exists
       const newOwner = await prisma.user.findUnique({ where: { id: input.newOwnerId } });
       if (!newOwner) {
-        throw new Error('El nuevo propietario no existe');
+        throw new Error('New owner does not exist');
       }
 
-      // Find current owner and demote to EDITOR
+      // Find current owner and demote to MEMBER
       const currentOwner = existing.members.find(m => m.role === ProjectMemberRole.OWNER);
       if (currentOwner && currentOwner.userId !== input.newOwnerId) {
         await prisma.projectMember.update({
           where: { id: currentOwner.id },
-          data: { role: ProjectMemberRole.EDITOR },
+          data: { role: ProjectMemberRole.MEMBER },
         });
       }
 
@@ -210,7 +210,7 @@ export class ProjectsService {
     if (!existing) return false;
 
     if (!isAdmin && !existing.members.some((m) => m.userId === userId && m.role === ProjectMemberRole.OWNER)) {
-      throw new Error('No tienes permiso para eliminar este proyecto');
+      throw new Error("Don't have permission to delete this project");
     }
 
     try {
@@ -222,7 +222,7 @@ export class ProjectsService {
   }
 
   /**
-   * Guarda o actualiza un proyecto desde un TestFlow.
+   * Guarda o actualiza un  desde un TestFlow.
    */
   async saveFromFlow(flow: TestFlow, userId: string): Promise<ProjectDTO> {
     const existing = await prisma.project.findUnique({
@@ -236,7 +236,7 @@ export class ProjectsService {
         (m) => m.userId === userId && m.role === ProjectMemberRole.OWNER
       );
       if (!isOwner) {
-        throw new Error('No tienes permiso para editar este proyecto');
+        throw new Error("Don't have permission to update this project");
       }
       return this.update(flow.id, {
         name: flow.name,

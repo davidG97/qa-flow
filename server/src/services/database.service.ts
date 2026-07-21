@@ -9,24 +9,24 @@ const adapter = new PrismaLibSql({
 export const prisma = new PrismaClient({ adapter });
 
 /**
- * Conectar a la base de datos
+ * Connect to database
  */
 export async function connectDatabase(): Promise<void> {
   try {
     await prisma.$connect();
-    console.log('✅ Conectado a la base de datos');
+    console.log('✅ Connected to database');
   } catch (error) {
-    console.error('❌ Error conectando a la base de datos:', error);
+    console.error('❌ Error connecting to database:', error);
     throw error;
   }
 }
 
 /**
- * Desconectar de la base de datos
+ * Disconnect from database
  */
 export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect();
-  console.log('🔌 Desconectado de la base de datos');
+  console.log('🔌 Disconnected from database');
 }
 
 export default prisma;

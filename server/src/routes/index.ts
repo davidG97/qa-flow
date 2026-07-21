@@ -11,25 +11,25 @@ import usersRoutes from './users.routes.js';
 
 const router = Router();
 
-// Autenticación
+// Authentication
 router.use('/auth', authRoutes);
 
-// Administración de usuarios
+// User management
 router.use('/users', usersRoutes);
 
-// Montar todas las rutas
+// Mount all routes
 router.use('/', executionRoutes);
 router.use('/', flowRoutes);
 router.use('/', reportRoutes);
 
-// Rutas de base de datos
+// Database routes
 router.use('/projects', projectsRoutes);
 router.use('/test-runs', testRunsRoutes);
 
-// Rutas CLI runner
+// CLI runner routes
 router.use('/cli', cliRoutes);
 
-// Selector visual
+// Visual selector
 router.use('/picker', pickerRoutes);
 
 export default router;

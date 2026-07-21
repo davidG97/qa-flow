@@ -348,11 +348,3 @@ export const validateFlow = (nodes: Node[], edges: Edge[]): ValidationResult => 
     summary,
   };
 };
-
-// Función para obtener issues de un nodo específico
-export const getNodeIssues = (
-  nodeId: string,
-  validationResult: ValidationResult
-): ValidationIssue[] => {
-  return validationResult.issues.filter(i => i.nodeId === nodeId);
-};

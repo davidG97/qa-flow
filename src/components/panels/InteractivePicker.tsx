@@ -31,6 +31,53 @@ export default function InteractivePicker({
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
+  const pickerView = () => {
+    if (error) {
+      return (
+        <div className="error-placeholder">
+          <p>{error}</p>
+          <button onClick={onCancel}>Close</button>
+        </div>
+      );
+    } else if (frame) {
+      return (
+        <>
+            <img
+                ref={imgRef}
+                src={`data:image/jpeg;base64,${frame}`}
+                alt="Browser view"
+                onClick={handleClick}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className={isSelecting ? 'selecting' : ''}
+                draggable={false}
+            />
+            {/* Hover highlight overlay */}
+            {hoverInfo && (
+            <>
+                <div 
+                className="picker-highlight"
+                style={getHighlightStyle()}
+                />
+                <div className="picker-tooltip">
+                {hoverInfo.inShadowDOM && <span className="shadow-badge">Shadow DOM</span>}
+                <code>{hoverInfo.selector}</code>
+                <span className="tag-name">&lt;{hoverInfo.tagName}&gt;</span>
+                </div>
+            </>
+            )}
+        </>
+      );
+    } else {
+      return (
+        <div className="loading-placeholder">
+          <FiLoader className="spinner" size={32} />
+          <p>Loading browser view...</p>
+        </div>
+      );
+    }
+  }
+
   // Subscribe to screencast frames
   useEffect(() => {
     mountedRef.current = true;
@@ -56,7 +103,7 @@ export default function InteractivePicker({
     timeoutRef.current = setTimeout(() => {
       if (mountedRef.current) {
         console.warn('[InteractivePicker] No frames received, timeout');
-        setError('No se recibieron frames. Intenta de nuevo.');
+        setError('No frames received. Please try again.');
       }
     }, 15000);
 
@@ -109,8 +156,8 @@ export default function InteractivePicker({
         onCancel();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    globalThis.addEventListener('keydown', handleKeyDown);
+    return () => globalThis.removeEventListener('keydown', handleKeyDown);
   }, [onCancel]);
 
   // Handle click on image
@@ -134,7 +181,7 @@ export default function InteractivePicker({
       }
     } catch (error) {
       console.error('Error selecting element:', error);
-      alert('No se pudo seleccionar el elemento. Intenta de nuevo.');
+      alert('Could not select element. Please try again.');
     } finally {
       setIsSelecting(false);
     }
@@ -206,55 +253,18 @@ export default function InteractivePicker({
     <div className="interactive-picker-overlay">
       <div className="interactive-picker-container">
         {/* Close button - floating outside image area */}
-        <button className="picker-close-btn" onClick={onCancel} title="Cancelar (ESC)">
+        <button className="picker-close-btn" onClick={onCancel} title="Cancel (ESC)">
           <FiX size={20} />
         </button>
 
         {/* Screencast view */}
         <div className="interactive-picker-view" ref={viewRef}>
-          {error ? (
-            <div className="error-placeholder">
-              <p>{error}</p>
-              <button onClick={onCancel}>Cerrar</button>
-            </div>
-          ) : frame ? (
-            <>
-              <img
-                ref={imgRef}
-                src={`data:image/jpeg;base64,${frame}`}
-                alt="Vista del navegador"
-                onClick={handleClick}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                className={isSelecting ? 'selecting' : ''}
-                draggable={false}
-              />
-              {/* Hover highlight overlay */}
-              {hoverInfo && (
-                <>
-                  <div 
-                    className="picker-highlight"
-                    style={getHighlightStyle() as React.CSSProperties}
-                  />
-                  <div className="picker-tooltip">
-                    {hoverInfo.inShadowDOM && <span className="shadow-badge">Shadow DOM</span>}
-                    <code>{hoverInfo.selector}</code>
-                    <span className="tag-name">&lt;{hoverInfo.tagName}&gt;</span>
-                  </div>
-                </>
-              )}
-            </>
-          ) : (
-            <div className="loading-placeholder">
-              <FiLoader className="spinner" size={32} />
-              <p>Cargando vista del navegador...</p>
-            </div>
-          )}
+          {pickerView()}
         </div>
 
         {/* Footer hint */}
         <div className="interactive-picker-footer">
-          <kbd>Click</kbd> seleccionar • <kbd>Scroll</kbd> navegar • <kbd>ESC</kbd> cancelar
+          <kbd>Click</kbd> select • <kbd>Scroll</kbd> navigate • <kbd>ESC</kbd> cancel
         </div>
       </div>
 

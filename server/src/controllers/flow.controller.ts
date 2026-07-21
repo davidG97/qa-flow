@@ -24,7 +24,7 @@ export const flowController = {
     // Por ahora solo devolvemos el flujo con ID
     // En el futuro podemos persistir en SQLite, PostgreSQL, etc.
     res.json({ 
-      message: 'Flujo guardado (solo en memoria)',
+      message: 'Flow saved successfully',
       flow
     });
   },
@@ -35,8 +35,8 @@ export const flowController = {
   generateCode(req: Request, res: Response) {
     const { flow } = req.body as { flow: TestFlow };
     
-    if (!flow || !flow.nodes) {
-      return res.status(400).json({ error: 'Flujo inválido' });
+    if (!flow?.nodes) {
+      return res.status(400).json({ error: 'Invalid flow' });
     }
     
     const code = codeGeneratorService.generate(flow);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, SubmitEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiService, ProjectDTO } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -49,7 +49,7 @@ const ProjectsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
-  // Form state para crear proyecto
+  // Form state for project creation
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
@@ -59,7 +59,7 @@ const ProjectsPage = () => {
     loadProjects();
   }, []);
 
-  // Filtrar proyectos cuando cambia el término de búsqueda
+  // Filter projects when search term changes
   useEffect(() => {
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
@@ -79,17 +79,17 @@ const ProjectsPage = () => {
       const data = await apiService.getProjects();
       setProjects(data);
     } catch (err) {
-      setError('Error cargando proyectos. Verifica tu conexión.');
+      setError('Error loading projects. Check your connection.');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateProject = async (e: React.FormEvent) => {
+  const handleCreateProject = async (e: SubmitEvent) => {
     e.preventDefault();
     if (!projectName.trim()) {
-      setError('El nombre del proyecto es requerido');
+      setError('Project name is required');
       return;
     }
 
@@ -103,10 +103,10 @@ const ProjectsPage = () => {
         edges: [],
       });
 
-      // Navegar directamente al editor del nuevo proyecto
+      // Navigate directly to new project editor
       navigate(`/projects/${newProject.id}`);
     } catch (err) {
-      setError('Error creando proyecto');
+      setError('Error creating project');
       console.error(err);
       setCreating(false);
     }
@@ -117,7 +117,7 @@ const ProjectsPage = () => {
     
     if (deleteConfirm !== id) {
       setDeleteConfirm(id);
-      // Auto-cancelar después de 3 segundos
+      // Auto-cancel after 3 seconds
       setTimeout(() => setDeleteConfirm(null), 3000);
       return;
     }
@@ -127,7 +127,7 @@ const ProjectsPage = () => {
       setProjects(prev => prev.filter(p => p.id !== id));
       setDeleteConfirm(null);
     } catch (err) {
-      setError('Error eliminando proyecto');
+      setError('Error deleting project');
       console.error(err);
     }
   }, [deleteConfirm]);
@@ -146,16 +146,16 @@ const ProjectsPage = () => {
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       if (diffHours === 0) {
         const diffMins = Math.floor(diffMs / (1000 * 60));
-        return `hace ${diffMins} min`;
+        return `${diffMins} min ago`;
       }
-      return `hace ${diffHours}h`;
+      return `${diffHours}h ago`;
     } else if (diffDays === 1) {
-      return 'ayer';
+      return 'yesterday';
     } else if (diffDays < 7) {
-      return `hace ${diffDays} días`;
+      return `${diffDays} days ago`;
     }
     
-    return date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString('en-US', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -175,22 +175,22 @@ const ProjectsPage = () => {
             <img src="/logo.png" alt="QA Flow" width="48" height="48" style={{ borderRadius: '0.5rem' }} />
             <h1>QA Flow</h1>
           </div>
-          <p className="projects-subtitle">Editor visual de pruebas automatizadas con Playwright</p>
+          <p className="projects-subtitle">Visual automated testing editor with Playwright</p>
           
           {/* Quick stats */}
           {!loading && projects.length > 0 && (
             <div className="quick-stats">
               <div className="stat">
                 <FiFolder size={14} />
-                <span>{projects.length} proyectos</span>
+                <span>{projects.length} projects</span>
               </div>
               <div className="stat">
                 <FiBox size={14} />
-                <span>{totalNodes} nodos</span>
+                <span>{totalNodes} nodes</span>
               </div>
               <div className="stat">
                 <FiGitBranch size={14} />
-                <span>{totalEdges} conexiones</span>
+                <span>{totalEdges} connections</span>
               </div>
             </div>
           )}
@@ -223,17 +223,17 @@ const ProjectsPage = () => {
               <>
                 <Link to="/admin/users" className="btn-secondary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }}>
                   <FiShield size={14} />
-                  <span>Usuarios</span>
+                  <span>Users</span>
                 </Link>
                 <Link to="/admin/projects" className="btn-secondary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }}>
                   <FiLayers size={14} />
-                  <span>Proyectos</span>
+                  <span>Projects</span>
                 </Link>
               </>
             )}
             <button className="btn-secondary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }} onClick={logout}>
               <FiLogOut size={14} />
-              <span>Salir</span>
+              <span>Logout</span>
             </button>
           </div>
         )}
@@ -244,9 +244,9 @@ const ProjectsPage = () => {
           <div className="projects-toolbar">
             <h2>
               <FiFolder size={20} />
-              Mis Proyectos
+              My Projects
               {filteredProjects.length !== projects.length && (
-                <span className="results-count">({filteredProjects.length} de {projects.length})</span>
+                <span className="results-count">({filteredProjects.length} of {projects.length})</span>
               )}
             </h2>
             <div className="projects-toolbar-actions">
@@ -255,7 +255,7 @@ const ProjectsPage = () => {
                 <FiSearch size={16} className="search-icon" />
                 <input
                   type="text"
-                  placeholder="Buscar proyectos..."
+                  placeholder="Search projects..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="search-input"
@@ -271,7 +271,7 @@ const ProjectsPage = () => {
                 className="btn-icon"
                 onClick={loadProjects}
                 disabled={loading}
-                title="Recargar lista"
+                title="Reload list"
               >
                 <FiRefreshCw size={18} className={loading ? 'animate-spin' : ''} />
               </button>
@@ -280,7 +280,7 @@ const ProjectsPage = () => {
                 onClick={() => setShowCreateForm(true)}
               >
                 <FiPlus size={18} />
-                <span>Nuevo Proyecto</span>
+                <span>New Project</span>
               </button>
             </div>
           </div>
@@ -290,41 +290,41 @@ const ProjectsPage = () => {
             <div className="error-banner">
               <FiAlertCircle size={18} />
               <span>{error}</span>
-              <button onClick={() => setError(null)} title="Cerrar">
+              <button onClick={() => setError(null)} title="Close">
                 <FiX size={16} />
               </button>
             </div>
           )}
 
-          {/* Formulario de creación mejorado */}
+          {/* Improved creation form */}
           {showCreateForm && (
             <div className="create-project-card">
               <form onSubmit={handleCreateProject}>
                 <div className="form-header">
                   <FiZap size={20} className="form-icon" />
-                  <h3>Crear nuevo proyecto</h3>
+                  <h3>Create new project</h3>
                 </div>
                 <div className="form-field">
-                  <label htmlFor="project-name">Nombre del proyecto <span className="required">*</span></label>
+                  <label htmlFor="project-name">Project name <span className="required">*</span></label>
                   <input
                     id="project-name"
                     type="text"
                     value={projectName}
                     onChange={e => setProjectName(e.target.value)}
-                    placeholder="Ej: Login Tests, Checkout Flow..."
+                    placeholder="E.g.: Login Tests, Checkout Flow..."
                     autoFocus
                     disabled={creating}
                     maxLength={100}
                   />
-                  <span className="field-hint">{projectName.length}/100 caracteres</span>
+                  <span className="field-hint">{projectName.length}/100 characters</span>
                 </div>
                 <div className="form-field">
-                  <label htmlFor="project-description">Descripción <span className="optional">(opcional)</span></label>
+                  <label htmlFor="project-description">Description <span className="optional">(optional)</span></label>
                   <textarea
                     id="project-description"
                     value={projectDescription}
                     onChange={e => setProjectDescription(e.target.value)}
-                    placeholder="Describe el propósito de este proyecto de pruebas..."
+                    placeholder="Describe the purpose of this test project..."
                     rows={3}
                     disabled={creating}
                     maxLength={500}
@@ -341,7 +341,7 @@ const ProjectsPage = () => {
                     }}
                     disabled={creating}
                   >
-                    Cancelar
+                    Cancel
                   </button>
                   <button 
                     type="submit" 
@@ -351,12 +351,12 @@ const ProjectsPage = () => {
                     {creating ? (
                       <>
                         <FiRefreshCw size={16} className="animate-spin" />
-                        <span>Creando...</span>
+                        <span>Creating...</span>
                       </>
                     ) : (
                       <>
                         <FiPlay size={16} />
-                        <span>Crear y abrir</span>
+                        <span>Create and open</span>
                       </>
                     )}
                   </button>
@@ -365,7 +365,7 @@ const ProjectsPage = () => {
             </div>
           )}
 
-          {/* Lista de proyectos */}
+          {/* Projects list */}
           {loading && projects.length === 0 ? (
             <div className="projects-grid">
               {[1, 2, 3, 4, 5, 6].map(i => (
@@ -377,14 +377,14 @@ const ProjectsPage = () => {
               <div className="empty-icon">
                 <FiFolder size={48} />
               </div>
-              <h3>Comienza tu primer proyecto</h3>
-              <p>Crea un proyecto para diseñar pruebas automatizadas de forma visual. Arrastra nodos, conéctalos y ejecuta tus tests.</p>
+              <h3>Start your first project</h3>
+              <p>Create a project to design automated tests visually. Drag nodes, connect them, and run your tests.</p>
               <button 
                 className="btn-primary large"
                 onClick={() => setShowCreateForm(true)}
               >
                 <FiPlus size={20} />
-                <span>Crear primer proyecto</span>
+                <span>Create first project</span>
               </button>
             </div>
           ) : filteredProjects.length === 0 ? (
@@ -392,13 +392,13 @@ const ProjectsPage = () => {
               <div className="empty-icon">
                 <FiSearch size={48} />
               </div>
-              <h3>Sin resultados</h3>
-              <p>No se encontraron proyectos que coincidan con "{searchTerm}"</p>
+              <h3>No results</h3>
+              <p>No projects found matching "{searchTerm}"</p>
               <button 
                 className="btn-secondary"
                 onClick={clearSearch}
               >
-                Limpiar búsqueda
+                Clear search
               </button>
             </div>
           ) : (
@@ -428,11 +428,11 @@ const ProjectsPage = () => {
                       <div className="project-card-stats">
                         <span className="stat-badge">
                           <FiBox size={10} />
-                          {project.nodes.length} nodos
+                          {project.nodes.length} nodes
                         </span>
                         <span className="stat-badge">
                           <FiGitBranch size={10} />
-                          {project.edges.length} conexiones
+                          {project.edges.length} connections
                         </span>
                       </div>
                     </div>
@@ -453,18 +453,18 @@ const ProjectsPage = () => {
                           e.stopPropagation();
                           handleOpenProject(project.id);
                         }}
-                        title="Abrir en el editor"
+                        title="Open in editor"
                       >
                         <FiPlay size={14} />
-                        <span>Abrir</span>
+                        <span>Open</span>
                       </button>
                       <button 
                         className={`btn-action delete ${deleteConfirm === project.id ? 'confirm' : ''}`}
                         onClick={(e) => handleDeleteProject(project.id, e)}
-                        title={deleteConfirm === project.id ? 'Clic para confirmar eliminación' : 'Eliminar proyecto'}
+                        title={deleteConfirm === project.id ? 'Click to confirm deletion' : 'Delete project'}
                       >
                         <FiTrash2 size={14} />
-                        {deleteConfirm === project.id && <span>¿Seguro?</span>}
+                        {deleteConfirm === project.id && <span>Sure?</span>}
                       </button>
                     </div>
                   </div>

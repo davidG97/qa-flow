@@ -6,11 +6,11 @@ const router = Router();
 
 /**
  * POST /cli/run
- * Ejecuta un flujo usando el Playwright Test Runner CLI
+ * Runs a flow using the Playwright Test Runner CLI
  * 
  * Body:
- * - flow: TestFlow (requerido)
- * - options: CLIRunnerOptions (opcional)
+ * - flow: TestFlow (required)
+ * - options: CLIRunnerOptions (optional)
  */
 router.post('/run', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -19,7 +19,7 @@ router.post('/run', async (req: Request, res: Response): Promise<void> => {
     if (!flow?.nodes || !flow?.edges) {
       res.status(400).json({
         success: false,
-        error: 'Se requiere un flujo válido con nodos y edges',
+        error: 'A valid flow with nodes and edges is required',
       });
       return;
     }
@@ -43,14 +43,14 @@ router.post('/run', async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error ejecutando test con CLI',
+      error: error instanceof Error ? error.message : 'Error running test with CLI',
     });
   }
 });
 
 /**
  * GET /cli/tests
- * Lista los tests generados disponibles
+ * Lists available generated tests
  */
 router.get('/tests', async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -63,17 +63,17 @@ router.get('/tests', async (_req: Request, res: Response): Promise<void> => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error listando tests',
+      error: error instanceof Error ? error.message : 'Error listing generated tests',
     });
   }
 });
 
 /**
  * DELETE /cli/tests
- * Limpia tests generados antiguos
+ * Cleans old generated tests
  * 
  * Query:
- * - olderThanHours: número de horas (default: 24)
+ * - olderThanHours: number of hours (default: 24)
  */
 router.delete('/tests', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -89,14 +89,14 @@ router.delete('/tests', async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error limpiando tests',
+      error: error instanceof Error ? error.message : 'Error cleaning generated tests',
     });
   }
 });
 
 /**
  * GET /cli/report
- * Obtiene la ruta del reporte HTML de la última ejecución
+ * Gets the HTML report path from the last execution
  */
 router.get('/report', async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -112,20 +112,20 @@ router.get('/report', async (_req: Request, res: Response): Promise<void> => {
     } else {
       res.status(404).json({
         success: false,
-        error: 'No hay reporte HTML disponible',
+        error: 'No HTML report available',
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error obteniendo reporte',
+      error: error instanceof Error ? error.message : 'Error getting report path',
     });
   }
 });
 
 /**
  * POST /cli/show-report
- * Abre el reporte HTML en el navegador (solo para desarrollo local)
+ * Opens the HTML report in the browser (only for local development)
  */
 router.post('/show-report', async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -133,12 +133,12 @@ router.post('/show-report', async (_req: Request, res: Response): Promise<void> 
     
     res.json({
       success: true,
-      message: 'Reporte abierto en el navegador',
+      message: 'Report opened in the browser',
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error abriendo reporte',
+      error: error instanceof Error ? error.message : 'Error opening report',
     });
   }
 });
