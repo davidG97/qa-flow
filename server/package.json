@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.17.3",
-    "@playwright/test": "^1.40.0",
+    "@playwright/test": "^1.61.1",
     "@prisma/adapter-libsql": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcryptjs": "^3.0.3",
@@ -33,7 +33,7 @@
     "prisma": "^7.8.0",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "uuid": "^14.0.0",
-    "ws": "^8.21.0"
+    "ws": "^8.21.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",

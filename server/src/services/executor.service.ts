@@ -1339,6 +1339,27 @@ export class FlowExecutor {
     let cdpUrl = this.flowConfig?.cdpUrl || process.env.CDP_URL;
     const baseUrl = config.baseUrl as string;
 
+    // Advanced options from config
+    const device = config.device as string | undefined;
+    const viewportWidth = (config.viewportWidth as number) || 1280;
+    const viewportHeight = (config.viewportHeight as number) || 720;
+    const deviceScaleFactor = (config.deviceScaleFactor as number) || 1;
+    const isMobile = config.isMobile === true;
+    const hasTouch = config.hasTouch === true;
+    const locale = config.locale as string | undefined;
+    const timezoneId = config.timezoneId as string | undefined;
+    const geoLatitude = config.geoLatitude as string | undefined;
+    const geoLongitude = config.geoLongitude as string | undefined;
+    const geoAccuracy = config.geoAccuracy as number | undefined;
+    const colorScheme = config.colorScheme as 'light' | 'dark' | 'no-preference' | undefined;
+    const reducedMotion = config.reducedMotion as 'reduce' | 'no-preference' | undefined;
+    const forcedColors = config.forcedColors as 'active' | 'none' | undefined;
+    // Network and JS options
+    const offline = config.offline === true;
+    const javaScriptEnabled = config.javaScriptEnabled !== false; // default true
+    const userAgent = config.userAgent as string | undefined;
+    const permissions = config.permissions as string[] | undefined;
+
     try {
       if (cdpUrl) {
         // ponytail: localhost → 127.0.0.1 para evitar IPv6 issues
@@ -1355,10 +1376,67 @@ export class FlowExecutor {
       }
       console.log(`[Executor] Browser ready`);
 
-      this.context = await this.browser.newContext({
-        viewport: { width: 1280, height: 720 },
+      // Build context options from advanced settings
+      const contextOptions: Record<string, unknown> = {};
+      
+      // Device emulation (uses Playwright's device descriptors)
+      if (device) {
+        const { devices } = await import('playwright');
+        const deviceDescriptor = devices[device];
+        if (deviceDescriptor) {
+          Object.assign(contextOptions, deviceDescriptor);
+          console.log(`[Executor] Using device emulation: ${device}`);
+        }
+      } else {
+        // Custom viewport settings
+        contextOptions.viewport = { width: viewportWidth, height: viewportHeight };
+        contextOptions.deviceScaleFactor = deviceScaleFactor;
+        contextOptions.isMobile = isMobile;
+        contextOptions.hasTouch = hasTouch;
+      }
+
+      // Localization options
+      if (locale) contextOptions.locale = locale;
+      if (timezoneId) contextOptions.timezoneId = timezoneId;
+      
+      // Geolocation
+      if (geoLatitude && geoLongitude) {
+        const lat = Number.parseFloat(geoLatitude);
+        const lon = Number.parseFloat(geoLongitude);
+        if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
+          contextOptions.geolocation = {
+            latitude: lat,
+            longitude: lon,
+            accuracy: geoAccuracy || 100,
+          };
+          contextOptions.permissions = ['geolocation'];
+          console.log(`[Executor] Geolocation set: ${lat}, ${lon}`);
+        }
+      }
+      
+      // Appearance options
+      if (colorScheme) contextOptions.colorScheme = colorScheme;
+      if (reducedMotion) contextOptions.reducedMotion = reducedMotion;
+      if (forcedColors) contextOptions.forcedColors = forcedColors;
+
+      // Network and JS options
+      if (offline) contextOptions.offline = true;
+      if (!javaScriptEnabled) contextOptions.javaScriptEnabled = false;
+      if (userAgent) contextOptions.userAgent = userAgent;
+      
+      // Browser permissions (merge with geolocation if set)
+      if (permissions && permissions.length > 0) {
+        const existingPermissions = contextOptions.permissions as string[] || [];
+        contextOptions.permissions = [...new Set([...existingPermissions, ...permissions])];
+      }
+
+      this.context = await this.browser.newContext(contextOptions);
+      console.log(`[Executor] Context created with options:`, {
+        device: device || 'custom',
+        viewport: contextOptions.viewport || 'from device',
+        isMobile: contextOptions.isMobile,
+        locale: locale || 'default',
       });
-      console.log(`[Executor] Context created`);
 
       this.page = await this.context.newPage();
       this.page.setDefaultTimeout(this.options.timeout || 30000);
