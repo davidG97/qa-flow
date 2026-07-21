@@ -352,66 +352,6 @@ class ApiService {
     return data.code;
   }
 
-  // ========================
-  // Recording
-  // ========================
-
-  async startRecording(url?: string): Promise<{ sessionId: string; message: string }> {
-    const response = await this.request(`${API_URL}/record/start`, {
-      method: 'POST',
-      body: JSON.stringify({ url }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error starting recording');
-    }
-
-    return response.json();
-  }
-
-  async getRecordingStatus(sessionId: string): Promise<{
-    id: string;
-    status: 'recording' | 'completed' | 'error';
-    startedAt: string;
-    completedAt?: string;
-    hasCode: boolean;
-    error?: string;
-  }> {
-    const response = await this.request(`${API_URL}/record/status/${sessionId}`);
-
-    if (!response.ok) {
-      throw new Error('Session not found');
-    }
-
-    return response.json();
-  }
-
-  async stopRecording(sessionId: string): Promise<void> {
-    const response = await this.request(`${API_URL}/record/stop/${sessionId}`, {
-      method: 'POST',
-    });
-
-    if (!response.ok) {
-      throw new Error('Error stopping recording');
-    }
-  }
-
-  async getRecordingNodes(sessionId: string): Promise<{
-    nodes: FlowNode[];
-    edges: FlowEdge[];
-    code: string;
-  }> {
-    const response = await this.request(`${API_URL}/record/nodes/${sessionId}`);
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error getting recorded nodes');
-    }
-
-    return response.json();
-  }
-
   async parsePlaywrightCode(code: string): Promise<{
     nodes: FlowNode[];
     edges: FlowEdge[];

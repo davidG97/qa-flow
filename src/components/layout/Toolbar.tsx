@@ -1,12 +1,11 @@
 import { useRef, useState, useCallback } from 'react';
-import { FiTrash2, FiSave, FiCode, FiVideo, FiPlay, FiLoader, FiSettings, FiDownload, FiUpload, FiArrowLeft, FiCheck, FiMoreHorizontal } from 'react-icons/fi';
+import { FiTrash2, FiSave, FiCode, FiPlay, FiLoader, FiSettings, FiDownload, FiUpload, FiArrowLeft, FiCheck, FiMoreHorizontal } from 'react-icons/fi';
 
 interface ToolbarProps {
   onRun: () => void;
   onSave: () => void;
   onClear: () => void;
   onGenerateCode?: () => void;
-  onRecord?: () => void;
   onConfig?: () => void;
   onExport?: () => void;
   onImport?: (file: File) => void;
@@ -17,7 +16,7 @@ interface ToolbarProps {
 }
 
 // ponytail: simplified toolbar - fewer visible buttons, menu for secondary actions
-const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, onExport, onImport, onProjects, isRunning, hasStartNodes, projectName }: ToolbarProps) => {
+const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onConfig, onExport, onImport, onProjects, isRunning, hasStartNodes, projectName }: ToolbarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -106,11 +105,6 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
                 {onGenerateCode && (
                   <button onClick={() => menuAction(onGenerateCode)}>
                     <FiCode size={14} /> Generate code
-                  </button>
-                )}
-                {onRecord && (
-                  <button onClick={() => menuAction(onRecord)}>
-                    <FiVideo size={14} /> Record session
                   </button>
                 )}
                 {onExport && (

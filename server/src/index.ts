@@ -65,8 +65,8 @@ const startServer = async () => {
   ║                                                       ║
   ║   🧪 QA Flow Backend Server                           ║
   ║                                                       ║
-  ║   REST API:  http://localhost:${config.port}                 ║
-  ║   WebSocket: ws://localhost:${config.port}                   ║
+  ║   REST API:  http://localhost:${config.port}                    ║
+  ║   WebSocket: ws://localhost:${config.port}                      ║
   ║   Database:  ✅ Connected                             ║
   ║                                                       ║
   ║   Endpoints:                                          ║
@@ -81,9 +81,6 @@ const startServer = async () => {
   ║   - GET  /api/status/:id       Execution status       ║
   ║   - GET  /api/executions       List executions        ║
   ║   - POST /api/generate-code    Generate code          ║
-  ║   - POST /api/record/start     Start recording        ║
-  ║   - GET  /api/record/status    Recording status       ║
-  ║   - GET  /api/record/nodes     Get recorded nodes     ║
   ║   - POST /api/parse-code       Parse code             ║
   ║   - GET  /api/health           Health check           ║
   ║   - GET  /api/reports          List reports           ║
