@@ -155,7 +155,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
   return (
     <div className={panelClass}>
       {/* Header */}
-      <div className="ep-header" onClick={() => isMinimized && handleMinimizeToggle()}>
+      <div className="ep-header" onClick={() => isMinimized && handleMinimizeToggle()} role="none">
         <div className="ep-header-left">
           {hasContent ? (
             <div className="ep-status-badge" style={{ background: getStatusColor() + '20', borderColor: getStatusColor() }}>
@@ -248,7 +248,7 @@ const ExecutionPanel = ({ status, validation, executionId, isRunning = false, on
             </div>
 
             {/* Draggable divider */}
-            <div className="ep-resizer" onMouseDown={handleMouseDown} />
+            <div className="ep-resizer" onMouseDown={handleMouseDown} role="none"/>
 
             {/* Right: Logs */}
             <div className="ep-logs-section">

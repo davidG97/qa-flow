@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, SubmitEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiService, ProjectDTO } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -86,7 +86,7 @@ const ProjectsPage = () => {
     }
   };
 
-  const handleCreateProject = async (e: React.FormEvent) => {
+  const handleCreateProject = async (e: SubmitEvent) => {
     e.preventDefault();
     if (!projectName.trim()) {
       setError('Project name is required');

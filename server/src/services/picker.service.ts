@@ -827,7 +827,7 @@ class PickerService {
     try {
       // ponytail: elementFromPoint handles scroll correctly and traverses open shadows
       // Also checks for uniqueness and returns index if multiple matches
-      const jsResult = await session.page.evaluate(`
+      const jsResult = await session.page.evaluate(String.raw`
         (function(px, py) {
           function traverse(root, x, y) {
             var el = root.elementFromPoint ? root.elementFromPoint(x, y) : document.elementFromPoint(x, y);
@@ -856,12 +856,12 @@ class PickerService {
               candidates.push({ selector: attrs['data-testid'], type: 'testId', count: matches.length, index: idx });
             }
             
-            if (attrs.id && !attrs.id.match(/^[0-9]|[:\\s]/)) {
+            if (attrs.id && !attrs.id.match(/^[0-9]|[:\s]/)) {
               candidates.push({ selector: '#' + attrs.id, type: 'css', count: 1, index: 0 });
             }
             
             if (attrs.class) {
-              var classes = attrs.class.split(/\\s+/).filter(function(c) { return c && !c.match(/^[0-9]/); }).slice(0, 2);
+              var classes = attrs.class.split(/\s+/).filter(function(c) { return c && !c.match(/^[0-9]/); }).slice(0, 2);
               if (classes.length > 0) {
                 var sel = tag + '.' + classes.join('.');
                 var matches = document.querySelectorAll(sel);
@@ -938,12 +938,12 @@ class PickerService {
         selectors.push({ selector: attrs['data-testid'], type: 'testId', confidence: 100 });
       }
 
-      if (attrs.id && !attrs.id.match(/^[0-9]|[:\s]/)) {
+      if (attrs.id && !/(?:^\d)|[:\s]/.exec(attrs.id)) {
         selectors.push({ selector: `#${attrs.id}`, type: 'css', confidence: 95 });
       }
 
       if (attrs.class) {
-        const classes = attrs.class.split(/\s+/).filter(c => c && !c.match(/^[0-9]/)).slice(0, 2);
+        const classes = attrs.class.split(/\s+/).filter(c => c && !/^\d/.exec(c)).slice(0, 2);
         if (classes.length > 0) {
           selectors.push({ selector: `${tagName}.${classes.join('.')}`, type: 'css', confidence: 70 });
         }
@@ -961,15 +961,15 @@ class PickerService {
     }
     const name = attrs['aria-label'] || attrs.placeholder || attrs.title;
     if (role && name) {
-      selectors.push({ selector: `getByRole('${role}', { name: '${name.replace(/'/g, "\\'")}' })`, type: 'role', confidence: 92 });
+      selectors.push({ selector: `getByRole('${role}', { name: '${name.replaceAll("'", String.raw`\'`)}' })`, type: 'role', confidence: 92 });
     }
 
     if (attrs.placeholder && !candidates) {
-      selectors.push({ selector: `getByPlaceholder('${attrs.placeholder.replace(/'/g, "\\'")}')`, type: 'placeholder', confidence: 90 });
+      selectors.push({ selector: `getByPlaceholder('${attrs.placeholder.replaceAll("'", String.raw`\'`)}')`, type: 'placeholder', confidence: 90 });
     }
 
     if (attrs.title) {
-      selectors.push({ selector: `getByTitle('${attrs.title.replace(/'/g, "\\'")}')`, type: 'title', confidence: 88 });
+      selectors.push({ selector: `getByTitle('${attrs.title.replaceAll("'", String.raw`\'`)}')`, type: 'title', confidence: 88 });
     }
 
     selectors.push({ selector: tagName, type: 'css', confidence: 30 });
@@ -1075,7 +1075,7 @@ class PickerService {
     }
 
     // Priority 2: id
-    if (attributes.id && !attributes.id.match(/^[0-9]|[:\s]/)) {
+    if (attributes.id && !/(?:^\d)|[:\s]/.exec(attributes.id)) {
       alternatives.push({ selector: `#${attributes.id}`, type: 'css', confidence: 95 });
     }
 
@@ -1094,7 +1094,7 @@ class PickerService {
 
     // Priority 5: CSS class selector
     if (attributes.class) {
-      const classes = attributes.class.split(/\s+/).filter(c => c && !c.match(/^[0-9]|--/));
+      const classes = attributes.class.split(/\s+/).filter(c => c && !/(?:^\d)|--/.exec(c));
       if (classes.length > 0) {
         const selector = `${tagName}.${classes.slice(0, 2).join('.')}`;
         alternatives.push({ selector, type: 'css', confidence: 70 });

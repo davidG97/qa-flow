@@ -6,6 +6,14 @@ import { FiX, FiPlus, FiChevronDown, FiChevronRight, FiCrosshair } from 'react-i
 import { apiService, PickerResult } from '../../services/api';
 import InteractivePicker from './InteractivePicker';
 
+// Helper to safely convert unknown values to string
+const safeString = (value: unknown, fallback = ''): string => {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return fallback;
+};
+
 // ponytail: simplified selector types - only what Playwright actually uses
 const SELECTOR_TYPES = [
   { value: 'css', label: 'CSS' },
@@ -125,10 +133,10 @@ const FieldRenderer = ({
       
       {field.type === 'text' && isSelector && (
         <SelectorField
-          value={String(config.selector || '')}
-          selectorType={String(config.selectorType || 'css')}
-          onChange={(v) => onSelectorChange(v, String(config.selectorType || 'css'))}
-          onTypeChange={(t) => onSelectorChange(String(config.selector || ''), t)}
+          value={safeString(config.selector)}
+          selectorType={safeString(config.selectorType, 'css')}
+          onChange={(v) => onSelectorChange(v, safeString(config.selectorType, 'css'))}
+          onTypeChange={(t) => onSelectorChange(safeString(config.selector), t)}
           onStartPicker={onStartPicker}
           isPickerActive={isPickerActive}
           pickerProgress={pickerProgress}
@@ -139,7 +147,7 @@ const FieldRenderer = ({
         <input
           type="text"
           placeholder={field.placeholder}
-          value={String(value || '')}
+          value={safeString(value)}
           onChange={(e) => onChange(e.target.value)}
         />
       )}
@@ -155,7 +163,7 @@ const FieldRenderer = ({
       
       {field.type === 'select' && (
         <select
-          value={String(value || field.defaultValue || '')}
+          value={safeString(value, safeString(field.defaultValue))}
           onChange={(e) => onChange(e.target.value)}
         >
           {field.options?.map((option) => (
@@ -169,7 +177,7 @@ const FieldRenderer = ({
       {field.type === 'textarea' && (
         <textarea
           placeholder={field.placeholder}
-          value={String(value || '')}
+          value={safeString(value)}
           onChange={(e) => onChange(e.target.value)}
         />
       )}

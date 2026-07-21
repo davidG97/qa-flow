@@ -23,6 +23,12 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
+  const getSaveIcon = () => {
+    if (saveState === 'saving') return <FiLoader size={16} className="animate-spin" />;
+    if (saveState === 'saved') return <FiCheck size={16} />;
+    return <FiSave size={16} />;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && onImport) onImport(file);
@@ -74,9 +80,7 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
           disabled={saveState === 'saving'}
           title="Save (Ctrl+S)"
         >
-          {saveState === 'saving' ? <FiLoader size={16} className="animate-spin" /> 
-           : saveState === 'saved' ? <FiCheck size={16} /> 
-           : <FiSave size={16} />}
+          {getSaveIcon()}
         </button>
 
         {onConfig && (
@@ -97,7 +101,7 @@ const Toolbar = ({ onRun, onSave, onClear, onGenerateCode, onRecord, onConfig, o
           
           {showMenu && (
             <>
-              <div className="toolbar-menu-backdrop" onClick={() => setShowMenu(false)} />
+              <div className="toolbar-menu-backdrop" onClick={() => setShowMenu(false)} role="none" />
               <div className="toolbar-menu">
                 {onGenerateCode && (
                   <button onClick={() => menuAction(onGenerateCode)}>

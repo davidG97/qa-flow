@@ -31,6 +31,53 @@ export default function InteractivePicker({
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
+  const pickerView = () => {
+    if (error) {
+      return (
+        <div className="error-placeholder">
+          <p>{error}</p>
+          <button onClick={onCancel}>Close</button>
+        </div>
+      );
+    } else if (frame) {
+      return (
+        <>
+            <img
+                ref={imgRef}
+                src={`data:image/jpeg;base64,${frame}`}
+                alt="Browser view"
+                onClick={handleClick}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className={isSelecting ? 'selecting' : ''}
+                draggable={false}
+            />
+            {/* Hover highlight overlay */}
+            {hoverInfo && (
+            <>
+                <div 
+                className="picker-highlight"
+                style={getHighlightStyle()}
+                />
+                <div className="picker-tooltip">
+                {hoverInfo.inShadowDOM && <span className="shadow-badge">Shadow DOM</span>}
+                <code>{hoverInfo.selector}</code>
+                <span className="tag-name">&lt;{hoverInfo.tagName}&gt;</span>
+                </div>
+            </>
+            )}
+        </>
+      );
+    } else {
+      return (
+        <div className="loading-placeholder">
+          <FiLoader className="spinner" size={32} />
+          <p>Loading browser view...</p>
+        </div>
+      );
+    }
+  }
+
   // Subscribe to screencast frames
   useEffect(() => {
     mountedRef.current = true;
@@ -109,8 +156,8 @@ export default function InteractivePicker({
         onCancel();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    globalThis.addEventListener('keydown', handleKeyDown);
+    return () => globalThis.removeEventListener('keydown', handleKeyDown);
   }, [onCancel]);
 
   // Handle click on image
@@ -212,44 +259,7 @@ export default function InteractivePicker({
 
         {/* Screencast view */}
         <div className="interactive-picker-view" ref={viewRef}>
-          {error ? (
-            <div className="error-placeholder">
-              <p>{error}</p>
-              <button onClick={onCancel}>Close</button>
-            </div>
-          ) : frame ? (
-            <>
-              <img
-                ref={imgRef}
-                src={`data:image/jpeg;base64,${frame}`}
-                alt="Browser view"
-                onClick={handleClick}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                className={isSelecting ? 'selecting' : ''}
-                draggable={false}
-              />
-              {/* Hover highlight overlay */}
-              {hoverInfo && (
-                <>
-                  <div 
-                    className="picker-highlight"
-                    style={getHighlightStyle() as React.CSSProperties}
-                  />
-                  <div className="picker-tooltip">
-                    {hoverInfo.inShadowDOM && <span className="shadow-badge">Shadow DOM</span>}
-                    <code>{hoverInfo.selector}</code>
-                    <span className="tag-name">&lt;{hoverInfo.tagName}&gt;</span>
-                  </div>
-                </>
-              )}
-            </>
-          ) : (
-            <div className="loading-placeholder">
-              <FiLoader className="spinner" size={32} />
-              <p>Loading browser view...</p>
-            </div>
-          )}
+          {pickerView()}
         </div>
 
         {/* Footer hint */}

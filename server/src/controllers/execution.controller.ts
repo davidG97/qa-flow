@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import { FlowExecutor } from '../services/executor.service.js';
 import { ReporterService } from '../services/reporter.service.js';
-import { RunFlowRequest, ExecutionStatus, TestFlow } from '../types/index.js';
+import { RunFlowRequest, ExecutionStatus } from '../types/index.js';
 import { notifyClients, notifyScreencastFrame, cleanupExecution } from '../websocket/index.js';
 
 // Almacén de ejecuciones activas
 const executions = new Map<string, ExecutionStatus>();
-const executionFlows = new Map<string, TestFlow>();
 
 export const executionController = {
   /**
@@ -17,7 +15,7 @@ export const executionController = {
     try {
       const { flow, options } = req.body as RunFlowRequest;
       
-      if (!flow || !flow.nodes || !flow.edges) {
+      if (!flow?.nodes || !flow?.edges) {
         return res.status(400).json({ error: 'Invalid flow' });
       }
 
@@ -35,9 +33,6 @@ export const executionController = {
       });
 
       const executionId = executor.getExecutionId();
-      
-      // Guardar el flujo para generar reporte después
-      executionFlows.set(executionId, flow);
       
       // Respond immediately with execution ID
       res.json({ 

@@ -36,6 +36,7 @@ const IfNode = memo(({ id, data, selected }: NodeProps & { data: CustomNodeData 
       className={`custom-node if-node ${data.category} ${selected ? 'selected' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      role="none"
     >
       <Handle type="target" position={Position.Left} />
       

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SubmitEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService, ProjectDTO } from '../services/api';
 import {
@@ -20,7 +20,7 @@ interface EditModalProps {
   onSave: (id: string, data: { name: string; description: string; newOwnerId?: string }) => Promise<void>;
 }
 
-function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
+function EditProjectModal({ project, users, onClose, onSave }: Readonly<EditModalProps>) {
   const currentOwner = project.members?.find(m => m.role === 'OWNER');
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description || '');
@@ -28,7 +28,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setError('Name is required');
@@ -40,7 +40,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
       await onSave(project.id, {
         name: name.trim(),
         description: description.trim(),
-        newOwnerId: ownerId !== currentOwner?.user.id ? ownerId : undefined,
+        newOwnerId: ownerId == currentOwner?.user.id ? undefined : ownerId,
       });
       onClose();
     } catch (err) {
@@ -81,7 +81,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
-              Name *
+              Name *{''}
             </label>
             <input
               type="text"
@@ -98,7 +98,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
 
           <div style={{ marginBottom: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
-              Description
+              Description{''}
             </label>
             <textarea
               value={description}
@@ -115,7 +115,7 @@ function EditProjectModal({ project, users, onClose, onSave }: EditModalProps) {
 
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-dark-300)' }}>
-              Owner
+              Owner{''}
             </label>
             <select
               value={ownerId}

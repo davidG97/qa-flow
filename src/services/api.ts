@@ -224,7 +224,7 @@ class ApiService {
       this.ws = new WebSocket(WS_URL);
 
       this.ws.onopen = () => {
-        console.log('✅ WebSocket conectado');
+        console.log('✅ WebSocket connected');
         resolve();
       };
 
@@ -275,12 +275,12 @@ class ApiService {
             }
           }
         } catch (error) {
-          console.error('Error procesando mensaje WS:', error);
+          console.error('Error processing WS message:', error);
         }
       };
 
       this.ws.onclose = () => {
-        console.log('🔌 WebSocket desconectado');
+        console.log('🔌 WebSocket disconnected');
         this.ws = null;
       };
     });
@@ -437,7 +437,7 @@ class ApiService {
   }> {
     const response = await this.request(`${API_URL}/reports`);
     if (!response.ok) {
-      throw new Error('Error obteniendo reportes');
+      throw new Error('Error getting reports');
     }
     return response.json();
   }
@@ -468,7 +468,7 @@ class ApiService {
       method: 'DELETE',
     });
     if (!response.ok) {
-      throw new Error('Error eliminando reporte');
+      throw new Error('Error deleting report');
     }
   }
 
@@ -581,8 +581,8 @@ class ApiService {
 
   // === Interactive Picker (works in Docker) ===
   
-  private pickerFrameCallbacks: Map<string, (frameBase64: string) => void> = new Map();
-  private pickerFrameBuffer: Map<string, string> = new Map();  // Buffer frames until subscriber connects
+  private readonly pickerFrameCallbacks: Map<string, (frameBase64: string) => void> = new Map();
+  private readonly pickerFrameBuffer: Map<string, string> = new Map();  // Buffer frames until subscriber connects
 
   async startInteractivePicker(
     targetNodeId: string,

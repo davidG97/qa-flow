@@ -21,6 +21,8 @@ export interface ExecutorOptions {
   onScreencastFrame?: (frameBase64: string) => void;
 }
 
+type Orientation = 'left' | 'right' | 'middle';
+
 interface TestCase {
   startNode: FlowNode;
   nodes: FlowNode[];
@@ -294,7 +296,7 @@ export class FlowExecutor {
             message: `[${testName}] ${node.data.label} evaluado: ${conditionResult ? 'TRUE' : 'FALSE'}`,
             duration: Date.now() - startTime,
           });
-          currentNodeId = this.getNextNodeId(currentNodeId!, conditionResult);
+          currentNodeId = this.getNextNodeId(currentNodeId, conditionResult);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           this.addResult({
@@ -320,7 +322,7 @@ export class FlowExecutor {
           message: `[${testName}] ${node.data.label} executed successfully`,
           duration: Date.now() - startTime,
         });
-        currentNodeId = this.getNextNodeId(currentNodeId!);
+        currentNodeId = this.getNextNodeId(currentNodeId);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         this.addResult({
@@ -805,13 +807,6 @@ export class FlowExecutor {
       activePromises.set(promise, test);
       return promise;
     };
-
-    // Iniciar workers iniciales
-    const initialPromises: Promise<void>[] = [];
-    for (let i = 0; i < Math.min(maxWorkers, tests.length); i++) {
-      const p = startNextTest();
-      if (p) initialPromises.push(p);
-    }
 
     // Procesar tests mientras haya pendientes o activos
     while (activePromises.size > 0 || pending.length > 0) {
@@ -1397,7 +1392,7 @@ export class FlowExecutor {
     if (!this.page) throw new Error('Browser not initialized');
     
     const selector = this.buildSelector(config);
-    const button = (config.button as 'left' | 'right' | 'middle') || 'left';
+    const button = (config.button as Orientation) || 'left';
     const clickCount = (config.clickCount as number) || 1;
     const delay = (config.delay as number) || 0;
     const force = config.force === true;
@@ -2105,7 +2100,7 @@ export class FlowExecutor {
         if (selector.startsWith('//') || selector.startsWith('(//')) {
           return `xpath=${selector}`;
         }
-        if (selector.match(/^[a-z]+\[/i) || selector.match(/^[a-z]+$/i)) {
+        if (/^[a-z]+\[/i.exec(selector) || /^[a-z]+$/i.exec(selector)) {
           // Parece un selector de rol (ej: button[name="x"] o button)
           return `role=${selector}`;
         }

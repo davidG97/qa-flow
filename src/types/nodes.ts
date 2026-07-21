@@ -666,7 +666,7 @@ export const nodeTypes: NodeTypeDefinition[] = [
   // Actions - Focus
   {
     id: 'focus',
-    label: 'Dar Foco',
+    label: 'Focus Element',
     category: 'action',
     description: 'Focuses an element',
     fields: [

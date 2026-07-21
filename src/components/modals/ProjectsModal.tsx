@@ -43,6 +43,98 @@ const ProjectsModal = ({
   const [projectDescription, setProjectDescription] = useState('');
   const [saveCurrentFlow, setSaveCurrentFlow] = useState(true);
 
+  const getFormHint = () => {
+    if (saveCurrentFlow) {
+      return `Will save ${currentNodes.length} nodes and ${currentEdges.length} connections`;
+    }
+    if (viewMode === 'edit') {
+      return 'Will keep existing project flow';
+    }
+    return 'Will create an empty project';
+  };
+
+  const renderProjectsList = () => {
+    if (loading && projects.length === 0) {
+      return (
+        <div className="text-center py-8 text-dark-500">
+          Loading projects...
+        </div>
+      );
+    }
+    
+    if (projects.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <FiFolder size={48} className="mx-auto mb-4 text-dark-600" />
+          <p className="text-dark-500 mb-4">No saved projects</p>
+          <button 
+            className="toolbar-btn success"
+            onClick={() => { resetForm(); setViewMode('create'); }}
+          >
+            <FiPlus size={14} />
+            <span>Create first project</span>
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="projects-list">
+        {projects.map(project => (
+          <div key={project.id} className="project-card">
+            <div className="project-info">
+              <h3 className="project-name">{project.name}</h3>
+              {project.description && (
+                <p className="project-description">{project.description}</p>
+              )}
+              <div className="project-meta">
+                <span className="flex items-center gap-1">
+                  <FiClock size={12} />
+                  {formatDate(project.updatedAt)}
+                </span>
+                <span className="project-stats">
+                  {project.nodes.length} nodes · {project.edges.length} connections
+                </span>
+              </div>
+            </div>
+            <div className="project-actions">
+              <button 
+                className="action-btn primary"
+                onClick={() => handleLoadProject(project)}
+                title="Load project"
+              >
+                <FiDownload size={16} />
+              </button>
+              <button 
+                className="action-btn"
+                onClick={() => handleSaveCurrentToProject(project)}
+                title="Save current flow to this project"
+                disabled={loading}
+              >
+                <FiUpload size={16} />
+              </button>
+              <button 
+                className="action-btn"
+                onClick={() => handleEditProject(project)}
+                title="Edit project"
+              >
+                <FiEdit2 size={16} />
+              </button>
+              <button 
+                className="action-btn danger"
+                onClick={() => handleDeleteProject(project.id)}
+                title="Delete project"
+                disabled={loading}
+              >
+                <FiTrash2 size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   // Load projects on open
   useEffect(() => {
     if (isOpen) {
@@ -203,11 +295,12 @@ const ProjectsModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} role="none">
       <div 
         className="modal-content projects-modal" 
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: '700px', maxHeight: '80vh' }}
+        role="none"
       >
         <div className="modal-header">
           <h2 className="flex items-center gap-2">
@@ -257,77 +350,7 @@ const ProjectsModal = ({
                 </button>
               </div>
 
-              {loading && projects.length === 0 ? (
-                <div className="text-center py-8 text-dark-500">
-                  Loading projects...
-                </div>
-              ) : projects.length === 0 ? (
-                <div className="text-center py-8">
-                  <FiFolder size={48} className="mx-auto mb-4 text-dark-600" />
-                  <p className="text-dark-500 mb-4">No saved projects</p>
-                  <button 
-                    className="toolbar-btn success"
-                    onClick={() => { resetForm(); setViewMode('create'); }}
-                  >
-                    <FiPlus size={14} />
-                    <span>Create first project</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="projects-list">
-                  {projects.map(project => (
-                    <div key={project.id} className="project-card">
-                      <div className="project-info">
-                        <h3 className="project-name">{project.name}</h3>
-                        {project.description && (
-                          <p className="project-description">{project.description}</p>
-                        )}
-                        <div className="project-meta">
-                          <span className="flex items-center gap-1">
-                            <FiClock size={12} />
-                            {formatDate(project.updatedAt)}
-                          </span>
-                          <span className="project-stats">
-                            {project.nodes.length} nodes · {project.edges.length} connections
-                          </span>
-                        </div>
-                      </div>
-                      <div className="project-actions">
-                        <button 
-                          className="action-btn primary"
-                          onClick={() => handleLoadProject(project)}
-                          title="Load project"
-                        >
-                          <FiDownload size={16} />
-                        </button>
-                        <button 
-                          className="action-btn"
-                          onClick={() => handleSaveCurrentToProject(project)}
-                          title="Save current flow to this project"
-                          disabled={loading}
-                        >
-                          <FiUpload size={16} />
-                        </button>
-                        <button 
-                          className="action-btn"
-                          onClick={() => handleEditProject(project)}
-                          title="Edit project"
-                        >
-                          <FiEdit2 size={16} />
-                        </button>
-                        <button 
-                          className="action-btn danger"
-                          onClick={() => handleDeleteProject(project.id)}
-                          title="Delete project"
-                          disabled={loading}
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {renderProjectsList()}
             </>
           )}
 
@@ -335,7 +358,7 @@ const ProjectsModal = ({
           {(viewMode === 'create' || viewMode === 'edit') && (
             <div className="project-form">
               <div className="form-group">
-                <label>Project name *</label>
+                <label>Project name *{''}</label>
                 <input
                   type="text"
                   value={projectName}
@@ -346,7 +369,7 @@ const ProjectsModal = ({
               </div>
 
               <div className="form-group">
-                <label>Description (optional)</label>
+                <label>Description (optional){''}</label>
                 <textarea
                   value={projectDescription}
                   onChange={e => setProjectDescription(e.target.value)}
@@ -369,11 +392,7 @@ const ProjectsModal = ({
                   </span>
                 </label>
                 <span className="form-hint">
-                  {saveCurrentFlow 
-                    ? `Will save ${currentNodes.length} nodes and ${currentEdges.length} connections`
-                    : viewMode === 'edit' 
-                      ? 'Will keep existing project flow'
-                      : 'Will create an empty project'}
+                  {getFormHint()}
                 </span>
               </div>
 

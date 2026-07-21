@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SubmitEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
     setShowModal(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     setError('');
     try {
@@ -229,9 +229,9 @@ export default function AdminUsersPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={() => setShowModal(false)} role="none">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: '28rem' }}>
+            style={{ maxWidth: '28rem' }} role="none">
             <div className="modal-header">
               <h2>{editingUser ? 'Edit user' : 'New user'}</h2>
               <button className="btn-icon" onClick={() => setShowModal(false)}>
@@ -240,7 +240,10 @@ export default function AdminUsersPage() {
             </div>
             <form onSubmit={handleSubmit} className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={labelStyle}>Email <span style={{ color: '#ef4444' }}>*</span></label>
+                <label style={labelStyle}>
+                  Email{''}
+                  <span style={{ color: '#ef4444' }}>*</span>
+                </label>
                 <input
                   type="email"
                   value={formEmail}
@@ -250,7 +253,9 @@ export default function AdminUsersPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Name</label>
+                <label style={labelStyle}>
+                  Name{''}
+                </label>
                 <input
                   type="text"
                   value={formName}
@@ -271,7 +276,9 @@ export default function AdminUsersPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>Role</label>
+                <label style={labelStyle}>
+                  Role{''}
+                </label>
                 <select
                   value={formRole}
                   onChange={(e) => setFormRole(e.target.value as 'USER' | 'ADMIN')}

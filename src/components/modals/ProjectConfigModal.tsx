@@ -28,8 +28,8 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content config-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose} role="none">
+      <div className="modal-content config-modal" onClick={(e) => e.stopPropagation()} role="none">
         <div className="modal-header">
           <h2 className="flex items-center gap-2">
             <FiSettings size={20} />
@@ -49,7 +49,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
             </h3>
             
             <div className="config-field">
-              <label>Execution Mode</label>
+              <label>Execution Mode{''}</label>
               <select
                 value={localConfig.executionMode}
                 onChange={(e) => setLocalConfig({
@@ -67,7 +67,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
             </div>
 
             <div className="config-field">
-              <label>Workers</label>
+              <label>Workers{''}</label>
               <input
                 type="number"
                 min="1"
@@ -75,7 +75,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 value={localConfig.workers}
                 onChange={(e) => setLocalConfig({
                   ...localConfig,
-                  workers: Math.max(1, parseInt(e.target.value) || 1)
+                  workers: Math.max(1, Number.parseInt(e.target.value) || 1)
                 })}
               />
               <span className="config-hint">
@@ -93,7 +93,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
             </h3>
 
             <div className="config-field">
-              <label>Retries on failure</label>
+              <label>Retries on failure{''}</label>
               <input
                 type="number"
                 min="0"
@@ -101,7 +101,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 value={localConfig.retries}
                 onChange={(e) => setLocalConfig({
                   ...localConfig,
-                  retries: Math.max(0, parseInt(e.target.value) || 0)
+                  retries: Math.max(0, Number.parseInt(e.target.value) || 0)
                 })}
               />
               <span className="config-hint">
@@ -120,7 +120,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 value={localConfig.maxFailures}
                 onChange={(e) => setLocalConfig({
                   ...localConfig,
-                  maxFailures: Math.max(0, parseInt(e.target.value) || 0)
+                  maxFailures: Math.max(0, Number.parseInt(e.target.value) || 0)
                 })}
               />
               <span className="config-hint">
@@ -137,7 +137,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
             </h3>
 
             <div className="config-field">
-              <label>Timeout per test (ms)</label>
+              <label>Timeout per test (ms){''}</label>
               <input
                 type="number"
                 min="1000"
@@ -145,7 +145,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
                 value={localConfig.timeout}
                 onChange={(e) => setLocalConfig({
                   ...localConfig,
-                  timeout: Math.max(1000, parseInt(e.target.value) || 30000)
+                  timeout: Math.max(1000, Number.parseInt(e.target.value) || 30000)
                 })}
               />
               <span className="config-hint">
@@ -162,7 +162,7 @@ const ProjectConfigModal = ({ isOpen, onClose, config, onSave }: ProjectConfigMo
             </h3>
 
             <div className="config-field">
-              <label>CDP URL (optional)</label>
+              <label>CDP URL (optional){''}</label>
               <input
                 type="text"
                 placeholder="http://localhost:9222"

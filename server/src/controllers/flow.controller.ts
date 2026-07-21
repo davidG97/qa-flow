@@ -35,7 +35,7 @@ export const flowController = {
   generateCode(req: Request, res: Response) {
     const { flow } = req.body as { flow: TestFlow };
     
-    if (!flow || !flow.nodes) {
+    if (!flow?.nodes) {
       return res.status(400).json({ error: 'Invalid flow' });
     }
     

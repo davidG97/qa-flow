@@ -19,15 +19,8 @@ export default function CodeViewerModal({ isOpen, onClose, code, filename = 'tes
       await navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = code;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
     }
   };
 
@@ -39,13 +32,13 @@ export default function CodeViewerModal({ isOpen, onClose, code, filename = 'tes
     a.download = filename;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
     URL.revokeObjectURL(url);
   };
 
   return createPortal(
-    <div className="code-viewer-overlay" onClick={onClose}>
-      <div className="code-viewer-modal" onClick={e => e.stopPropagation()}>
+    <div className="code-viewer-overlay" onClick={onClose} role="none">
+      <div className="code-viewer-modal" onClick={e => e.stopPropagation()} role="none">
         <div className="code-viewer-header">
           <h3>Generated Code</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

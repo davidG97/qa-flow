@@ -79,7 +79,7 @@ const Sidebar = ({ onDragStart }: SidebarProps) => {
       <div className="sidebar-header">
         <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <img src="/logo.png" alt="" width="22" height="22" style={{ borderRadius: '4px' }} />
-          QA Flow
+          <h2>QA Flow</h2>
         </h1>
         <p>Visual Test Automation</p>
       </div>
@@ -130,6 +130,7 @@ const Sidebar = ({ onDragStart }: SidebarProps) => {
                     
                     return (
                       <div
+                        role="none"
                         key={nodeType.id}
                         className={`node-item ${isDragging ? 'dragging' : ''}`}
                         draggable

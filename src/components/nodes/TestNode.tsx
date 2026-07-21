@@ -41,6 +41,7 @@ const TestNode = memo(({ id, data, selected }: NodeProps & { data: CustomNodeDat
       className={`custom-node ${data.category} ${selected ? 'selected' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      role="none"
     >
       {data.category !== 'trigger' && data.category !== 'hook' && (
         <Handle type="target" position={Position.Left} />

@@ -27,7 +27,7 @@ const initialNodes: Node<NodeData>[] = [
     type: 'testNode',
     position: { x: 250, y: 50 },
     data: {
-      label: 'Inicio',
+      label: 'Start',
       nodeType: 'start',
       category: 'trigger',
       config: {
@@ -44,6 +44,8 @@ export function useFlowNodes() {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
   const nodeIdCounter = useRef(2);
+
+  const nodeLength = (currentNodes: Node<NodeData>[]) => currentNodes.length > 0 ? 400 : 0;
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -103,8 +105,8 @@ export function useFlowNodes() {
 
   // ponytail: simplified - just count matches
   const getUniqueLabel = useCallback((baseLabel: string, existingNodes: Node<NodeData>[] = nodes): string => {
-    const escaped = baseLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const count = existingNodes.filter(n => new RegExp(`^${escaped}(-\\d+)?$`).test(n.data.label)).length;
+    const escaped = baseLabel.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+    const count = existingNodes.filter(n => new RegExp(String.raw`^${escaped}(-\d+)?$`).test(n.data.label)).length;
     return count === 0 ? baseLabel : `${baseLabel}-${count + 1}`;
   }, [nodes]);
 
@@ -138,7 +140,7 @@ export function useFlowNodes() {
             id: newId,
             type: nodeComponentType,
             position: {
-              x: node.position.x + (replaceAll ? 0 : (currentNodes.length > 0 ? 400 : 0)),
+              x: node.position.x + (replaceAll ? 0 : nodeLength(currentNodes)),
               y: node.position.y,
             },
           };
@@ -217,7 +219,7 @@ export function useFlowNodes() {
             nodeIdCounter.current = maxId + 1;
 
             // Cargar nodos y edges
-            setNodes(project.nodes as Node<NodeData>[]);
+            setNodes(project.nodes);
             setEdges(project.edges || []);
             setSelectedNode(null);
 
