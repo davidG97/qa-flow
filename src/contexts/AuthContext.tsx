@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
+// Use same origin in production, fallback to localhost:3001 in development
+const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -30,7 +33,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/me', {
+      const response = await fetch(`${API_BASE}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -52,7 +55,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   }, [fetchUser]);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('http://localhost:3001/api/auth/login', {
+    const response = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -69,7 +72,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   };
 
   const register = async (email: string, password: string, name?: string) => {
-    const response = await fetch('http://localhost:3001/api/auth/register', {
+    const response = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name }),

@@ -1,7 +1,15 @@
 // Servicio API para comunicarse con el backend
 
-const API_URL = 'http://localhost:3001/api';
-const WS_URL = 'ws://localhost:3001';
+// Use same origin in production, fallback to localhost:3001 in development
+const isProduction = import.meta.env.PROD;
+const API_URL = isProduction ? '/api' : 'http://localhost:3001/api';
+
+function getWebSocketUrl(): string {
+  if (!isProduction) return 'ws://localhost:3001';
+  const wsProtocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${wsProtocol}//${globalThis.location.host}`;
+}
+const WS_URL = getWebSocketUrl();
 
 export interface ExecutionResult {
   success: boolean;

@@ -34,11 +34,15 @@ export const executionController = {
 
       const executionId = executor.getExecutionId();
       
+      // Build WebSocket URL from request host (works with any port)
+      const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'wss' : 'ws';
+      const host = req.headers.host || 'localhost:3001';
+      
       // Respond immediately with execution ID
       res.json({ 
         executionId, 
         message: 'Execution started',
-        wsUrl: `ws://localhost:3001`,
+        wsUrl: `${protocol}://${host}`,
       });
 
       // Ejecutar en background
