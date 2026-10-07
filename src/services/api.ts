@@ -210,6 +210,39 @@ class ApiService {
   }
 
   // ==========================================
+  // PERSONAL ACCESS TOKENS
+  // ==========================================
+
+  async getTokens(): Promise<Array<{ id: string; name: string; lastUsedAt: string | null; expiresAt: string | null; createdAt: string }>> {
+    const response = await this.request(`${API_URL}/tokens`);
+    if (!response.ok) {
+      throw new Error('Error fetching tokens');
+    }
+    return response.json();
+  }
+
+  async createToken(data: { name: string; expiresAt?: string }): Promise<{ id: string; token: string; message: string }> {
+    const response = await this.request(`${API_URL}/tokens`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Error creating token');
+    }
+    return response.json();
+  }
+
+  async revokeToken(id: string): Promise<void> {
+    const response = await this.request(`${API_URL}/tokens/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Error revoking token');
+    }
+  }
+
+  // ==========================================
   // HEALTH & WEBSOCKET
   // ==========================================
 

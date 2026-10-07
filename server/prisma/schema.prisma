@@ -30,6 +30,7 @@ model User {
   updatedAt    DateTime @updatedAt
 
   members ProjectMember[]
+  tokens  PersonalAccessToken[]
 
   @@map("users")
 }
@@ -129,4 +130,18 @@ model Report {
   createdAt DateTime @default(now())
 
   @@map("reports")
+}
+
+// Personal Access Tokens for CLI authentication
+model PersonalAccessToken {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String    // User-friendly name for the token
+  tokenHash  String    @unique // SHA256 hash of the token
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@map("personal_access_tokens")
 }

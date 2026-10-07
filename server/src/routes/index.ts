@@ -8,6 +8,7 @@ import cliRoutes from './cli.routes.js';
 import pickerRoutes from './picker.routes.js';
 import authRoutes from './auth.routes.js';
 import usersRoutes from './users.routes.js';
+import patRoutes from './pat.routes.js';
 
 const router = Router();
 
@@ -16,6 +17,9 @@ router.use('/auth', authRoutes);
 
 // User management
 router.use('/users', usersRoutes);
+
+// Personal access tokens
+router.use('/tokens', patRoutes);
 
 // Mount all routes
 router.use('/', executionRoutes);
