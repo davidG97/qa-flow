@@ -7,6 +7,7 @@ import ProjectsPage from './pages/ProjectsPage';
 import EditorPage from './pages/EditorPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminProjectsPage from './pages/AdminProjectsPage';
+import TokensPage from './pages/TokensPage';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/:projectId" element={<EditorPage />} />
+        <Route path="/tokens" element={<TokensPage />} />
       </Route>
 
       {/* Rutas de admin */}

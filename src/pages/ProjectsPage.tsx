@@ -18,7 +18,8 @@ import {
   FiZap,
   FiLogOut,
   FiUser,
-  FiShield
+  FiShield,
+  FiKey
 } from 'react-icons/fi';
 
 // Componente Skeleton para loading
@@ -231,6 +232,10 @@ const ProjectsPage = () => {
                 </Link>
               </>
             )}
+            <Link to="/tokens" className="btn-secondary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }}>
+              <FiKey size={14} />
+              <span>API Tokens</span>
+            </Link>
             <button className="btn-secondary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }} onClick={logout}>
               <FiLogOut size={14} />
               <span>Logout</span>
